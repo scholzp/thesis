@@ -1,12 +1,12 @@
 ## Action Items
-[] Mit Prof. über Rahmenbedingung reden.
-[] CC: Mit Werner reden
-[] Darksol: Mit Parthy/Werner reden
+- [X] Mit Prof. über Rahmenbedingung reden.
+- [X] CC: Mit Werner reden
+- [X] Darksol: Mit Parthy/Werner reden
 
 ## Possible topics
 ###  Irgendwas mit CC (Confidential computing)
 Action Items:
-	[] Mit Werner reden
+- [X] Mit Werner reden
 	* Wie nehme ich dem OS einen Core weg?
 	* Wie bekommt es den wieder?
 	* DCU Bakrhausen Instirur
@@ -23,7 +23,9 @@ Details:
 ### vfio-udev
 ### Darksol
 Action Items:
-	[] Mit Parthy/Tor reden
+- [X] Mit Parthy/Tor reden
+	- Darksol proposal gelesen
+	- Erstmal mit anderen drüber reden.
 ### Enlightned nested Virtualization
 Action Items:
 	?
