@@ -1,0 +1,137 @@
+\documentclass{beamer}
+%Information to be included in the title page:
+\title{TEE on commodity x86 Hardware}
+\author{Pascal Scholz}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Motivation hinter TEEs}
+    Ziel: Die eigene Software auf Computern Dritter laufen lassen, ohne dass diese die Software manipulieren oder Geheimnisse von ihr lernen können. \\
+    \bigskip
+    Zwei Haupteinsatzgebiete:
+    \begin{itemize}
+        \item DRM: DRM Anbieter wollen verhindern, dass Inhalte entschlüsselt werden (privater Kontext)
+        \item Cloud Computing: Cloudanbietende (mit erhöhten Rechten) sollen Workloads der Servicenutzenden nicht manipulieren/ausspionieren können
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Motivation: Probleme aktuller Techniken}
+    \begin{itemize}
+        \item Seitenkanalangriffe: Populär seit Spectre/Meltdown Angriffe (2017)
+              \begin{itemize}
+                  \item Umgeht Speicherschutz durch Missbrauch von speculative execution
+                  \item Speicher wird gelesen, Seiteneffekte sind im Cache nachweisbar
+              \end{itemize}
+        \item TEE wie Intel SGX und ARM Trustzone sind angreifbar
+              \begin{itemize}
+                  \item BUSted (2023) nutzt geteilten Bus um Speicherzugriffszeiten zu protokollieren
+                  \item Foreshadow (2018) lädt Daten in L1 bevor Spekulation abegrochen werden kann
+                  \item AEPICleak (2022) leakt SGX Daten über DMA mit xAPIC
+              \end{itemize}
+    \end{itemize}
+    $\rightarrow$ Nutzen des Speichersubsystems öffnet mögliche Einfallstore (Seitenkanäle)\\
+    $\rightarrow$ Lücken in Hardware oft umständlich zu schließen
+\end{frame}
+
+\begin{frame}
+    \frametitle{Hypothese}
+    \begin{itemize}
+        \item Es ist möglich eine TEE ohne spezielle Hardwareerweiterung in Software zu bauen
+              \bigskip
+        \item Es ist möglich eine TEE in Software zu bauen, die nicht von Seitenkanalattacken betroffen ist
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Idee: Maximale Isolierung ohne zusätzliche Hardware}
+    \begin{itemize}
+        \item Nur lokalen Cache nutzen (L1 auf Intel, L2 auf AMD)
+        \item Kein Hauptspeicherzugriff während zu schützender Code läuft
+        \item Kein Hyperthreading (Hyperthreaads teilen lokalen Chache, Gefahr von Zombieload)
+        \item OS kann keinen anderen Code auf den Core schedulen (transient execution ausschließen)
+        \item Performance counter um Leak zu erkennen
+        \item Wird Leak erkannt, sofortiges Handeln (z.Bsp. Reset der Maschine)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Nutzen der Implementierung}
+    \begin{itemize}
+        \item Zur Isolierung von Code (Task Isolation)
+              \bigskip
+        \item Als TEE
+              \begin{itemize}
+                  \item Offene Frage: Remote Attestation über Zustand der TEE
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Angreifermodell}
+    \begin{itemize}
+        \item Schutz vor OS / anderen Anwendungen
+              \begin{itemize}
+                  \item OS und TEE laufen parallel, OS hat keinen Einfluss auf TEE Core
+                  \item Kompromittierte TEE könnte OS beeinflussen
+                  \item Alles was benötigt wird ist Core-exklusiv
+              \end{itemize}
+        \item Parallel laufender HV kann wie ein OS keinen Einfluss nehmen
+        \item Kein Schutz innerhalb eines Hypervisors
+              \begin{itemize}
+                  \item Gast kann nicht sicherstellen, dass HV rdmsr nicht manipuliert
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Forschungsfragen}
+    \begin{itemize}
+        \item Wie viel Code brauchen wir minimal dafür, wie viel Speicher bleibt für die Payload übrig?
+        \item Gelingt eine solche Implementierung oder braucht es doch zusätzliche Hardware?
+        \item Konzept für eine Kommunikation des OS mit TEE erdenken und Implementieren?
+        \item Konzept für Remote Attestation entwickleln, existierende Algorithmen auswerten?
+        \item Können wir mit (globalen) Performance Countern Remote Attestation machen?
+        \item Kann/muss das TPM eingebunden werden als Hardware Root of Trust ?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Was wird implementiert}
+    \begin{itemize}
+        \item Vor OS-Boot setzt trusted Software (Firmware, Bootloader) TEE auf
+        \item Lädt danach OS/HV
+        \item Core mit TEE hat eigenen Interrupthandler, keine Einflussnahme durch OS/HV möglich
+        \item Kommunikation über Treiber/Kernelmodule zu definierten Zeitpunkten über definierten Speicherbereich
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Angedachter Umfang}
+    \begin{itemize}
+        \item Implementieren des im lokalem Cache laufenden Kernels
+        \item Implementieren der Performance Counter Überwachung, sammt reset
+        \item Implementierung um TEE und OS nebeneinander aufzusetzen
+        \item Es soll des Konzept anhand eines PoC erforscht werden
+              %\item Vielleicht in Rust (wird wohl viel Assembly)?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Was erstmal nicht dazu gehört}
+    \begin{itemize}
+        \item Insbesondere sicherer Geheimnis-Austausch zwischen TEE und OS/Applikationen
+              \begin{itemize}
+                  \item Das ist eher als Future Work nach Auswertung der Remote Attestation Algorithmen zu verstehen
+                  \item Eventuell (Public-)Key durch Software hinterlegen, die System aufsetzt
+                  \item Kann hierzu das TPM verwendet werden
+              \end{itemize}
+        \item Der Software, die System, aufsetzt wird erstmal vertraut
+    \end{itemize}
+\end{frame}
+
+\end{document}

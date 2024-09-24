@@ -26,8 +26,12 @@ Nicht unbedingt SE, aber Systeme, die ihre Ressourcen partitionieren, CPUs einze
 - [CPU Hotplugging](https://docs.kernel.org/core-api/cpu_hotplug.html) in Linux und [Control Groups](https://man7.org/linux/man-pages/man7/cgroups.7.html)
 - [fTPM](https://www.usenix.org/system/files/conference/usenixsecurity16/sec16_paper_raj.pdf)
     * Software Implemtierung von TPM 2.0 in der Firmware
+- [CaR Projects](https://www.blackhat.com/docs/us-14/materials/us-14-Weis-Protecting-Data-In-Use-From-Firmware-And-Physical-Attacks-WP.pdf)
 
 ## In Frage kommende/nützliche(?) Techniken (die man sich anschauen kann)
+* Prefetch Instruction in x86
+### vCage
+* [Stackoverflow, see comments](https://stackoverflow.com/questions/27699197/cache-as-ram-no-fill-mode-executable-code)
 ### Cache-as-RAM
 * Wie stabil und dokumentiert ist es überhaupt? 
 * Wie funktioniert es?
@@ -37,6 +41,7 @@ Nicht unbedingt SE, aber Systeme, die ihre Ressourcen partitionieren, CPUs einze
 * [Stack overflow](https://stackoverflow.com/questions/19591500/how-to-make-sure-a-piece-of-code-never-leaves-the-cpu-cache-l3/24710093#24710093)
 * [Coreboot CAR Intel](https://github.com/coreboot/coreboot/tree/main/src/soc/intel/common/block/cpu/car)
 * [Coreboot CAR AMD](https://github.com/coreboot/coreboot/tree/main/src/soc/amd/common/block/cpu/car)
+* [Intel NEM (no evict mode)](https://community.intel.com/t5/Software-Archive/UnDocumented-MSR-s/td-p/968420)
 
 ### ARM MPAM
 * Mittels Tags paritionierbare Systemressourcen auf ARM
@@ -46,9 +51,20 @@ Nicht unbedingt SE, aber Systeme, die ihre Ressourcen partitionieren, CPUs einze
 
 #### Links
 * [MPAM Docu](https://developer.arm.com/documentation/107768/0100/Overview)
+* [Attack on TrustZone](https://eprint.iacr.org/2016/980.pdf)
+* [TrueSense; Cache based side channel attack on TrustZone](https://csis.gmu.edu/ksun/publications/trusense-infocom18.pdf)
 
 ### TCU
 * Ähnlich wie MPAM(?)
 
 #### Links
 * [Seit beim Barhausen Institut](https://www.barkhauseninstitut.org/forschung/forschungsbereiche/trustworthy-digital-architectures)
+
+### MSRs in x86
+* MSR_EVICT_CTL in Intel
+* PQOS Enforcement (PQE) auf AMD kann festlegen, wie der L3 und andere shared resources genutzt werden. CAT (Cache allocation enforcement)(Volume 2, 19.4.2)
+
+
+### Intel processor trace
+* Kann vielleicht genutzt werden
+* Kann vielliecht für Malware genutzt werde?
