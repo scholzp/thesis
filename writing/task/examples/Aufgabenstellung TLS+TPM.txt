@@ -1,0 +1,37 @@
+In distributed systems, programs running on two or more computers work towards
+a common goal. If security and reliability aspects are critical to reaching
+that goal, these programs must trust each other to actually cooperate and not
+work against the common goal. This trust can be established, if two
+preconditions hold:
+
+1) The communication channels between the cooperating programs must be secure,
+   such that they can cooperate in the first place and without interference
+   from outside. The Transport Layer Security (TLS) protocol solves the
+   problem of securing communication channels in distributed systems.
+
+2) The participating programs must function correctly and as intended. Remote
+   attestation is a technology from the field of Trusted Computing that allows
+   to identify what software is running on a remote computer system and that
+   the integrity of that software is preserved. Additionally, remote
+   attestation provides secure identification of the remote system. Based on
+   the identity both the software and its execution environment, a decision
+   can be made if trust in the remote system is warranted.
+
+In this task, Remote Attestation based on a Trusted Platform Module (TPM)
+shall be integrated with a TLS library. The goal is that TLS checks not just
+the possession of private keys for server and/or client certificates, but that
+the identity of the remote software and computer system is considered as well.
+
+An important secondary goal of this task is to keep modifications to the TLS
+protocol (if any) and the implementation of the TLS library small and
+non-invasive. Ideally, the design of the integrated solution should be
+modular. At least in principle, it should be possible to adapt it to use not
+only TPMs, but other hardware trust anchors that are based on similar
+concepts.
+
+A prototype implementation based on TPMs shall be developed and key
+performance aspects evaluated (e.g., how long it takes to establish a
+connection and do the necessary identity checks, etc.). Additionally, the
+complexity of the integration shall be evaluated, for example, with regard to
+maintainability. Organizational aspects (e.g., necessary changes in key or
+certificate management) should be considered as well.

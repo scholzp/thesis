@@ -1,0 +1,18 @@
+Für das am Lehrstuhl genutzte L4 Runtime Environment (L4Re) gibt es im Moment
+keine native Unterstützung für den Universal Serial Bus (USB). Im Rahmen der 
+Bachelorarbeit sollen die Grundlagen für die Nutzung von USB-Geräten mit diesem 
+Mikrokernsystem gelegt werden.
+
+Beim Entwurf des USB-Stacks für L4Re soll darauf geachtet werden, dass die 
+grundlegende Architektur die Anbindung von USB Host Controllern verschiedener
+Generationen erlaubt (z.B. USB 2.0, USB 3.x, etc.). Die Eignung für verschiedene
+USB-Geräteklassen soll ebenfalls berücksichtigt werden.
+
+Im Rahmen der prototypischem Umsetzung soll für mindestens einen gebräuchlichen
+Typ von USB Host Controller ein Treiber bereitgestellt werden. Die grundlegende
+Funktion des Treibers und dessen Integration in das L4Re-System soll an Hand
+einer einfachen USB-Geräteklasse (z.B. USB HID) gezeigt werden. Die
+Entwurfsentscheidungen sind in der schriftlichen Arbeit zu dokumentieren und zu
+begünden. Entsprechend dem Stand der Umsetzung sollen relevante
+Performance-Metriken für die neue USB-Unterstützung in L4Re identifiziert, mit
+geeigneten Benchmarks gemessen und im Rahmen der Auswertung diskutiert werden.
