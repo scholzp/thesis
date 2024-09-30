@@ -1,5 +1,5 @@
 ### [Intel SGX Explained](https://eprint.iacr.org/2016/086.pdf)
-[local](2016-086.pdf)
+[local](../sources/2016-086.pdf)
 * Secure remote execution: running software on a remote computer owned and maintained by an untrusted party (SRE)
 * Homomorphic Encryption solved SRE, but has overhead
 * SGX relies on software attestation
@@ -19,7 +19,7 @@
 #### Software attacks
 
 ### [Principles of Remote Attestation](https://web.cs.wpi.edu/~guttman/pubs/remote_attest.pdf)
-[local](remote_attest.pdf)
+[local](../sources/remote_attest.pdf)
 * Makes claims about properties of a target and offers evidence to an appraiser over network
 * Five core principles
     * deliver temporarely fresh evidience of the running systems (not just images)
@@ -34,19 +34,19 @@
 * 
 
 ### [A Survey of Published Attacks on Intel SGX](https://arxiv.org/pdf/2006.13598)
-[local](2006.13598v1.pdf)
+[local](../sources/2006.13598v1.pdf)
 * SGX protects against other software
 
 ### [Shielding applications from an untrusted cloud with Haven](https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-baumann.pdf)
-[local](osdi14-paper-baumann.pdf)
+[local](../sources/osdi14-paper-baumann.pdf)
 
 ### [The Heisenberg Defense: Proactively Defending SGX Enclaves against Page-Table-Based Side-Channel Attacks](https://arxiv.org/pdf/1712.08519)
-[local](1712.08519v1.pdf)
+[local](../sources/1712.08519v1.pdf)
 
 ### [On the Challenges of Detecting Side-Channel Attacks in SGX](https://arxiv.org/pdf/2011.14599)
-[local](2011.14599v2.pdf)
+[local](../sources/2011.14599v2.pdf)
 
 ### [AEPICleak](https://aepicleak.com/aepicleak.pdf)
-[local](aepicleak.pdf)
+[local](../sources/aepicleak.pdf)
 * Leak SGX enclave data/keys by directly accessing data when it's passed from L2 to LLC.
 * Uses APCI (not x2APIC) memory mapped registers to access neighboring cache lines 
