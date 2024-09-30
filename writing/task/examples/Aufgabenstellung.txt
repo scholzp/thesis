@@ -1,0 +1,43 @@
+Title: Leveraging CPU Exclusive Resources for Building Software-Based Trusted Execution Environments on Commodity x86_64 Hardware
+
+Trusted Execution Environments (TEE) enable tenants to let their software run on
+computer systems that are not fully under their control so that privileged 
+parties on the target system can neither interfere with the software nor learn its 
+secrets. This can be useful for content providers to implement DRM or in cloud
+environments where the owner of the computer system and/or privileged software 
+is not trusted by the tenant. A hardware root of trust is needed to verify 
+the integrity and confidentiality of the workload and the identity of the TEE.
+
+Different hardware vendor-specific approaches, such as Intel SGX, AMD SEV and 
+ARM TrustZone exists to this day, that fulfill the requirements on integrity and
+confidentiality to different degrees. Besides software needs to be adopted by 
+each vendor to make use of the TEE's different implementations, there also exists
+major security flaws in the respective implementations. A lot of the 
+vulnerabilities of TEE implementations come from the fact, that they are not 
+considering side channel attacks in their attacker model.
+
+A possible solution to this is to create a trusted execution environment that
+only uses core local resources. For example, when using only CPU local and
+exclusive caches, side-channel attacks from sibling CPUs utilizing the memory
+subsystem or buses become impossible. The environment can monitor its 
+confidentiality, for example, by leveraging performance counters, to detect
+snooping from other CPUs or if a cache line is displaced to a higher level,
+potentially shared part of the memory system. Such an approach enables the
+creation of a Trusted Execution Environment on commodity x86 hardware without
+the need for dedicated hardware support.
+
+In this task, a proof of concept (PoC) implementation of such a Trusted Execution 
+Environment, that only uses CPU-exclusive resources, shall be created. The 
+software shall be able to run next to a mainstream OS, such as Linux. Using 
+performance counters, the PoC shall monitor its confidentiality by making 
+use of performance counters. In case of an information leak, the implementation
+shall take appropriate measures. An appropriate way to exchange information with
+the OS running next to the Trusted Execution environment has to be thought out 
+and implemented. Because CPU-exclusive resources are scarce, the PoC shall be 
+evaluated regarding code size and what payload could potentially be executed 
+by the TEE. Furthermore, while the TEE can monitor its integrity and 
+confidentiality by using performance counters, no other parties can. For this,
+remote attestation algorithms shall be evaluated regarding their suitability to
+attest the state of the TEE for third parties. For this, a suitable hardware root
+of trust is to be identified, or if none exists, a set of minimal required
+additional hardware is to be identified.
