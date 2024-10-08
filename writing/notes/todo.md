@@ -1,0 +1,15 @@
+* read [Overshadow paper](../sources/overshadow.pdf)
+* read [InkTag paper](../sources/inktag.pdf)
+* read [Flicker paper](../sources/flicker.pdf)
+* read [SICE paper](../sources/sice.pdf)
+* read [Virtual Ghost paper](../sources/VirtualGhost-ASPLOS-2014.pdf)
+* read [Sanctum paper](../sources/sec16_paper_costan_sanctum.pdf)
+* read more about ARM TrustZone
+* read more about Apple Secure enclave (processor)
+* read [Mimosa paper](../sources/mimosa.pdf)
+* read [ORAM](../sources/oram.pdf)
+* read [Scone](../sources/osdi16-arnautov_scone.pdf)
+* read [Haven](../sources/osdi14-paper-baumann.pdf)
+* read about Iago attacks
+* read about [Frost attack](../sources/frost_attack.pdf)
+* read about [Branch scope attack](../sources/branchscope2018evtyushkin.pdf)

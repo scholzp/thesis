@@ -9,6 +9,8 @@ läuft dann im lokalen Cache das SE. Durch Performance Counter o.ä. wird
 sichergestellt, bzw. erkannt, wenn Informationen den lokalen Cahce verlassen.
 Das verhindert die Übertragung über den Cache-Seitenkanal.
 
+* Vielleicht etas bauen, was AMD SEV macht?
+
 ## Existierende Projekte mit ähnlichen Ansatz
 Nicht unbedingt SE, aber Systeme, die ihre Ressourcen partitionieren, CPUs einzeln verwalten o.ä.:
 
