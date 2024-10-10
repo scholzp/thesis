@@ -13,3 +13,21 @@
 * read about Iago attacks
 * read about [Frost attack](../sources/frost_attack.pdf)
 * read about [Branch scope attack](../sources/branchscope2018evtyushkin.pdf)
+* read [SIGDROP: Signature-based ROP Detection using Hardware Performance Counters](../sources/1609.02667v1_sigdrop.pdf)
+* read [CacheZoom: How SGX Amplifies The Power of Cache Attacks](../sources/1703.06986v2_cachezoom.pdf)
+* read [Frontal Attack: Leaking Control-Flow in SGX via the CPU Frontend](../sources/frontalattack)
+* read [Trusted Monitor: TEE-Based System Monitoring](../sources/Trusted_Monitor_TEE-Based_System_Monitoring.pdf)
+* read [TEEMon: A continuous performance monitoring framework for TEEs](../sources/2012.06554v1_teemon.pdf)
+* read [Hardware-Backed Heist](../sources/3319535_3354197_ecdsa_trustzone.pdf)
+* read [Secure Content-Based Routing Using Intel Software Guard Extensions](../sources/2988336.2988346_content_based_routing_sgx.pdf)
+* read [T-SGX: Eradicating Controlled-Channel Attacks Against Enclave Programs](../sources/ndss2017_07-2_Shih_paper_tsgx.pdf)
+
+## Perforamnce counter usage
+* read [Malicious Firmware Detection with Hardware Performance Counters](../sources/tmscs16_firmware_detect_hpc.pdf)
+* read [Detecting Spectre Attacks Using Hardware Performance Counters](../sources/10338791_hpc_spectre.pdf)
+* read [REAL TIME DETECTION OF CACHE-BASED SIDE-CHANNEL ATTACKS USING HARDWARE PERFORMANCE COUNTERS](../sources/MarcoChiapetta_10124219_ms_hpc_detect_side_channel_attacks.pdf)
+* read [SoK: The Challenges, Pitfalls, and Perils of Using Hardware Performance Counters for Security](../sources/10094405_sok_hpc_for_security.pdf)
+* read [Hardware Performance Counters for System Reliability Monitoring](../sources/hpc_for_reliability_monitoring.pdf)
+* read [Cache-Based Side-Channel Attacks Detection through Intel Cache Monitoring Technology and Hardware Performance Counters](../sources/hpc_for_cache_siede_channel_detection.pdf)
+* read [CFIMon: Detecting Violation of Control Flow Integrity using Performance Counters](../sources/cfimon-dsn12.pdf)
+* read [Towards Self-monitoring Enclaves: Side-Channel Detection Using Performance Counters (p120-136)](../sources/secure_it_systems.pdf)
