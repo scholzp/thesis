@@ -27,7 +27,10 @@
 * read [Detecting Spectre Attacks Using Hardware Performance Counters](../sources/10338791_hpc_spectre.pdf)
 * read [REAL TIME DETECTION OF CACHE-BASED SIDE-CHANNEL ATTACKS USING HARDWARE PERFORMANCE COUNTERS](../sources/MarcoChiapetta_10124219_ms_hpc_detect_side_channel_attacks.pdf)
 * read [SoK: The Challenges, Pitfalls, and Perils of Using Hardware Performance Counters for Security](../sources/10094405_sok_hpc_for_security.pdf)
-* read [Hardware Performance Counters for System Reliability Monitoring](../sources/hpc_for_reliability_monitoring.pdf)
+
+[x] read [Hardware Performance Counters for System Reliability Monitoring](../sources/hpc_for_reliability_monitoring.pdf)
+
 * read [Cache-Based Side-Channel Attacks Detection through Intel Cache Monitoring Technology and Hardware Performance Counters](../sources/hpc_for_cache_siede_channel_detection.pdf)
 * read [CFIMon: Detecting Violation of Control Flow Integrity using Performance Counters](../sources/cfimon-dsn12.pdf)
 * read [Towards Self-monitoring Enclaves: Side-Channel Detection Using Performance Counters (p120-136)](../sources/secure_it_systems.pdf)
+* read about [openHCL](https://openvmm.dev/user_guide/openhcl.html)

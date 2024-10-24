@@ -37,8 +37,9 @@ will take appropriate measures. An appropriate way to exchange information with
 the OS running next to the Trusted Execution environment has to be thought out 
 and implemented. Because CPU-exclusive resources are scarce, the PoC will be 
 evaluated regarding code size and what payload could potentially be executed 
-by the TEE. Furthermore, while the TEE can monitor its integrity and 
-confidentiality using performance counters, no third parties can. Allowing 
+by the TEE. Furthermore, at run time the TEE can monitor the system state
+using performance counters. This enables the TEE to detect modification and 
+information breach at run time. Allowing 
 third parties to safely identify and obtain information on the state of the TEE
 requires a form of remote attestation.
 Remote attestation algorithms will be evaluated regarding their suitability to

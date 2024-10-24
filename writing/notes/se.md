@@ -30,6 +30,7 @@ Nicht unbedingt SE, aber Systeme, die ihre Ressourcen partitionieren, CPUs einze
     * Software Implemtierung von TPM 2.0 in der Firmware
 - [CaR Projects](https://www.blackhat.com/docs/us-14/materials/us-14-Weis-Protecting-Data-In-Use-From-Firmware-And-Physical-Attacks-WP.pdf)
 
+
 ## In Frage kommende/nützliche(?) Techniken (die man sich anschauen kann)
 * Prefetch Instruction in x86
 ### vCage
