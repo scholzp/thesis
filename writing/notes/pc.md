@@ -4,10 +4,7 @@
 
 ## [Accuracy of Performance Counter Measurements](https://folia.unifr.ch/documents/318206/files/ITR0805.pdf)
 [local](../sources/ITR0805.pdf)
-* First study on accurary of performance counters
-* explains PFC
-* There seems to be an error rate that increases with duration when reading performance counters
--> might need to check if this is still the case
+
 
 ## [Non-Determinism and Overcount on Modern Hardware Performance Counter Implementations](https://icl.utk.edu/files/publications/2013/icl-utk-1246-2013.pdf)
 [local](../sources/icl-utk-1246-2013.pdf)
