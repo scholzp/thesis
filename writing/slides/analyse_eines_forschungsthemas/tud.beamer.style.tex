@@ -1,0 +1,60 @@
+% -*- LaTeX -*-
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+
+\title[Präsentationsvorlagen im CD]{Präsentationsvorlagen\protect\\\mdseries im CD der TU Dresden\strut}
+\subtitle{Beamer-Stil}
+\author{Tobias Schlemmer}
+\einrichtung{Einrichtung}
+\fachrichtung{Fachrichtung}
+\institut{Institut für Algebra}
+\professur{Professur}
+\einrichtung{}
+\fachrichtung{}
+\institut{}
+\professur{}
+\datecity{Dresden}
+
+\newcommand*\inmm[1]{\pgfmathsetmacro\inmmwert{#1 / 1mm}\inmmwert}
+\makeatletter
+\newcommand*\inpt[1]{\setlength\@tempdima{#1}\the\@tempdima}
+\makeatother
+
+\AtBeginSection[]{\partpage{\usebeamertemplate***{part page}}}
+\begin{document}
+
+\maketitle
+
+\mode<presentation>{\setbeamertemplate{page number in footline}[page][total]}
+
+\frame{\frametitle{Inhalt}\tableofcontents}
+\begin{frame}
+ Test
+\end{frame}
+\section{Test}
+\begin{frame}
+ 
+\end{frame}
+
+\begin{frame}
+ 
+\end{frame}
+
+\begin{frame}
+ 
+\end{frame}
+
+\begin{frame}
+ 
+\end{frame}
+
+\begin{frame}
+ 
+\end{frame}
+
+\begin{frame}
+ 
+\end{frame}
+\end{document}
+

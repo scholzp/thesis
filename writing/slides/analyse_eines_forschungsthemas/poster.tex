@@ -1,0 +1,30 @@
+% -*- LaTeX -*-
+% process with pdflatex or lualatex
+\documentclass[ngerman,aspectratio=141]{beamer}%1,41:1
+\usepackage[utf8]{luainputenc}
+\usepackage{ifluatex}
+\ifluatex\else
+\usepackage[TS1,T1]{fontenc}
+\fi
+\usepackage[ngerman]{babel}
+\usepackage{listings}
+\lstset{language=[LaTeX]{TeX}}
+%
+\usetheme[pagenum,ddc]{tud}
+\title{Ein Beamer-Stil\protect\\ im CD der TU Dresden}
+\subtitle{https://github.com/tud-cd/tud-cd}
+\author{Tobias Schlemmer}
+\einrichtung{Fakult\"at f\"ur Mathematik\strut}
+\institut{Institut f\"ur Algebra}
+\professur{Professur f\"ur Angewandte Algebra}
+%
+\begin{document}
+\maketitle
+\begin{frame}\tiny
+  \lstinputlisting{poster.tex}
+\end{frame}
+\end{document}
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

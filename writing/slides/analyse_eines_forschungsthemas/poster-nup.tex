@@ -1,0 +1,18 @@
+\batchmode
+\documentclass[a4paper]{article}
+\usepackage[utf8]{luainputenc}
+\usepackage{hyperref}
+\hypersetup{pdftitle={Ein Beamer-Stil im CD der TU Dresden - https://github/tud-cd/tud-cd}}
+\hypersetup{pdfauthor={Tobias Schlemmer}}
+\hypersetup{pdfsubject={}}
+\hypersetup{pdfkeywords={}}
+\usepackage{pdfpages}
+
+\begin{document}
+\includepdfmerge[nup=2x1,nup=1x2,frame=true,scale=0.95,delta=10 10]{poster.pdf,-}
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
