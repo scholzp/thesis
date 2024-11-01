@@ -38,7 +38,11 @@
 
 [x] read [CFIMon: Detecting Violation of Control Flow Integrity using Performance Counters](../sources/cfimon-dsn12.pdf)
 
-* read [Towards Self-monitoring Enclaves: Side-Channel Detection Using Performance Counters (p120-136)](../sources/secure_it_systems.pdf)
+[x] read [Towards Self-monitoring Enclaves: Side-Channel Detection Using Performance Counters (p120-136)](../sources/secure_it_systems.pdf)
+
+[ ] read [Open-TEE is No Longer Virtual: Towards Software-only Trusted Execution Environments Using White-box Cryptography](../sources/Open-TEE_is_No_Longer_Virtual_Towards_Software-Only_Trusted_Execution_Environments_Using_White-Box_Cryptography.pdf)
+
+[ ] read [A White-Box DES Implementation for DRM Applications (p1-15)](../sources/b11725_whitebox.pdf)
 
 * read about [openHCL](https://openvmm.dev/user_guide/openhcl.html)
 * read [Hardware-Assisted Rootkits: Abusing Performance Counters on the ARM and x86 Architectures](../sources/hardware_assisted_rrotkits.pdf)
