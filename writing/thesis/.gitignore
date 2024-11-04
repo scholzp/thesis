@@ -1,0 +1,43 @@
+
+auto
+*.log
+*.aux
+*.bbl
+*.blg
+*.brf
+*.lod
+*.lof
+*.out
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.ist
+*.lot
+*.gls
+*.bak
+*.toc
+.sconsign.dblite
+*~
+*.fdb_latexmk
+*.fls
+*.tdo
+
+*.bcf
+diplom.pdf
+# comes from the "make stats" command
+diplom.pdf.txt
+*.run.xml
+*.synctex.gz
+
+# vim tmp files
+*.swp
+*.swo
+
+# Nix result links
+/result*
+
+# "make" produces PDFs in this format.
+/*DRAFT*.pdf
+

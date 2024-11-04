@@ -1,0 +1,102 @@
+\documentclass[
+  a4paper,
+  abstract=true,
+  twoside,
+  listof=totoc,
+  numbers=noenddot,
+  bibliography=totoc,
+  BCOR=1.5cm,
+  headsepline,
+  DIV=12,
+  appendixprefix,
+  final
+] {scrreprt}
+
+% You should select either american or british instead of english here:
+\usepackage[ngerman,english]{babel}
+\usepackage{fontspec}
+
+\usepackage[citebordercolor={0.75 0.75 1},
+filebordercolor={0.75 0.75 1},
+linkbordercolor={0.75 0.75 1},
+% pagebordercolor={0.75 0.75 1},
+urlbordercolor={0.75 0.75 1},
+pdfborder={0.75 0.75 1},
+hidelinks,
+plainpages=false,pdfpagelabels=true]{hyperref}
+\hypersetup{%
+  pdftitle={Dein Titel},
+  pdfauthor={Otto Mustermann},
+  pdfkeywords={foo, bar},
+}
+
+\input{preamble/packages.tex}
+\addbibresource{own.bib}
+\input{preamble/color.tex}
+\input{preamble/style.tex}
+\input{preamble/newcommands.tex}
+
+% If you know when you will hand in your thesis, enter the date here.
+%\date{30. April 2009}
+%\newcommand{\printdate}{\@date}
+
+\begin{document}
+
+\pagenumbering{Roman}
+
+\input{content/00_title.tex}
+
+\includepdf{images/diplom-aufgabe.pdf}
+\cleardoublepage
+
+\input{content/01_disclaimer.tex}
+
+% NOTE: if you selected british or american above, change that here too
+\selectlanguage{english}
+
+\begin{abstract}
+\input{content/02_abstract.tex}
+\end{abstract}
+
+\cleardoublepage
+
+\tableofcontents
+
+\cleardoublepage
+
+% remove this on final
+\listoftodos
+\cleardoublepage
+
+\listoffigures
+\cleardoublepage
+
+\listoftables
+\cleardoublepage
+
+\pagenumbering{arabic}
+% use \input for small stuff (like a list you include twice or a tiks figure)
+% and \include for large latex compilation workloads (like a chapter) to get faster builds.
+\include{content/10_introduction}
+\include{content/20_state}
+\include{content/30_design}
+\include{content/40_implementation}
+\include{content/50_evaluation}
+\include{content/60_futurework}
+\include{content/70_conclusion}
+
+\appendix
+
+%\addchap{Glossar}
+
+% makeglossaries diplom
+%\printglossary[style=altlist]
+%\printglossary[type=\acronymtype,style=long]
+
+\printbibliography
+\iffalse
+    % an aid for Kile autocompletion
+    \bibliography{own.bib}
+\fi
+
+\end{document}
