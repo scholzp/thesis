@@ -1,4 +1,4 @@
-## [Detecting Spectre Attacks Using Hardware Performance Counters](../sources/10338791_hpc_spectre.pdf)
+## [Malicious Firmware Detection with Hardware Performance Counters](../sources/tmscs16_firmware_detect_hpc.pdf)
 
 * Attacker model: Firmware manipulation
 * Analysis of computational control flow in firmware
