@@ -46,6 +46,10 @@ function fn_main() {
         # Setup monitor
         "-monitor"
         "vc:1024x768"
+
+        # CPU settings
+        "-cpu"
+        "host"
     )
 
     echo "Executing: qemu-system-x86_64 " "${QEMU_ARGS[@]}"
