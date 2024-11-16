@@ -11,6 +11,8 @@
 \usepackage{hyperref}
 \usepackage{wrapfig}
 \usepackage{float}
+\usepackage{pifont}
+\usepackage{listings}
 
 \hypersetup{
     colorlinks=false,
@@ -68,267 +70,218 @@
 \AtBeginSection[]{\partpage{\usebeamertemplate***{part page}}}
 \begin{document}
 
+\newcommand{\greencheck}{}%
+\DeclareRobustCommand{\greencheck}{%
+    \tikz\fill[scale=0.4, color=teal]
+    (0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;%
+}
+
 \maketitle
 
 \mode<presentation>{\setbeamertemplate{page number in footline}[frame number]}
 
 %-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Motivation}
+\begin{frame}{TEE extensions in existing hardware}
+    \begin{itemize}
+        \item SGX: Costan, Victor. "Intel SGX explained." {\footnotesize{IACR Cryptol, EPrint Arch (2016)}}
+        \item TDX: "White Paper | Intel® Trust Domain Extensions" {\footnotesize{Intel Corporation, 2023}}
+        \item AMD SEV-SNP: SEV-SNP, AMD. "Strengthening VM isolation with integrity protection and more." {\footnotesize{White Paper, January (2020): 1450-1465}}
+        \item ARM Trustzone: Pinto, Sandro, and Nuno Santos. "Demystifying arm trustzone: A comprehensive survey." {\footnotesize{ACM computing surveys (CSUR) 51.6 (2019): 1-36}}
+    \end{itemize}
+\end{frame}
+
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Existing Trusted Computing extensions: Comparison}
     \begin{figure}
-        \includegraphics[width=\textwidth]{images/components.eps}
+        \begin{subfigure}[]{0.23\textwidth}
+            \includegraphics[width=\textwidth]{images/sgx.png}
+            \caption{Intel SGX}
+        \end{subfigure}
+        \begin{subfigure}[]{0.23\textwidth}
+            \includegraphics[width=\textwidth]{images/trustzone.png}
+            \caption{ARM Trustzone}
+        \end{subfigure}
+        \begin{subfigure}[]{0.23\textwidth}
+            \includegraphics[width=\textwidth]{images/svm-snp.png}
+            \caption{AMD SEV-SNP}
+        \end{subfigure}
+        \begin{subfigure}[]{0.23\textwidth}
+            \includegraphics[width=\textwidth]{images/tdx.png}
+            \caption{Intel TDX}
+        \end{subfigure}
+        \caption{Communication with TEE}
     \end{figure}
 \end{frame}
 %-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Hardware Performance Counters}
-    \begin{itemize}
-        \item Events are either architectural (fixed) or non-architectural (PMU)
-        \item Different amount of counters for non-/architectural events
-        \item Each programming MSR has a corresponding counter MSR
-        \item Either polling or performance-measurement-interrupt (PMI)
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Trusted Execution Environments}
-    \textit{An execution environment that runs alongside but isolated from an REE (regular execution environment).
-        A TEE has security capabilities and meets certain security-related
-        requirements} \\ - GlobalPlatform Specification
+\begin{frame}{Trusted Computing extensions: Features}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c}
+                                         & SGX         & TDX         & SEV-NP      & TrustZone   \\
+            \hline
+            Isolated Execution           & \greencheck & \greencheck & \greencheck & \greencheck \\
+            Data sealing                 & \greencheck & \greencheck & \greencheck & \ding{53}   \\
+            Side channel mitigation      & \ding{53}   & \greencheck & \ding{53}   & \ding{53}   \\
+            Memory Probing mitigation    & \greencheck & \greencheck & \greencheck & \ding{53}   \\
+            Remote Attestation           & \greencheck & \greencheck & \greencheck & \ding{53}   \\
+            Runs unmodified Applications & \ding{53}   & \greencheck & \greencheck & \ding{53}   \\
+        \end{tabular}\\
+        \bigskip
+        \greencheck - Supported \space\space\space \ding{53} - Not Supported
+    \end{center}
     \bigskip
+    \footnotesize{Based on: Pinto, Sandro, and Nuno Santos. "Demystifying arm trustzone: A comprehensive survey." ACM computing surveys (CSUR) 51.6 (2019): 1-36.}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Wait, side channel attacks?...}
+    \begin{figure}
+        \begin{subfigure}[]{0.45\textwidth}
+            \begin{center}
+                \includegraphics[width=0.6\textwidth]{images/spectre.pdf}
+                \onslide<1>{\caption{\footnotesize{\url{https://meltdownattack.com/spectre-text.svg}, accessed 11th Nov., 2024}}}
+            \end{center}
+        \end{subfigure}
+        \begin{subfigure}[]{0.45\textwidth}
+            \begin{center}
+                \includegraphics[width=0.37\textwidth]{images/meltdown.pdf}
+            \end{center}
+            \caption{\footnotesize{\url{https://meltdownattack.com/meltdown-text.svg}, accessed 11th Nov., 2024}}
+        \end{subfigure}
+    \end{figure}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{Transient execution and side channels}
+    \begin{center}
+        \begin{figure}
+            \begin{subfigure}[]{0.6\textwidth}
+                \begin{lstlisting}
+if (x < array1_size)
+  y = array2[array1[x] * 4096];
+                \end{lstlisting}
+            \end{subfigure}
+            \begin{subfigure}[]{0.45\textwidth}
+                \begin{center}
+                    \includegraphics[width=\textwidth]{images/spectre_predict.png}
+                    \caption{Possible predication results}
+                \end{center}
+            \end{subfigure}
+            \caption{Spectre attack mechanism: Kocher, Paul, et al. "Spectre attacks: Exploiting speculative execution." \footnotesize{Communications of the ACM 63.7 (2020): 93-101.}}
+        \end{figure}
+    \end{center}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{... how it's going}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=\textwidth]{images/timeline.pdf}
+        \end{center}
+    \end{figure}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Two Questions}
+    \begin{enumerate}
+        \item How to detect side channel attacks?
+              \bigskip
+        \item How to isolate parts of the system?
+    \end{enumerate}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Controlf Flow protection through Performance Counters}
     \begin{itemize}
-        \item protects assets from general software attacks
-        \item defines rigid safeguards as to data and functions
-        \item resists a set of defined threats
+        \item CFIMon: Xia, Yubin, et al. "CFIMon: Detecting violation of control flow integrity using performance counters." {\footnotesize{IEEE/IFIP International Conference on Dependable Systems and Networks (DSN 2012). IEEE, 2012}}
+        \item ConFirm: Wang, Xueyang, et al. "Malicious firmware detection with hardware performance counters." {\footnotesize{IEEE Transactions on Multi-Scale Computing Systems 2.3 (2016): 160-173.}}
     \end{itemize}
 \end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Controlf Flow protection through Performance Counters}
+    \begin{itemize}
+        \item x86 offers 4 architectural PCs
+        \item Additional PCs implementation specific
+        \item So called core and uncore events
+    \end{itemize}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Controlf Flow protection through Performance Counters}
+    \begin{center}
+        \begin{minipage}{0.5\linewidth}
+            \begin{center}
+                \includegraphics[width=.83\textwidth]{images/control_flow_1.pdf}
+            \end{center}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.4\linewidth}
+            \begin{center}
+                \begin{tabular}{c|c|c}
+                    Event      & Path A & Path B \\
+                    \hline
+                    Loads      & 3      & 0      \\
+                    Store      & 0      & 2      \\
+                    Jump       & 0      & 2      \\
+                    Arithmetic & 0      & 2      \\
+                \end{tabular}
+            \end{center}
+        \end{minipage}
+    \end{center}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Side channel Attack detection}
+    \begin{itemize}
+        \item Li, Congmiao, and Jean-Luc Gaudiot. "Detecting spectre attacks using hardware performance counters." {\footnotesize{IEEE Transactions on Computers 71.6 (2021): 1320-1331.}}
+        \item Lantz, David, Felipe Boeira, and Mikael Asplund. "Towards self-monitoring enclaves: Side-channel detection using performance counters." {\footnotesize{Nordic Conference on Secure IT Systems. Cham: Springer International Publishing, 2022.}}
+        \item Bazm, Mohammad-Mahdi, et al. "Cache-based side-channel attacks detection through intel cache monitoring technology and hardware performance counters." {\footnotesize{2018 Third International Conference on Fog and Mobile Edge Computing (FMEC). IEEE, 2018.}}
+    \end{itemize}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Side channel Attack detection}
+    \begin{center}
+        \begin{figure}
+            \includegraphics[width=.6\textwidth]{images/spectre_llc_miss_distribution.png}
+            \caption{{\footnotesize{Li, Congmiao, and Jean-Luc Gaudiot. "Detecting spectre attacks using hardware performance counters." IEEE Transactions on Computers 71.6 (2021): 1320-1331., p. 7}}}
+        \end{figure}
+    \end{center}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Software Enclaves}
+    \begin{itemize}
+        \item Enma: Hanna Reitz, Isolating Program Execution on L4Re/Fiasco.OC, 2019, Diploma Thesis
+        \item Haven: Baumann, Andrew, Marcus Peinado, and Galen Hunt. "Shielding applications from an untrusted cloud with haven." {\footnotesize{ACM Transactions on Computer Systems (TOCS) 33.3 (2015): 1-26.}}
+        \item OpenVMM: Microsoft 2024
+    \end{itemize}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Architecture overview}
+    \begin{figure}
+        \begin{subfigure}[]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{images/haven.png}
+            \caption{Heaven}
+        \end{subfigure}
+        \begin{subfigure}[]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{images/openvmm.png}
+            \caption{OpenVMM}
+        \end{subfigure}
+        \begin{subfigure}[]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{images/enma.png}
+            \caption{Enma}
+        \end{subfigure}
+    \end{figure}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{TCB Comparison}
+    \begin{center}
+        \begin{tabular}{c|c|c|c}
+                                        & Haven       & OpenVMM     & Enma        \\
+            \hline
+            Hardware                    & \greencheck & \greencheck & \greencheck \\
+            Firmware                    & \greencheck & \greencheck & \greencheck \\
+            Kernel (potentially subset) & \greencheck & \greencheck & \greencheck \\
+            Additional Services         & \greencheck & \greencheck & \greencheck \\
+            Root of Trust               & SGX         & TDX/SEV-SNP & TPM         \\
+        \end{tabular}
+        \\
+        \bigskip
+        \greencheck - Contained in TCB \space\space\space \ding{53} - Not contained in TCB \\
+    \end{center}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
 
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Hardware Performance Counters for System Reliability - Overview}
-    \begin{itemize}
-        \item Evaluates system reliability by monitoring Performance counters
-        \item Theory: System anomalies are reflected by abnormal software behavior
-              \\ $\rightarrow$ Software anomalies are visible through Performance Counters
-        \item Uses Gem5 simulator to simulate single stuck fault
-        \item Events measured:
-              \begin{enumerate}
-                  \item Instructions committed
-                  \item Number of function calls
-                  \item Number of integer instructions
-                  \item Number of load instructions
-              \end{enumerate}
-        \item Sampling of Performance Counters every 10ms
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Hardware Performance Counters for System Reliability - Findings}
-    \begin{itemize}
-        \item Fault injection leads to exceptions (e.g. Page fault, invalid OpCode ...)
-        \item Abnormal program behavior/recovering from exception was reflected in PC
-        \item With timing data from sampling, authors were able to recover from faults
-        \item Without timing data, one can only tell if program terminated early
-              \begin{itemize}
-                  \item Cannot differentiate between crash and termination with error
-              \end{itemize}
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Malicious Firmware Detection with Hardware Performance Counters - Overview}
-    \begin{itemize}
-        \item Embedded device: ROM contains bootloader, that loads Firmware/OS
-        \item Firmware/OS then loads application
-        \item Goal: Monitor control flow integrity (CFI) for detecting malicious modification
-        \item ConFirm monitor CFI through reading Performance Counters
-        \item ConFirm embedded into bootloader to protect it against manipulation
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Malicious Firmware Detection with Hardware Performance Counters - Details}
-    \begin{itemize}
-        \item ConFirm consists of three modules:
-              \begin{enumerate}
-                  \item Insertion module, that replaces instructions with checkpoints
-                  \item Driver for reading and managing performance counters
-                  \item Database storing valid PC signatures
-              \end{enumerate}
-        \item PC signatures are collected running the firmware
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Malicious Firmware Detection with Hardware Performance Counters - Findings}
-    \begin{itemize}
-        \item HPC measurements need to be reliable and reproducible
-        \item On average HPC measurements showed are derivation of 18.9\% (ARM) and 16.7\% (PowerPC)
-        \item Signature based approach performs good for firmware with simple control flow
-        \item Bad performance for complex control flow
-              \\$\rightarrow$ ML approach used to improve results
-        \item To reduce system load, ML-approach was run remote
-    \end{itemize}
-\end{frame}
 
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{CFIMon: Detecting Violation of Control Flow Integrity using Performance Counters - Overview}
-    \begin{itemize}
-        \item Idea: Control flow monitoring through performance counters
-        \item AMD manuel states that IP in interrupt based sampling differs up to 72 instructions
-              \\ $\rightarrow$ Use Intel Precise Event Based Sampling (PEBS) and AMD Instruction-based sampling (IBS)
-        \item Branch Trace Store (BTS) records all control flow events
-              \\ $\rightarrow$ Enables monitoring of whole application control flow
-        \item Analyze legal Control flow in an offline phase, Monitor in an online phase
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{CFIMon: Detecting Violation of Control Flow Integrity using Performance Counters - Details}
-    \begin{itemize}
-        \item Static analysis yields set of allowed addresses for direct jumps
-        \item Run time analysis yields addresses for indirect jumps
-              \\ $\rightarrow$ Set of legal jump addresses is created
-        \item On run time: Divide branches taken into legal, suspicious and illegal
-              \\ $\rightarrow$ Illegal branching triggers a defined response
-              \\ $\rightarrow$ If the number of suspicious branches exceeds threshold, the control flow is considered illegal
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{CFIMon: Detecting Violation of Control Flow Integrity using Performance Counters - Findings}
-    \begin{itemize}
-        \item All control flow exploits tested could be identified
-        \item Performance overhead for analysis is 6.1\%
-        \item No false positives when using the PoC implementation in daily use over multiple days
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Detecting Spectre Attacks Using Hardware Performance Counters - Basics}
-    \begin{itemize}
-        \item Two variants of Spectre attacks:
-              \begin{enumerate}
-                  \item Variant one: Exploits conditional branch prediction
-                  \item Variant two: Exploits unconditional jump target prediction
-              \end{enumerate}
-        \item Training of branch predictor through executing the same path multiple times
-              \\ $\rightarrow$ mispredictions drop below expected amount
-        \item Attack itself relies on timing and therefore executes cache flushes
-              \\ $\rightarrow$ Number of Cache flushes and cache misses rise
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Detecting Spectre Attacks Using Hardware Performance Counters - Detection}
-    \begin{itemize}
-        \item Microarchitectural effects observable through hardware counters
-        \item Monitored events
-              \begin{enumerate}
-                  \item Cache references
-                  \item Cache misses
-                  \item Branch instructions retired
-                  \item Branch mispredictions
-              \end{enumerate}
-        \item Sliding windows for PC sampling
-        \item Training of different ML algorithms
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Detecting Spectre Attacks Using Hardware Performance Counters - Findings}
-    \begin{itemize}
-        \item Default attack can be reliably detected
-        \item Reducing the attacks speed (and bandwidth) makes detection less reliable
-        \item Splitting attack up into atomically executed parts increases attack success rate
-        \item This also allows to insert obfuscation code to be inserted
-        \item Obfuscation reduces detection rate
-        \item Multi layer perceptron network can still reliably detect attack
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Towards Self-monitoring Enclaves: Side-Channel Detection Using Performance Counters - Overwiev}
-    \begin{itemize}
-        \item Studies Load Value injection attacks (LVI)
-        \item Authors identify Cache side channels as a high risk attack vector
-        \item Thesis: LVI attacks lead to abnormal program behavior
-              \\ $\rightarrow$ Effects on hardware should be observable
-        \item Monitor performance counters to detect attacks
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Towards Self-monitoring Enclaves: Side-Channel Detection Using Performance Counters - Concept}
-    \begin{itemize}
-        \item LVI attacks induce high count of page faults
-        \item Moreover LVI attacks produce a abnormal high count of cache misses and cache references
-        \item Events measures:
-              \begin{enumerate}
-                  \item Total number of instructions
-                  \item LLC misses
-                  \item LLC references
-                  \item Page faults (minor, major, total)
-              \end{enumerate}
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Towards Self-monitoring Enclaves: Side-Channel Detection Using Performance Counters - Findings}
-    \begin{itemize}
-        \item LVI were detected using a simple threshold mechanism
-              \begin{itemize}
-                  \item L1D cache injection was harder to detect
-              \end{itemize}
-        \item Authors assume ML could help improving the results
-        \item Authors conclude that SGX could benefit form self monitoring
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Isolating Program Execution on L4Re/Fiasco - Overview}
-    \begin{itemize}
-        \item Diplomarbeit of Hanna Reitz in cooperation with Kernkonzept
-        \item Goal: Creating isolated enclaves within L4Re
-        \item Software based solution, leverage isolation properties if L4Re
-        \item Assumes Fiasco is trustworthy
-        \item TPM is hardware root of trust
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Isolating Program Execution on L4Re/Fiasco - Components}
-    \begin{itemize}
-        \item Enma (Enclave Manager) manages and creates Enclaves
-        \item TCB: Hardware + Firmware + Bootloader + Fiasco.OC + sigma0 + moe + Enma
-        \item TPM verifies that software stack is unmodified
-        \item Quoting enclave verifies state of other enclaves through Remote Attestation
-        \item Works without SGX or other hardware features
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{OpenVMM \& OpenHCL}
-    \begin{itemize}
-        \item Microsofts VMM with OpenHCL being the underlying Paravisor
-              \begin{itemize}
-                  \item Paravisor: Cooperates with Guest for increased performance
-              \end{itemize}
-        \item Written in Rust
-        \item Developed closed source since 2019, open source since October 2024
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{OpenHCL in detail}
-    \begin{itemize}
-        \item Host so called partitions (VMs)
-        \item Backed either by hardware features or Virtual Secure Mode (VSM)
-        \item Utilizes SLAT for address space isolation
-        \item Manages vCPUs and other resources
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-\begin{frame}{Virtual Secure Mode (VSM)}
-    \begin{itemize}
-        \item Offers interface to enable creation and modification of partitions
-        \item Assigns each partition a Virtual Trust Level (VTL)
-        \item Lower VTL can't interact with higher VTL
-        \item OpenHCL runs in VTL2, secure Kernel in VTL1,
-    \end{itemize}
-\end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
-% \begin{frame}{Some graphics}
-%     \begin{figure}
-%         \begin{subfigure}[]{0.45\textwidth}
-%             \includegraphics[width=\textwidth]{images/example.png}
-%             \caption{Smiling example face}
-%         \end{subfigure}
-%         \begin{subfigure}[]{0.45\textwidth}
-%             \includegraphics[width=\textwidth]{images/example.png}
-%             \caption{Teh same smile again}
-%         \end{subfigure}
-%     \end{figure}
-% \end{frame}
-%-----------------------------------------------------------------------------------------------------------------------
 \end{document}
