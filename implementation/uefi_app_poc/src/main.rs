@@ -92,7 +92,7 @@ fn main() -> Status {
     let mut cpuid_result = unsafe{ __cpuid_count(0x0, 0x0) };
     info!("CPUID Result: {:#x?}", cpuid_result);
     cpuid_result = unsafe{ __cpuid_count(0x8000_0001, 0x0) };
-    info!("CPUID Result: {:#x?}", cpuid_result);
+    info!("CPUID Result: {:#x?}, PerfCtrExtLLC: {:#x?}", cpuid_result, Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32);
     info!("CPUID LLC extensiosn: {:#x?}", cpuid_result.ecx & (Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32));
     while true {}
     boot::stall(10_000_000);
