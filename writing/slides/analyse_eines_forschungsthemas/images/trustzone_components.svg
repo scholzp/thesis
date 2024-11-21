@@ -2,13 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="160.44142mm"
-   height="170mm"
-   viewBox="0 0 160.44142 170"
+   width="161.03944mm"
+   height="153.75299mm"
+   viewBox="0 0 161.03944 153.75299"
    version="1.1"
    id="svg1"
    inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
    sodipodi:docname="trustzone_components.svg"
+   inkscape:export-filename="trustzone_components.pdf"
+   inkscape:export-xdpi="96.571075"
+   inkscape:export-ydpi="96.571075"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,8 +27,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="1.5777339"
-     inkscape:cx="297.26179"
-     inkscape:cy="296.94488"
+     inkscape:cx="299.79708"
+     inkscape:cy="203.77328"
      inkscape:window-width="1920"
      inkscape:window-height="1149"
      inkscape:window-x="0"
@@ -97,7 +100,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-4.5585883,-30)">
+     transform="translate(-3.9605569,-30)">
     <rect
        style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
        id="rect1"
@@ -310,7 +313,7 @@
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264582px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-dasharray:0.26458201,0.26458201;stroke-dashoffset:0"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264582px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.264582, 0.264582;stroke-dashoffset:0;stroke-opacity:1"
        d="M 164.92572,127.07556 3.9610301,126.49983"
        id="path24-2"
        inkscape:connector-type="polyline"
@@ -322,7 +325,7 @@
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0" />
     <path
-       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-dasharray:0.26458299,0.26458299;stroke-dashoffset:0"
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.264583, 0.264583;stroke-dashoffset:0;stroke-opacity:1"
        d="M 88.66067,30.169499 88.63586,126.78594"
        id="path23-3-5"
        inkscape:connector-type="polyline"
