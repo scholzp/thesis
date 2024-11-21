@@ -155,12 +155,27 @@
             Memory Probing mitigation    & \greencheck & \greencheck & \greencheck & \ding{53}   \\
             Remote Attestation           & \greencheck & \greencheck & \greencheck & \ding{53}   \\
             Runs unmodified Applications & \ding{53}   & \greencheck & \greencheck & \ding{53}   \\
+            Protect against DoS          & \ding{53}   & \ding{53}   & \ding{53}   & \greencheck \\
         \end{tabular}\\
         \bigskip
         \greencheck - Supported \space\space\space \ding{53} - Not Supported
     \end{center}
     \bigskip
     \footnotesize{Based on: Pinto, Sandro, and Nuno Santos. "Demystifying arm trustzone: A comprehensive survey." ACM computing surveys (CSUR) 51.6 (2019): 1-36.}
+\end{frame}
+%-----------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Hardware solutions TCB}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c}
+                               & SGX         & TDX         & SEV-SNP     & TrustZone   \\
+            \hline
+            CPU implementation & \greencheck & \greencheck & \greencheck & \greencheck \\
+            Firmware           & \ding{53}   & \ding{53}   & \ding{53}   & \greencheck \\
+        \end{tabular}
+        \\
+        \bigskip
+        \greencheck - Contained in TCB \space\space\space \ding{53} - Not contained in TCB \\
+    \end{center}
 \end{frame}
 %-----------------------------------------------------------------------------------------------------------------------
 \begin{frame}{Wait, side channel attacks?...}
