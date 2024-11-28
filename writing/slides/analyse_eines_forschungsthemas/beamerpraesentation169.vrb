@@ -1,4 +1,4 @@
-\frametitle{Transient execution and side channels}
+\frametitle{Transient Execution and Side Channels}
 \begin{center}
         \begin{figure}
             \begin{subfigure}[]{0.6\textwidth}
@@ -7,12 +7,12 @@ if (x < array1_size)
   y = array2[array1[x] * 4096];
                 \end{lstlisting}
             \end{subfigure}
-            \begin{subfigure}[]{0.45\textwidth}
-                \begin{center}
-                    \includegraphics[width=\textwidth]{images/spectre_predict.png}
-                    \caption{Possible predication results}
-                \end{center}
-            \end{subfigure}
-            \caption{Spectre attack mechanism: Kocher, Paul, et al. "Spectre attacks: Exploiting speculative execution." \footnotesize{Communications of the ACM 63.7 (2020): 93-101.}}
+            % \begin{subfigure}[]{0.45\textwidth}
+            %     \begin{center}
+            %         \includegraphics[width=\textwidth]{images/spectre_predict.png}
+            %         \caption{Possible predication results}
+            %     \end{center}
+            % \end{subfigure}
+            %\caption{Spectre attack mechanism: Kocher, Paul, et al. "Spectre attacks: Exploiting speculative execution." \footnotesize{Communications of the ACM 63.7 (2020): 93-101.}}
         \end{figure}
     \end{center}

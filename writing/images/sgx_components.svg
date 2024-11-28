@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="160.44142mm"
+   height="170mm"
+   viewBox="0 0 160.44142 170"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   sodipodi:docname="sgx_components.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.6890572"
+     inkscape:cx="269.08503"
+     inkscape:cy="367.95675"
+     inkscape:window-width="1920"
+     inkscape:window-height="1149"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="ArrowTriangleStylized"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Stylized triangle arrow"
+       markerWidth="2"
+       markerHeight="2"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="m 6,0 c -3,1 -7,3 -9,5 0,0 0,-4 2,-5 -2,-1 -2,-5 -2,-5 2,2 6,4 9,5 z"
+         id="path4" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-4.5585883,-30)">
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1"
+       width="49.700001"
+       height="75.532661"
+       x="115.15"
+       y="30.15" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1-5-2"
+       width="49.699997"
+       height="34.700001"
+       x="15.15"
+       y="165.14999" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1-5-6"
+       width="29.699999"
+       height="42.509071"
+       x="125.15"
+       y="55.811733" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1-5-7"
+       width="49.699997"
+       height="34.700001"
+       x="115.15"
+       y="165.14999" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect2"
+       width="73.350014"
+       height="34.700001"
+       x="52.2948"
+       y="118.74079" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.7611px;text-align:center;text-anchor:middle;fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       x="140.02654"
+       y="38.807659"
+       id="text3"><tspan
+         sodipodi:role="line"
+         id="tspan3"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3"
+         x="140.02654"
+         y="38.807659">SGX Enclave</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.93889px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="140.08763"
+       y="62.359013"
+       id="text4"><tspan
+         sodipodi:role="line"
+         id="tspan4"
+         style="font-size:4.93889px;stroke-width:0.3"
+         x="140.08763"
+         y="62.359013">Encrypted</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;stroke-width:0.3"
+         x="140.08763"
+         y="68.532623"
+         id="tspan5">EPC </tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;stroke-width:0.3"
+         x="140.08763"
+         y="74.706238"
+         id="tspan6">Pages</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1-5"
+       width="49.700001"
+       height="75.532661"
+       x="15.15"
+       y="30.15" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1-5-6-9"
+       width="29.699999"
+       height="42.509071"
+       x="25.15"
+       y="55.811729" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.7611px;text-align:center;text-anchor:middle;fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       x="40.426445"
+       y="38.807659"
+       id="text3-2"><tspan
+         sodipodi:role="line"
+         id="tspan3-2"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3"
+         x="40.426445"
+         y="38.807659">Usermode</tspan><tspan
+         sodipodi:role="line"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3"
+         x="40.426445"
+         y="48.509033"
+         id="tspan14">Application</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.93889px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="39.858162"
+       y="62.359009"
+       id="text4-8"><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;stroke-width:0.3"
+         x="39.858162"
+         y="62.359009"
+         id="tspan6-3">Pages</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.7611px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="88.773636"
+       y="138.21576"
+       id="text8"><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.3"
+         x="88.773636"
+         y="138.21576"
+         id="tspan22">SGX Module</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.7611px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="139.6781"
+       y="174.05949"
+       id="text9"><tspan
+         sodipodi:role="line"
+         id="tspan9"
+         style="stroke-width:0.3"
+         x="139.6781"
+         y="174.05949">Launch</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.3"
+         x="139.6781"
+         y="183.76086"
+         id="tspan10">Enclave</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.7611px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="39.145256"
+       y="173.53767"
+       id="text11"><tspan
+         sodipodi:role="line"
+         id="tspan11"
+         style="stroke-width:0.3"
+         x="39.145256"
+         y="173.53767">System</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.3"
+         x="39.145256"
+         y="183.23904"
+         id="tspan12">Software</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.265, 0.265;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#ArrowTriangleStylized)"
+       d="m 64.930904,175.86684 48.151176,0.009"
+       id="path16"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.265, 0.265;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 66.840656,190.87567 48.154174,0.009"
+       id="path16-1"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-dasharray:0.264999, 0.264999;stroke-dashoffset:0;stroke-opacity:1"
+       x="89.676872"
+       y="185.00417"
+       id="text16"><tspan
+         sodipodi:role="line"
+         id="tspan16"
+         style="stroke-width:0.265"
+         x="89.676872"
+         y="185.00417">EINIT Token</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 127.80493,126.41375 h 25.14372 v -20.73242"
+       id="path17"
+       inkscape:connector-type="orthogonal"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4.4;stroke-opacity:1;marker-end:url(#ArrowTriangleStylized)"
+       d="m 125.60939,142.24936 h 35.58063 v -34.69091"
+       id="path18"
+       inkscape:connector-type="orthogonal"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-dasharray:0.264999, 0.264999;stroke-dashoffset:0;stroke-opacity:1"
+       x="141.04712"
+       y="135.15833"
+       id="text18"><tspan
+         sodipodi:role="line"
+         id="tspan18"
+         style="stroke-width:0.265"
+         x="141.04712"
+         y="135.15833">EENTER/</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.265"
+         x="141.04712"
+         y="141.33195"
+         id="tspan19">ERESUME</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-dasharray:0.264999, 0.264999;stroke-dashoffset:0;stroke-opacity:1"
+       x="39.728004"
+       y="130.07137"
+       id="text18-5"><tspan
+         sodipodi:role="line"
+         id="tspan18-4"
+         style="stroke-width:0.265"
+         x="39.728004"
+         y="130.07137">EENTER/</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.265"
+         x="39.728004"
+         y="136.245"
+         id="tspan19-7">ERESUME</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-dasharray:0.264999, 0.264999;stroke-dashoffset:0;stroke-opacity:1"
+       x="139.23772"
+       y="119.84915"
+       id="text20"><tspan
+         sodipodi:role="line"
+         id="tspan20"
+         style="stroke-width:0.265"
+         x="139.23772"
+         y="119.84915">EEXIT/</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.265"
+         x="139.23772"
+         y="126.02277"
+         id="tspan21">AEX</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-dasharray:0.264999, 0.264999;stroke-dashoffset:0;stroke-opacity:1"
+       x="43.379616"
+       y="118.42966"
+       id="text20-3"><tspan
+         sodipodi:role="line"
+         id="tspan20-2"
+         style="stroke-width:0.265"
+         x="43.379616"
+         y="118.42966">EEXIT/</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.265"
+         x="43.379616"
+         y="124.60328"
+         id="tspan21-0">AEX</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 35.119945,107.49945 -0.01135,18.1223"
+       id="path23"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 52.300269,125.61835 -17.184443,-0.001"
+       id="path24"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.264583, 0.264583;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 17.386091,193.39668 -12.8274924,-0.001"
+       id="path24-9"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.264583, 0.264583;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 13.327293,89.67632 -8.2819167,-0.001"
+       id="path24-5"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 27.273643,105.5896 -0.02481,32.46631"
+       id="path23-3"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 27.325298,142.71251 -0.02481,22.25761"
+       id="path23-3-8"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.264583, 0.264583;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 4.929663,89.45904 4.904853,193.57473"
+       id="path23-3-7"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 50.27728,137.93023 -22.849464,-0.003"
+       id="path24-6"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 50.193242,142.84822 -22.862933,-0.003"
+       id="path24-6-0"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 34.062425,148.50334 -0.01807,16.7148"
+       id="path23-3-8-1"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#ArrowTriangleStylized)"
+       d="m 50.393503,148.63637 -16.266668,-0.003"
+       id="path24-6-0-4"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-miterlimit:4.4;stroke-dasharray:0.264999, 0.264999;stroke-dashoffset:0;stroke-opacity:1"
+       x="38.713051"
+       y="194.95438"
+       id="text24"><tspan
+         sodipodi:role="line"
+         id="tspan24"
+         style="stroke-width:0.265"
+         x="38.713051"
+         y="194.95438">SGX Interface</tspan></text>
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.264999;stroke-miterlimit:4.4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect24"
+       width="39.782101"
+       height="8.1065836"
+       x="19.552872"
+       y="189.53339" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-miterlimit:4.4;stroke-dasharray:0.264583, 0.264583;stroke-dashoffset:0;stroke-opacity:1"
+       x="-136.30844"
+       y="9.0909863"
+       id="text25"
+       transform="rotate(-90.18147)"><tspan
+         sodipodi:role="line"
+         id="tspan25"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.265"
+         x="-136.30844"
+         y="9.0909863">SGX Interface</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-miterlimit:4.4;stroke-dasharray:0.264583, 0.264583;stroke-dashoffset:0;stroke-opacity:1"
+       x="38.567226"
+       y="146.83806"
+       id="text26"><tspan
+         sodipodi:role="line"
+         id="tspan26"
+         style="stroke-width:0.265"
+         x="38.567226"
+         y="146.83806">ECREATE</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-miterlimit:4.4;stroke-dasharray:0.264583, 0.264583;stroke-dashoffset:0;stroke-opacity:1"
+       x="40.568478"
+       y="152.94127"
+       id="text27"><tspan
+         sodipodi:role="line"
+         id="tspan27"
+         style="stroke-width:0.265"
+         x="40.568478"
+         y="152.94127">EINIT</tspan></text>
+  </g>
+</svg>

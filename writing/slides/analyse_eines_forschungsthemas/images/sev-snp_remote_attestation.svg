@@ -1,163 +1,313 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="45cm" height="46cm" viewBox="-17 -509 900 901" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <defs/>
-  <g id="Background">
-    <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="161" y="103" width="191" height="288" rx="0" ry="0"/>
-    <g>
-      <path style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" d="M 132.25 88.3333 L 195.75,88.3333 L 195.75,151.667 C 183.05,142.167 176.7,139 164,139 C 151.3,139 144.95,135.833 132.25,126.333 L 132.25,88.3333z"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="164" y="103.333">
-        <tspan x="164" y="103.333">Attached</tspan>
-        <tspan x="164" y="119.333">SIB</tspan>
-      </text>
-    </g>
-    <text font-size="22.5774" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="256.5" y="153">
-      <tspan x="256.5" y="153">VM under</tspan>
-      <tspan x="256.5" y="181.222">Attestation</tspan>
-    </text>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="243.828" y="157.457">
-      <tspan x="243.828" y="157.457"></tspan>
-    </text>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="188.407" y="203.082" width="121" height="57" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="248.907" y="227.482">
-        <tspan x="248.907" y="227.482">private Key</tspan>
-        <tspan x="248.907" y="243.482">with SP</tspan>
-      </text>
-    </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="177.807" y="273.082" width="148.435" height="104.078" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="252.025" y="329.021">
-        <tspan x="252.025" y="329.021"></tspan>
-      </text>
-    </g>
-    <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="161.057" y="-323.866" width="191" height="288" rx="0" ry="0"/>
-    <text font-size="22.5774" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="260.965" y="-289.785">
-      <tspan x="260.965" y="-289.785">Secure</tspan>
-      <tspan xml:space="preserve" x="260.965" y="-261.562"> Processor (SP)</tspan>
-    </text>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="244.886" y="-270.409">
-      <tspan x="244.886" y="-270.409"></tspan>
-    </text>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="167.365" y="-237.785" width="178.95" height="57" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="256.84" y="-213.385">
-        <tspan x="256.84" y="-213.385">Versioned Chip</tspan>
-        <tspan xml:space="preserve" x="256.84" y="-197.385"> Endorsment Key (VCEK)</tspan>
-      </text>
-    </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="178.115" y="-173.785" width="158.7" height="54" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="257.465" y="-150.885">
-        <tspan x="257.465" y="-150.885">Measured VM Launch</tspan>
-        <tspan x="257.465" y="-134.885">Digest</tspan>
-      </text>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="256.84" y="-209.285">
-      <tspan x="256.84" y="-209.285"></tspan>
-    </text>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="201.232" y="-107.033" width="94.35" height="54" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="248.407" y="-84.133">
-        <tspan x="248.407" y="-84.133">private Key</tspan>
-        <tspan x="248.407" y="-68.133">with VM</tspan>
-      </text>
-    </g>
-    <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="690.68" y="-353.367" width="191" height="341.5" rx="0" ry="0"/>
-    <text font-size="22.5774" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="790.587" y="-319.285">
-      <tspan x="790.587" y="-319.285">Attestation</tspan>
-      <tspan x="790.587" y="-291.063">Requester</tspan>
-    </text>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="774.508" y="-299.909">
-      <tspan x="774.508" y="-299.909"></tspan>
-    </text>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="696.987" y="-267.285" width="178.95" height="57" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="786.462" y="-234.885">
-        <tspan x="786.462" y="-234.885">Expected Launch Digest</tspan>
-      </text>
-    </g>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="702.812" y="-187.285" width="161.75" height="54" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="783.687" y="-164.385">
-        <tspan x="783.687" y="-164.385">Singed Identety</tspan>
-        <tspan xml:space="preserve" x="783.687" y="-148.385"> Block (SIB)</tspan>
-      </text>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="786.462" y="-238.785">
-      <tspan x="786.462" y="-238.785"></tspan>
-    </text>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="707.255" y="-114.867" width="156.05" height="67" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="785.28" y="-77.4667">
-        <tspan x="785.28" y="-77.4667">Public Requester Key</tspan>
-      </text>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="205.294" y="292.608">
-      <tspan x="205.294" y="292.608">Arbritarty Data</tspan>
-    </text>
-    <g>
-      <path style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" d="M 399.08 -493.367 C 418.56,-475.867 428.3,-475.867 447.78,-493.367 C 467.26,-510.867 477,-510.867 496.48,-493.367 L 496.48,-388.367 C 477,-405.867 467.26,-405.867 447.78,-388.367 C 428.3,-370.867 418.56,-370.867 399.08,-388.367 L 399.08,-493.367z"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="447.78" y="-460.867">
-        <tspan x="447.78" y="-460.867">VCEK</tspan>
-        <tspan x="447.78" y="-444.867">Launch Digest</tspan>
-        <tspan x="447.78" y="-428.867">SIB</tspan>
-        <tspan x="447.78" y="-412.867">Arbritary Data</tspan>
-      </text>
-    </g>
-    <g>
-      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x1="689.68" y1="-182.116" x2="362.793" y2="-180.418"/>
-      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="355.293,-180.379 365.267,-185.431 362.793,-180.418 365.319,-175.431 "/>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="386.78" y="-203.867">
-      <tspan x="386.78" y="-203.867">1. Request creation, provide SIB</tspan>
-    </text>
-    <g>
-      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x1="256.538" y1="-34.8766" x2="256.521" y2="92.2742"/>
-      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="256.52,99.7742 251.521,89.7736 256.521,92.2742 261.521,89.7749 "/>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="81.2426" y="18.946">
-      <tspan x="81.2426" y="18.946">2. Create VM, attach SIB</tspan>
-      <tspan x="81.2426" y="34.946">and create communication</tspan>
-      <tspan x="81.2426" y="50.946">Key</tspan>
-    </text>
-    <g>
-      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" points="689.678,-143.619 549.243,-86.8667 549.243,-10.8667 350.243,-10.8667 351.948,92.278 "/>
-      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="352.072,99.777 346.907,89.861 351.948,92.278 356.906,89.6957 "/>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="379.243" y="-47.8667">
-      <tspan x="379.243" y="-47.8667">3. Request Attestation</tspan>
-      <tspan x="379.243" y="-31.8667">over public Key</tspan>
-    </text>
-    <g>
-      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" points="256.557,-34.8766 256.557,33.5477 256.5,33.5477 256.5,92.2359 "/>
-      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="256.5,99.7359 251.5,89.7359 256.5,92.2359 261.5,89.7359 "/>
-    </g>
-    <g>
-      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" points="150.058,-179.713 140,-179.574 -15.7574,-179.574 -15.7574,247 161,247 "/>
-      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="150.128,-174.714 160.057,-179.852 149.989,-184.713 "/>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="-13.7574" y="-218.574">
-      <tspan x="-13.7574" y="-218.574">4. Request creation of </tspan>
-      <tspan x="-13.7574" y="-202.574">Report, provide arbritary</tspan>
-      <tspan x="-13.7574" y="-186.574">data</tspan>
-    </text>
-    <g>
-      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="184.493" y="305.16" width="129.5" height="54" rx="0" ry="0"/>
-      <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="249.243" y="328.06">
-        <tspan x="249.243" y="328.06">public Requester</tspan>
-        <tspan x="249.243" y="344.06">Key</tspan>
-      </text>
-    </g>
-    <g>
-      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x1="353.062" y1="-302.753" x2="405.889" y2="-370.023"/>
-      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="410.521,-375.922 408.277,-364.969 405.889,-370.023 400.413,-371.145 "/>
-    </g>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="240.243" y="-357.175">
-      <tspan x="240.243" y="-357.175">5. Create singed Report</tspan>
-    </text>
-    <text font-size="12.7998" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="417.243" y="-330.175">
-      <tspan x="417.243" y="-330.175"></tspan>
-    </text>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="160.03778mm"
+   height="64.585251mm"
+   viewBox="0 0 160.03778 64.585252"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   sodipodi:docname="sev-snp_remote_attestation.svg"
+   inkscape:export-filename="sev-snp_remote_attestation.pdf"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.5214848"
+     inkscape:cx="194.87543"
+     inkscape:cy="160.69829"
+     inkscape:window-width="1920"
+     inkscape:window-height="1149"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="Triangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect19"
+       is_visible="true"
+       lpeversion="1.3"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false"
+       uniform="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect18"
+       is_visible="true"
+       lpeversion="1.3"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false"
+       uniform="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect17"
+       is_visible="true"
+       lpeversion="1.3"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false"
+       uniform="false" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect16"
+       is_visible="true"
+       lpeversion="1" />
+    <marker
+       style="overflow:visible"
+       id="Triangle-7-7"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135-3-8" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Triangle-7-7-1"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135-3-8-9" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-8.2011405,-90.297266)">
+    <text
+       xml:space="preserve"
+       style="font-size:2.82222px;text-align:center;text-anchor:middle;fill:none;stroke:#000000;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+       x="154.70241"
+       y="152.26273"
+       id="text43"><tspan
+         sodipodi:role="line"
+         id="tspan43"
+         style="font-size:2.82222px;stroke-width:0.265"
+         x="154.70241"
+         y="152.26273" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.93889px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="87.381821"
+       y="94.236488"
+       id="text9-2-7"
+       transform="scale(1.017846,0.9824669)"><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;stroke-width:0.3"
+         x="87.381821"
+         y="94.236488"
+         id="tspan1-7">Report</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.93889px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="88.189445"
+       y="102.65232"
+       id="text9-2-7-0"
+       transform="scale(1.017846,0.9824669)"><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;stroke-width:0.3"
+         x="88.189445"
+         y="102.65232"
+         id="tspan1-7-3">Attest-</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;stroke-width:0.3"
+         x="88.189445"
+         y="108.82594"
+         id="tspan4">tation</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.464999;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Triangle)"
+       d="m 64.965262,105.2902 10e-7,34.2315"
+       id="path19"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Triangle)"
+       d="m 25.7639,106.89082 1e-6,34.22466"
+       id="path19-5"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.300001;stroke-opacity:1"
+       id="rect1-5-7-1"
+       width="159.728"
+       height="13.608567"
+       x="8.351141"
+       y="141.12395" />
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="86.643295"
+       y="150.07561"
+       id="text9-5"><tspan
+         sodipodi:role="line"
+         style="font-size:6.35px;stroke-width:0.3"
+         x="86.643295"
+         y="150.07561"
+         id="tspan10-97">Third Party (Signal App)</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1-5-7-8"
+       width="69.45919"
+       height="14.7"
+       x="8.3889236"
+       y="90.447266" />
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="41.933937"
+       y="95.645195"
+       id="text9-7"><tspan
+         sodipodi:role="line"
+         style="font-size:6.35px;stroke-width:0.3"
+         x="41.933937"
+         y="95.645195"
+         id="tspan10-92">Confidential VM</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:6.35px;stroke-width:0.3"
+         x="41.933937"
+         y="103.5827"
+         id="tspan1">(Signal Service)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-opacity:1"
+       x="134.78273"
+       y="100.02662"
+       id="text9-7-6"><tspan
+         sodipodi:role="line"
+         style="font-size:6.35px;stroke-width:0.3"
+         x="134.78273"
+         y="100.02662"
+         id="tspan10-92-8">SEV-SNP Module</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-opacity:1"
+       id="rect1-5-7-8-1"
+       width="67.697685"
+       height="14.7"
+       x="100.39124"
+       y="90.447296" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.93889px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+       x="-123.43314"
+       y="24.171051"
+       id="text44-9"
+       transform="rotate(-90)"><tspan
+         sodipodi:role="line"
+         id="tspan44-7"
+         style="font-size:4.93889px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.265"
+         x="-123.43314"
+         y="24.171051">Attestation</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.265"
+         x="-123.43314"
+         y="30.344664"
+         id="tspan2">Request</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.93889px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-dasharray:none;stroke-opacity:1"
+       x="-122.05468"
+       y="63.240467"
+       id="text44-9-6"
+       transform="rotate(-90)"><tspan
+         sodipodi:role="line"
+         id="tspan44-7-3"
+         style="font-size:4.93889px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.265"
+         x="-122.05468"
+         y="63.240467">Attestation</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:4.93889px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.265"
+         x="-122.05468"
+         y="69.414078"
+         id="tspan2-2">Report</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Triangle-7-7)"
+       d="m 78.017503,94.174819 20.730209,-0.0079"
+       id="path2"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Triangle-7-7-1)"
+       d="m 100.39692,102.08464 -20.730211,-0.008"
+       id="path2-7"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.9389px;text-align:center;text-anchor:middle;fill:#d6d8d7;stroke:#000000;stroke-width:0.365001;stroke-dasharray:0.465, 0.465"
+       x="81.191292"
+       y="89.634598"
+       id="text3"><tspan
+         sodipodi:role="line"
+         id="tspan3"
+         style="stroke-width:0.365"
+         x="81.191292"
+         y="89.634598" /></text>
   </g>
 </svg>
