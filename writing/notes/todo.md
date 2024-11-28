@@ -48,9 +48,18 @@
 * read [Hardware-Assisted Rootkits: Abusing Performance Counters on the ARM and x86 Architectures](../sources/hardware_assisted_rrotkits.pdf)
 
 * search for Whisper paper
+* search for TrustICE paper
 
 ## Diplomarbeit Aufgaben
     [ ] Prüfe ob Perfromance counter zuverlässig funktionieren
         [ ] Gibt es einen signifikanten Overcount für die L1 counter?
         [ ] Gibt es einen Undercount/wird jeder Evict erkannt?
         [ ] Hinterlässt der SMM Spuren in den Countern?
+    [ ] GlobalPlatform specification for TEE API
+        [ ] [OpenTEE](https://open-tee.github.io/) as UI?
+
+## Vortrag
+[] Inkonsistent in Abbildungen
+[] Rechtschreibung
+[] Titel richtig Formatieren
+[] Rework Performance counter part
