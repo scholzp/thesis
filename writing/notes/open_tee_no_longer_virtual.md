@@ -1,0 +1,1 @@
+## [Open-TEE is No Longer Virtual: Towards Software-only Trusted Execution Environments Using White-box Cryptography](../sources/Open-TEE_is_No_Longer_Virtual_Towards_Software-Only_Trusted_Execution_Environments_Using_White-Box_Cryptography.pdf)

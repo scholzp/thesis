@@ -17,3 +17,7 @@
 * Private signing key of QE attests system state  and structure
 * libtmps and [swtpm](https://github.com/stefanberger/swtpm) for developing tpm drivers
 * Terminal and TAN generatir example applications
+* Advisories against whom can not be defended
+    * boot chain manipulation
+    * Software with high priviledges (SMM, Monitor Mode, Secure World, 
+        Hardware Devices, physical access in general, side channels ) 
