@@ -13,7 +13,7 @@ build:pdf:
     - mkdir artifacts
     - cd writing/thesis
     - nix-build
-    - cp result/diplom.pdf ../artifacts/diplom.pdf
+    - cp result/diplom.pdf ../../artifacts/diplom.pdf
 
   artifacts:
     paths:
