@@ -1,0 +1,21 @@
+stages:
+  - build
+
+image: registry.vpn.cyberus-technology.de:443/infrastructure/nix-docker-image/cyberus-nix:master
+
+build:pdf:
+  stage: build
+  before_script:
+    - git config --global url.https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.vpn.cyberus-technology.de/.insteadOf "git@gitlab.vpn.cyberus-technology.de:"
+  tags:
+    - native-nix
+  script:
+    - mkdir artifacts
+    - cd writing/thesis
+    - nix-build
+    - cp result/diplom.pdf ../artifacts/diplom.pdf
+
+  artifacts:
+    paths:
+      - artifacts/diplom.pdf
+      
