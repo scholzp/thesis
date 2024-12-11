@@ -29,6 +29,9 @@ plainpages=false,pdfpagelabels=true]{hyperref}
   pdfauthor={Otto Mustermann},
   pdfkeywords={foo, bar},
 }
+\usepackage[acronym, toc, nonumberlist]{glossaries}
+
+\makeglossaries
 
 \input{preamble/packages.tex}
 \addbibresource{own.bib}
@@ -87,11 +90,18 @@ plainpages=false,pdfpagelabels=true]{hyperref}
 
 \appendix
 
-%\addchap{Glossar}
-
-% makeglossaries diplom
-%\printglossary[style=altlist]
-%\printglossary[type=\acronymtype,style=long]
+\newglossaryentry{Glossary}
+{
+    name=Glossary,
+    description={A alphabetical list of terms in a particular domain of knowledge
+            with thw definition of those terms.}
+}
+\newacronym{gcd}{GCD}{Greatest Common Divisor}
+\gls{Glossary}
+Given a set of numbers, there are elementary methods to compute
+its \acrlong{gcd}, which is abbreviated \acrshort{gcd}
+\printglossary[style=altlist]
+\printglossary[type=\acronymtype,style=long]
 
 \printbibliography
 \iffalse

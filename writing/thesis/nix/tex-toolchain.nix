@@ -5,10 +5,15 @@ texlive.combine {
     biber
     biblatex
     csquotes
+    datatool
+    glossaries
     hyphenat
     lastpage
     latexmk
+    mfirstuc
     siunitx
     todonotes
+    tracklang
+    xfor
     xpatch;
 }
