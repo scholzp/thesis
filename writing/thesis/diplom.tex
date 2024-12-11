@@ -80,6 +80,8 @@ plainpages=false,pdfpagelabels=true]{hyperref}
 \pagenumbering{arabic}
 % use \input for small stuff (like a list you include twice or a tiks figure)
 % and \include for large latex compilation workloads (like a chapter) to get faster builds.
+\include{content/03_glossary}
+\include{content/04_acronyms}
 \include{content/10_introduction}
 \include{content/20_state}
 \include{content/30_design}
@@ -90,16 +92,9 @@ plainpages=false,pdfpagelabels=true]{hyperref}
 
 \appendix
 
-\newglossaryentry{Glossary}
-{
-    name=Glossary,
-    description={A alphabetical list of terms in a particular domain of knowledge
-            with thw definition of those terms.}
-}
-\newacronym{gcd}{GCD}{Greatest Common Divisor}
-\gls{Glossary}
+\gls{tee}
 Given a set of numbers, there are elementary methods to compute
-its \acrlong{gcd}, which is abbreviated \acrshort{gcd}
+its \acrlong{a_tee}, which is abbreviated \acrshort{a_tee}
 \printglossary[style=altlist]
 \printglossary[type=\acronymtype,style=long]
 
