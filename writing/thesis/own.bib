@@ -1,74 +1,804 @@
-% This file was created with JabRef 2.9.2.
-% Encoding: UTF-8
 
-@INPROCEEDINGS{becher04:_feurig_hacken_mit_firew,
-    author = {Michael Becher and Maximillian Dornseif},
-    title = {{Feuriges Hacken - Spaß mit Firewire}},
-    booktitle = {21C3: Proceedings of the 21st Chaos Communication Congress},
-    date = {2004-12}
+@misc{wang_sigdrop_2016,
+  title      = {{SIGDROP}: {Signature}-based {ROP} {Detection} using {Hardware} {Performance} {Counters}},
+  shorttitle = {{SIGDROP}},
+  url        = {http://arxiv.org/abs/1609.02667},
+  abstract   = {Return-Oriented Programming (ROP) is a software exploit for system compromise. By chaining short instruction sequences from existing code pieces, ROP can bypass static code-integrity checking approaches and non-executable page protections. Existing defenses either require access to source code or binary, a customized compiler or hardware modiﬁcations, or suffer from high performance and storage overhead. In this work, we propose SIGDROP, a low-cost approach for ROP detection which uses low-level properties inherent to ROP attacks. Speciﬁcally, we observe special patterns of certain hardware events when a ROP attack occurs during program execution. Such hardware event-based patterns form signatures to ﬂag ROP attacks at runtime. SIGDROP leverages Hardware Performance Counters, which are already present in commodity processors, to efﬁciently capture and extract the signatures. Our evaluation demonstrates that SIGDROP can effectively detect ROP attacks with acceptable performance overhead and negligible storage overhead.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  publisher  = {arXiv},
+  author     = {Wang, Xueyang and Backer, Jerry},
+  month      = sep,
+  year       = {2016},
+  note       = {arXiv:1609.02667 [cs]},
+  keywords   = {Computer Science - Cryptography and Security},
+  file       = {Wang and Backer - 2016 - SIGDROP Signature-based ROP Detection using Hardw.pdf:/home/pscholz/Zotero/storage/W98HQAXX/Wang and Backer - 2016 - SIGDROP Signature-based ROP Detection using Hardw.pdf:application/pdf}
 }
 
-@CONFERENCE{bellard2005qfa,
-    author = {Fabrice Bellard},
-    title = {{QEMU, a fast and portable dynamic translator}},
-    booktitle = {Proceedings of the USENIX Annual Technical Conference, FREENIX Track},
-    date = {2005},
-    pages = {41--46}
+@article{costan2016intel,
+  title   = {Intel SGX explained},
+  author  = {Costan, Victor},
+  journal = {IACR Cryptol, EPrint Arch},
+  year    = {2016}
 }
 
-@INPROCEEDINGS{boileau06,
-    author = {Adam Boileau},
-    title = {{Hit by a Bus: Physical Access Attacks with Firewire}},
-    booktitle = {RUXCON},
-    date = {2006}
+@misc{moghimi_cachezoom_2017,
+  title      = {{CacheZoom}: {How} {SGX} {Amplifies} {The} {Power} of {Cache} {Attacks}},
+  shorttitle = {{CacheZoom}},
+  url        = {http://arxiv.org/abs/1703.06986},
+  abstract   = {In modern computing environments, hardware resources are commonly shared, and parallel computation is widely used. Parallel tasks can cause privacy and security problems if proper isolation is not enforced. Intel proposed SGX to create a trusted execution environment within the processor. SGX relies on the hardware, and claims runtime protection even if the OS and other software components are malicious. However, SGX disregards side-channel attacks. We introduce a powerful cache side-channel attack that provides system adversaries a high resolution channel. Our attack tool named CacheZoom is able to virtually track all memory accesses of SGX enclaves with high spatial and temporal precision. As proof of concept, we demonstrate AES key recovery attacks on commonly used implementations including those that were believed to be resistant in previous scenarios. Our results show that SGX cannot protect critical data sensitive computations, and efficient AES key recovery is possible in a practical environment. In contrast to previous works which require hundreds of measurements, this is the first cache side-channel attack on a real system that can recover AES keys with a minimal number of measurements. We can successfully recover AES keys from T-Table based implementations with as few as ten measurements.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  publisher  = {arXiv},
+  author     = {Moghimi, Ahmad and Irazoqui, Gorka and Eisenbarth, Thomas},
+  month      = aug,
+  year       = {2017},
+  note       = {arXiv:1703.06986 [cs]},
+  keywords   = {Computer Science - Cryptography and Security},
+  file       = {Moghimi et al. - 2017 - CacheZoom How SGX Amplifies The Power of Cache At.pdf:/home/pscholz/Zotero/storage/M62UPXGG/Moghimi et al. - 2017 - CacheZoom How SGX Amplifies The Power of Cache At.pdf:application/pdf}
 }
 
-@BOOK{frederick95,
-    author = {Brooks,Jr., Frederick P.},
-    title = {The mythical man-month (anniversary ed.)},
-    date = {1995},
-    publisher = {Addison-Wesley Longman Publishing Co., Inc.},
-    location = {Boston, MA, USA},
-    isbn = {0-201-83595-9}
+@misc{strackx_heisenberg_2017,
+  title      = {The {Heisenberg} {Defense}: {Proactively} {Defending} {SGX} {Enclaves} against {Page}-{Table}-{Based} {Side}-{Channel} {Attacks}},
+  shorttitle = {The {Heisenberg} {Defense}},
+  url        = {http://arxiv.org/abs/1712.08519},
+  abstract   = {Protected-module architectures (PMAs) have been proposed to provide strong isolation guarantees, even on top of a compromised system. Unfortunately, Intel SGX – the only publicly available highend PMA – has been shown to only provide limited isolation. An attacker controlling the untrusted page tables, can learn enclave secrets by observing its page access patterns.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  publisher  = {arXiv},
+  author     = {Strackx, Raoul and Piessens, Frank},
+  month      = dec,
+  year       = {2017},
+  note       = {arXiv:1712.08519 [cs]},
+  keywords   = {Computer Science - Cryptography and Security},
+  file       = {Strackx and Piessens - 2017 - The Heisenberg Defense Proactively Defending SGX .pdf:/home/pscholz/Zotero/storage/PNRBESIX/Strackx and Piessens - 2017 - The Heisenberg Defense Proactively Defending SGX .pdf:application/pdf}
 }
 
-@ARTICLE{collins97a,
-    author = {Robert R. Collins},
-    title = {{In-Circuit Emulation: How the Microprocessor Evolved Over Time}},
-    date = {1997-09},
-    journal = {Dr. Dobbs Journal}
+@misc{nilsson_survey_2020,
+  title     = {A {Survey} of {Published} {Attacks} on {Intel} {SGX}},
+  url       = {http://arxiv.org/abs/2006.13598},
+  abstract  = {Intel Software Guard Extensions (SGX) provides a trusted execution environment (TEE) to run code and operate sensitive data. SGX provides runtime hardware protection where both code and data are protected even if other code components are malicious. However, recently many attacks targeting SGX have been identiﬁed and introduced that can thwart the hardware defence provided by SGX. In this paper we present a survey of all attacks speciﬁcally targeting Intel SGX that are known to the authors, to date. We categorized the attacks based on their implementation details into 7 different categories. We also look into the available defence mechanisms against identiﬁed attacks and categorize the available types of mitigations for each presented attack.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  publisher = {arXiv},
+  author    = {Nilsson, Alexander and Bideh, Pegah Nikbakht and Brorsson, Joakim},
+  month     = jun,
+  year      = {2020},
+  note      = {arXiv:2006.13598 [cs]},
+  keywords  = {Computer Science - Cryptography and Security},
+  file      = {Nilsson et al. - 2020 - A Survey of Published Attacks on Intel SGX.pdf:/home/pscholz/Zotero/storage/FE43IRBS/Nilsson et al. - 2020 - A Survey of Published Attacks on Intel SGX.pdf:application/pdf}
 }
 
-@ARTICLE{feske07,
-    author = {Norman Feske},
-    title = {{A case study on the cost and benefit of dynamic RPC marshalling
-	for low-level system components}},
-    date = {2007},
-    volume = {41},
-    number = {4},
-    pages = {40--48},
-    issn = {0163-5980},
-    doi = {http://doi.acm.org/10.1145/1278901.1278908},
-    journal = {SIGOPS Operating Systems Review},
-    location = {New York, NY, USA},
-    publisher = {ACM}
+@misc{jiang_challenges_2022,
+  title     = {On the {Challenges} of {Detecting} {Side}-{Channel} {Attacks} in {SGX}},
+  url       = {http://arxiv.org/abs/2011.14599},
+  abstract  = {Existing tools to detect side-channel attacks on Intel SGX are grounded on the observation that attacks affect the performance of the victim application. As such, all detection tools monitor the potential victim and raise an alarm if the witnessed performance (in terms of runtime, enclave interruptions, cache misses, etc.) is out of the ordinary.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  publisher = {arXiv},
+  author    = {Jiang, Jianyu and Soriente, Claudio and Karame, Ghassan},
+  month     = jun,
+  year      = {2022},
+  note      = {arXiv:2011.14599 [cs]},
+  keywords  = {Computer Science - Cryptography and Security},
+  file      = {Jiang et al. - 2022 - On the Challenges of Detecting Side-Channel Attack.pdf:/home/pscholz/Zotero/storage/4Q63NSUJ/Jiang et al. - 2022 - On the Challenges of Detecting Side-Channel Attack.pdf:application/pdf}
 }
 
-@ONLINE{green04,
-    author = {Tom Green},
-    title = {{1394 Kernel Debugging Tips and Tricks}},
-    date = {2004},
-    url = {http://download.microsoft.com/download/1/8/f/18f8cee2-0b64-41f2-893d-a6f2295b40c8/DW04001_WINHEC2004.ppt},
-    note = {Slide presentation at the WinHEC 2004},
-    urldate = {2009-06-03}
+@misc{krahn_teemon_2020,
+  title      = {{TEEMon}: {A} continuous performance monitoring framework for {TEEs}},
+  shorttitle = {{TEEMon}},
+  url        = {http://arxiv.org/abs/2012.06554},
+  abstract   = {Trusted Execution Environments (TEEs), such as Intel Software Guard eXtensions (SGX), are considered as a promising approach to resolve security challenges in clouds. TEEs protect the confidentiality and integrity of application code and data even against privileged attackers with root and physical access by providing an isolated secure memory area, i.e., enclaves. The security guarantees are provided by the CPU, thus even if system software is compromised, the attacker can never access the enclave's content. While this approach ensures strong security guarantees for applications, it also introduces a considerable runtime overhead in part by the limited availability of protected memory (enclave page cache). Currently, only a limited number of performance measurement tools for TEE-based applications exist and none offer performance monitoring and analysis during runtime. This paper presents TEEMon, the first continuous performance monitoring and analysis tool for TEE-based applications. TEEMon provides not only fine-grained performance metrics during runtime, but also assists the analysis of identifying causes of performance bottlenecks, e.g., excessive system calls. Our approach smoothly integrates with existing open-source tools (e.g., Prometheus or Grafana) towards a holistic monitoring solution, particularly optimized for systems deployed through Docker containers or Kubernetes and offers several dedicated metrics and visualizations. Our evaluation shows that TEEMon's overhead ranges from 5\% to 17\%.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  publisher  = {arXiv},
+  author     = {Krahn, Robert and Dragoti, Donald and Gregor, Franz and Quoc, Do Le and Schiavoni, Valerio and Felber, Pascal and Souza, Clenimar and Brito, Andrey and Fetzer, Christof},
+  month      = dec,
+  year       = {2020},
+  note       = {arXiv:2012.06554 [cs]},
+  keywords   = {Computer Science - Cryptography and Security, Computer Science - Distributed, Parallel, and Cluster Computing, Computer Science - Performance},
+  file       = {Krahn et al. - 2020 - TEEMon A continuous performance monitoring framew.pdf:/home/pscholz/Zotero/storage/FWQCAUNA/Krahn et al. - 2020 - TEEMon A continuous performance monitoring framew.pdf:application/pdf}
 }
 
-@PATENT{patent:4819234,
-    author = {Huber, William S.},
-    title = {Operating system debugger},
-    number = {4819234},
-    date = {1989-04},
-    location = {Needham, MA},
-    url = {http://www.freepatentsonline.com/4819234.html}
+@article{zhang_truspy_nodate,
+  title    = {{TruSpy}: {Cache} {Side}-{Channel} {Information} {Leakage} from the {Secure} {World} on {ARM} {Devices}},
+  abstract = {As smart, embedded devices are increasingly integrated into our daily life, the security of these devices has become a major concern. The ARM processor family, which powers more than 60\% of embedded devices, introduced TrustZone technology to offer security protection via an isolated execution environment called secure world. Caches in TrustZone-enabled processors are extended with a nonsecure (NS) bit to indicate whether a cache line is used by the secure world or the normal world. This cache design improves system performance by eliminating the need to perform cache ﬂush during world switches; however, it also enables cache contention between the two worlds.},
+  language = {en},
+  author   = {Zhang, Ning and Sun, Kun and Shands, Deborah and Lou, Wenjing and Hou, Y Thomas},
+  file     = {Zhang et al. - TruSpy Cache Side-Channel Information Leakage fro.pdf:/home/pscholz/Zotero/storage/Y6MPPIKW/Zhang et al. - TruSpy Cache Side-Channel Information Leakage fro.pdf:application/pdf}
 }
 
+@inproceedings{pires_secure_2016,
+  address   = {Trento Italy},
+  title     = {Secure {Content}-{Based} {Routing} {Using} {Intel} {Software} {Guard} {Extensions}},
+  isbn      = {978-1-4503-4300-8},
+  url       = {https://dl.acm.org/doi/10.1145/2988336.2988346},
+  doi       = {10.1145/2988336.2988346},
+  abstract  = {Content-based routing (CBR) is a powerful model that supports scalable asynchronous communication among large sets of geographically distributed nodes. Yet, preserving privacy represents a major limitation for the wide adoption of CBR, notably when the routers are located in public clouds. Indeed, a CBR router must see the content of the messages sent by data producers, as well as the ﬁlters (or subscriptions) registered by data consumers. This represents a major deterrent for companies for which data is a key asset, as for instance in the case of ﬁnancial markets or to conduct sensitive business-to-business transactions. While there exists some techniques for privacy-preserving computation, they are either prohibitively slow or too limited to be usable in real systems. In this paper, we follow a diﬀerent strategy by taking advantage of trusted hardware extensions that have just been introduced in oﬀ-the-shelf processors and provide a trusted execution environment. We exploit Intel’s new software guard extensions (SGX) to implement a CBR engine in a secure enclave. Thanks to the hardware-based trusted execution environment (TEE), the compute-intensive CBR operations can operate on decrypted data shielded by the enclave and leverage eﬃcient matching algorithms. Extensive experimental evaluation shows that SGX adds only limited overhead to insecure plaintext matching outside secure enclaves while providing much better performance and more powerful ﬁltering capabilities than alternative softwareonly solutions. To the best of our knowledge, this work is the ﬁrst to demonstrate the practical beneﬁts of SGX for privacy-preserving CBR.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  booktitle = {Proceedings of the 17th {International} {Middleware} {Conference}},
+  publisher = {ACM},
+  author    = {Pires, Rafael and Pasin, Marcelo and Felber, Pascal and Fetzer, Christof},
+  month     = nov,
+  year      = {2016},
+  pages     = {1--10},
+  file      = {Pires et al. - 2016 - Secure Content-Based Routing Using Intel Software .pdf:/home/pscholz/Zotero/storage/ZZTAQ3YL/Pires et al. - 2016 - Secure Content-Based Routing Using Intel Software .pdf:application/pdf}
+}
+
+@inproceedings{das_sok_2019,
+  address    = {San Francisco, CA, USA},
+  title      = {{SoK}: {The} {Challenges}, {Pitfalls}, and {Perils} of {Using} {Hardware} {Performance} {Counters} for {Security}},
+  copyright  = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+  isbn       = {978-1-5386-6660-9},
+  shorttitle = {{SoK}},
+  url        = {https://ieeexplore.ieee.org/document/8835366/},
+  doi        = {10.1109/SP.2019.00021},
+  abstract   = {Hardware Performance Counters (HPCs) have been available in processors for more than a decade. These counters can be used to monitor and measure events that occur at the CPU level. Modern processors provide hundreds of hardware events that can be monitored, and with each new processor architecture more are added. Yet, there has been little in the way of systematic studies on how performance counters can best be utilized to accurately monitor events in real-world settings. Especially when it comes to the use of HPCs for security applications, measurement imprecisions or incorrect assumptions regarding the measured values can undermine the offered protection. To shed light on this issue, we embarked on a year-long effort to (i) study the best practices for obtaining accurate measurement of events using performance counters, (ii) understand the challenges and pitfalls of using HPCs in various settings, and (iii) explore ways to obtain consistent and accurate measurements across different settings and architectures. Additionally, we then empirically evaluated the way HPCs have been used throughout a wide variety of papers. Not wanting to stop there, we explored whether these widely used techniques are in fact obtaining performance counter data correctly. As part of that assessment, we (iv) extended the seminal work of Weaver and McKee from almost 10 years ago on non-determinism in HPCs, and applied our ﬁndings to 56 papers across various application domains.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {2019 {IEEE} {Symposium} on {Security} and {Privacy} ({SP})},
+  publisher  = {IEEE},
+  author     = {Das, Sanjeev and Werner, Jan and Antonakakis, Manos and Polychronakis, Michalis and Monrose, Fabian},
+  month      = may,
+  year       = {2019},
+  pages      = {20--38},
+  file       = {Das et al. - 2019 - SoK The Challenges, Pitfalls, and Perils of Using.pdf:/home/pscholz/Zotero/storage/J8XZD84H/Das et al. - 2019 - SoK The Challenges, Pitfalls, and Perils of Using.pdf:application/pdf;sok_performance_counters_for_security.md:/home/pscholz/thesis/thesis/writing/notes/sok_performance_counters_for_security.md:text/markdown}
+}
+
+@article{li_detecting_2021,
+  title     = {Detecting {Spectre} {Attacks} {Using} {Hardware} {Performance} {Counters}},
+  copyright = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+  issn      = {0018-9340, 1557-9956, 2326-3814},
+  url       = {https://ieeexplore.ieee.org/document/9437667/},
+  doi       = {10.1109/TC.2021.3082471},
+  abstract  = {Spectre attacks can be catastrophic and widespread because they exploit common design ﬂaws caused by the speculative capabilities in modern processors to leak sensitive data through side channels. Completely ﬁxing the problem would require a redesign of the architecture for transient execution or the implementation of a new design on re-conﬁgurable hardware. However, such ﬁxes cannot be backported to old machines with ﬁxed hardware design. Completely replacing those machines will take a long time. Moreover, existing software patches may cause signiﬁcant performance overhead. This paper proposes to detect Spectre by monitoring deviations in microarchitectural events using hardware performance counters with promising accuracy above 90 percent under a variety of workload conditions. However, the attacker may attempt to evade detection by slowing down the attack or mimicking benign programs. This paper thus compares different evasion strategies quantitatively and demonstrates that it is possible for the attacker to avoid detection when operating the attacks at a lower speed while maintaining a reasonable attack success rate. Then, we show that, in order to resist evasion, the original detector must be enhanced by randomly switching between a set of detectors using different features and sampling periods so we can keep the detection accuracy above 80 percent.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  journal   = {IEEE Transactions on Computers},
+  author    = {Li, Congmiao and Gaudiot, Jean-Luc},
+  year      = {2021},
+  pages     = {1--1},
+  file      = {detecting_spectre_attacks_using_hpc.md:/home/pscholz/thesis/thesis/writing/notes/detecting_spectre_attacks_using_hpc.md:text/markdown;Li and Gaudiot - 2021 - Detecting Spectre Attacks Using Hardware Performan.pdf:/home/pscholz/Zotero/storage/SREXKUTN/Li and Gaudiot - 2021 - Detecting Spectre Attacks Using Hardware Performan.pdf:application/pdf}
+}
+
+@article{borrello_aepic_nodate,
+  title    = {Æ{PIC} {Leak}: {Architecturally} {Leaking} {Uninitialized} {Data} from the {Microarchitecture}},
+  abstract = {CPU vulnerabilities undermine the security guarantees provided by software- and hardware-security improvements. While the discovery of transient-execution attacks increased the interest in CPU vulnerabilities on a microarchitectural level, architectural CPU vulnerabilities are still understudied. In this paper, we systematically analyze existing CPU vulnerabilities showing that CPUs suffer from vulnerabilities whose root causes match with those in complex software. We show that transient-execution attacks and architectural vulnerabilities often arise from the same type of bug and identify the blank spots. Investigating the blank spots, we focus on architecturally improperly initialized data locations.},
+  language = {en},
+  author   = {Borrello, Pietro and Kogler, Andreas and Schwarzl, Martin and Lipp, Moritz and Gruss, Daniel and Schwarz, Michael},
+  file     = {Borrello et al. - ÆPIC Leak Architecturally Leaking Uninitialized D.pdf:/home/pscholz/Zotero/storage/BK867U4A/Borrello et al. - ÆPIC Leak Architecturally Leaking Uninitialized D.pdf:application/pdf}
+}
+
+@inproceedings{evtyushkin_branchscope_2018,
+  address    = {Williamsburg VA USA},
+  title      = {{BranchScope}: {A} {New} {Side}-{Channel} {Attack} on {Directional} {Branch} {Predictor}},
+  isbn       = {978-1-4503-4911-6},
+  shorttitle = {{BranchScope}},
+  url        = {https://dl.acm.org/doi/10.1145/3173162.3173204},
+  doi        = {10.1145/3173162.3173204},
+  abstract   = {We present BranchScope — a new side-channel attack where the attacker infers the direction of an arbitrary conditional branch instruction in a victim program by manipulating the shared directional branch predictor. The directional component of the branch predictor stores the prediction on a given branch (taken or not-taken) and is a different component from the branch target buffer (BTB) attacked by previous work. BranchScope is the first fine-grained attack on the directional branch predictor, expanding our understanding of the side channel vulnerability of the branch prediction unit. Our attack targets complex hybrid branch predictors with unknown organization. We demonstrate how an attacker can force these predictors to switch to a simple 1-level mode to simplify the direction recovery. We carry out BranchScope on several recent Intel CPUs and also demonstrate the attack against an SGX enclave.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {Proceedings of the {Twenty}-{Third} {International} {Conference} on {Architectural} {Support} for {Programming} {Languages} and {Operating} {Systems}},
+  publisher  = {ACM},
+  author     = {Evtyushkin, Dmitry and Riley, Ryan and Abu-Ghazaleh, Nael Cse {And} Ece and Ponomarev, Dmitry},
+  month      = mar,
+  year       = {2018},
+  pages      = {693--707},
+  file       = {Evtyushkin et al. - 2018 - BranchScope A New Side-Channel Attack on Directio.pdf:/home/pscholz/Zotero/storage/IV2UDZB3/Evtyushkin et al. - 2018 - BranchScope A New Side-Channel Attack on Directio.pdf:application/pdf}
+}
+
+@inproceedings{yubin_xia_cfimon_2012,
+  address    = {Boston, MA, USA},
+  title      = {{CFIMon}: {Detecting} violation of control flow integrity using performance counters},
+  isbn       = {978-1-4673-1625-5 978-1-4673-1624-8 978-1-4673-1623-1},
+  shorttitle = {{CFIMon}},
+  url        = {http://ieeexplore.ieee.org/document/6263958/},
+  doi        = {10.1109/DSN.2012.6263958},
+  abstract   = {Many classic and emerging security attacks usually introduce illegal control ﬂow to victim programs. This paper proposes an approach to detecting violation of control ﬂow integrity based on hardware support for performance monitoring in modern processors. The key observation is that the abnormal control ﬂow in security breaches can be precisely captured by performance monitoring units. Based on this observation, we design and implement a system called CFIMon, which is the ﬁrst non-intrusive system that can detect and reason about a variety of attacks violating control ﬂow integrity without any changes to applications (either source or binary code) or requiring special-purpose hardware. CFIMon combines static analysis and runtime training to collect legal control ﬂow transfers, and leverages the branch tracing store mechanism in commodity processors to collect and analyze runtime traces on-theﬂy to detect violation of control ﬂow integrity. Security evaluation shows that CFIMon has low false positives or false negatives when detecting several realistic security attacks. Performance results show that CFIMon incurs only 6.1\% performance overhead on average for a set of typical server applications.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {{IEEE}/{IFIP} {International} {Conference} on {Dependable} {Systems} and {Networks} ({DSN} 2012)},
+  publisher  = {IEEE},
+  author     = {{Yubin Xia} and {Yutao Liu} and Chen, Haibo and Zang, Binyu},
+  month      = jun,
+  year       = {2012},
+  pages      = {1--12},
+  file       = {cfimon_detecting__violation_of_control_flow_integrety.md:/home/pscholz/thesis/thesis/writing/notes/cfimon_detecting__violation_of_control_flow_integrety.md:text/markdown;Yubin Xia et al. - 2012 - CFIMon Detecting violation of control flow integr.pdf:/home/pscholz/Zotero/storage/49CVBX2Y/Yubin Xia et al. - 2012 - CFIMon Detecting violation of control flow integr.pdf:application/pdf}
+}
+
+@article{reitz_isolierende_nodate,
+  title    = {Isolierende {Programmausführung} unter {L4Re}/{Fiasco}.{OC}},
+  language = {de},
+  author   = {Reitz, Hanna},
+  file     = {isolating_program_execution_on_l4re.md:/home/pscholz/thesis/thesis/writing/notes/isolating_program_execution_on_l4re.md:text/markdown;Reitz - Isolierende Programmausführung unter L4ReFiasco.O.pdf:/home/pscholz/Zotero/storage/NIN4TYNK/Reitz - Isolierende Programmausführung unter L4ReFiasco.O.pdf:application/pdf}
+}
+
+@inproceedings{mccune_flicker_2008,
+  address    = {Glasgow Scotland UK},
+  title      = {Flicker: an execution infrastructure for tcb minimization},
+  isbn       = {978-1-60558-013-5},
+  shorttitle = {Flicker},
+  url        = {https://dl.acm.org/doi/10.1145/1352592.1352625},
+  doi        = {10.1145/1352592.1352625},
+  abstract   = {We present Flicker, an infrastructure for executing securitysensitive code in complete isolation while trusting as few as 250 lines of additional code. Flicker can also provide meaningful, ﬁne-grained attestation of the code executed (as well as its inputs and outputs) to a remote party. Flicker guarantees these properties even if the BIOS, OS and DMAenabled devices are all malicious. Flicker leverages new commodity processors from AMD and Intel and does not require a new OS or VMM. We demonstrate a full implementation of Flicker on an AMD platform and describe our development environment for simplifying the construction of Flicker-enabled code.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {Proceedings of the 3rd {ACM} {SIGOPS}/{EuroSys} {European} {Conference} on {Computer} {Systems} 2008},
+  publisher  = {ACM},
+  author     = {McCune, Jonathan M. and Parno, Bryan J. and Perrig, Adrian and Reiter, Michael K. and Isozaki, Hiroshi},
+  month      = apr,
+  year       = {2008},
+  pages      = {315--328},
+  file       = {McCune et al. - 2008 - Flicker an execution infrastructure for tcb minim.pdf:/home/pscholz/Zotero/storage/KSUS55ES/McCune et al. - 2008 - Flicker an execution infrastructure for tcb minim.pdf:application/pdf}
+}
+
+@incollection{hutchison_frost_2013,
+  address    = {Berlin, Heidelberg},
+  title      = {{FROST}: {Forensic} {Recovery} of {Scrambled} {Telephones}},
+  volume     = {7954},
+  copyright  = {http://www.springer.com/tdm},
+  isbn       = {978-3-642-38979-5 978-3-642-38980-1},
+  shorttitle = {{FROST}},
+  url        = {http://link.springer.com/10.1007/978-3-642-38980-1_23},
+  abstract   = {At the end of 2011, Google released version 4.0 of its Android operating system for smartphones. For the ﬁrst time, Android smartphone owners were supplied with a disk encryption feature that transparently scrambles user partitions, thus protecting sensitive user information against targeted attacks that bypass screen locks. On the downside, scrambled telephones are a a nightmare for IT forensics and law enforcement, because once the power of a scrambled device is cut any chance other than bruteforce is lost to recover data.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {Applied {Cryptography} and {Network} {Security}},
+  publisher  = {Springer Berlin Heidelberg},
+  author     = {Müller, Tilo and Spreitzenbarth, Michael},
+  editor     = {Hutchison, David and Kanade, Takeo and Kittler, Josef and Kleinberg, Jon M. and Mattern, Friedemann and Mitchell, John C. and Naor, Moni and Nierstrasz, Oscar and Pandu Rangan, C. and Steffen, Bernhard and Sudan, Madhu and Terzopoulos, Demetri and Tygar, Doug and Vardi, Moshe Y. and Weikum, Gerhard and Jacobson, Michael and Locasto, Michael and Mohassel, Payman and Safavi-Naini, Reihaneh},
+  year       = {2013},
+  doi        = {10.1007/978-3-642-38980-1_23},
+  note       = {Series Title: Lecture Notes in Computer Science},
+  pages      = {373--388},
+  file       = {Müller and Spreitzenbarth - 2013 - FROST Forensic Recovery of Scrambled Telephones.pdf:/home/pscholz/Zotero/storage/V8EWNID7/Müller and Spreitzenbarth - 2013 - FROST Forensic Recovery of Scrambled Telephones.pdf:application/pdf}
+}
+
+@inproceedings{bazm_cache-based_2018,
+  address   = {Barcelona},
+  title     = {Cache-based side-channel attacks detection through {Intel} {Cache} {Monitoring} {Technology} and {Hardware} {Performance} {Counters}},
+  isbn      = {978-1-5386-5896-3},
+  url       = {https://ieeexplore.ieee.org/document/8364038/},
+  doi       = {10.1109/FMEC.2018.8364038},
+  language  = {en},
+  urldate   = {2024-10-21},
+  booktitle = {2018 {Third} {International} {Conference} on {Fog} and {Mobile} {Edge} {Computing} ({FMEC})},
+  publisher = {IEEE},
+  author    = {Bazm, Mohammad-Mahdi and Sautereau, Thibaut and Lacoste, Marc and Sudholt, Mario and Menaud, Jean-Marc},
+  month     = apr,
+  year      = {2018},
+  pages     = {7--12},
+  file      = {Bazm et al. - 2018 - Cache-based side-channel attacks detection through.pdf:/home/pscholz/Zotero/storage/4XBB56JE/Bazm et al. - 2018 - Cache-based side-channel attacks detection through.pdf:application/pdf}
+}
+
+@inproceedings{leng_hardware_2017,
+  address   = {Thessaloniki, Greece},
+  title     = {Hardware performance counters for system reliability monitoring},
+  isbn      = {978-1-5386-1708-3},
+  url       = {http://ieeexplore.ieee.org/document/8031548/},
+  doi       = {10.1109/IVSW.2017.8031548},
+  abstract  = {As technology scaling reaches nanometre scales, the error rate due to variations in temperature and voltage, single event effects and component degradation increases, making components less reliable. In order to ensure a system continues to function correctly while facing known reliability issues, it is imperative that the system should have the means to detect the occurrence of errors due to the presence of faults. A system that behaves normally (no error detected in the system) exhibits a proﬁle, and any deviations from this proﬁle indicate that there is an anomaly in the system. In this paper, we propose to use hardware performance counters (HPCs) to measure events that occur during the execution of the program. We explore the various counters available which could be use to identify the anomalous behaviour in the system and develop a methodology to observe the anomalies using HPCs by creating a faultfree pattern and observing any subsequent changes in that pattern. We evaluate the proposed technique using GemFI, an architectural simulator based on Gem5 with additional fault injection capabilities. We compare the results obtained at the end of the execution with data collected during a time interval. Our results show that HPCs can be used to identify anomalous behaviour in a system that would lead to failure.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  booktitle = {2017 {IEEE} 2nd {International} {Verification} and {Security} {Workshop} ({IVSW})},
+  publisher = {IEEE},
+  author    = {Leng, Elena Woo Lai and Zwolinski, Mark and Halak, Basel},
+  month     = jul,
+  year      = {2017},
+  pages     = {76--81},
+  file      = {hardware_performance_counters_for_system_reliability_monitoring.md:/home/pscholz/thesis/thesis/writing/notes/hardware_performance_counters_for_system_reliability_monitoring.md:text/markdown;Leng et al. - 2017 - Hardware performance counters for system reliabili.pdf:/home/pscholz/Zotero/storage/DDDJH9QL/Leng et al. - 2017 - Hardware performance counters for system reliabili.pdf:application/pdf}
+}
+
+@inproceedings{weaver_non-determinism_2013,
+  address   = {Austin, TX, USA},
+  title     = {Non-determinism and overcount on modern hardware performance counter implementations},
+  isbn      = {978-1-4673-5779-1 978-1-4673-5776-0 978-1-4673-5778-4},
+  url       = {http://ieeexplore.ieee.org/document/6557172/},
+  doi       = {10.1109/ISPASS.2013.6557172},
+  abstract  = {Ideal hardware performance counters provide exact deterministic results. Real-world performance monitoring unit (PMU) implementations do not always live up to this ideal. Events that should be exact and deterministic (such as retired instructions) show run-to-run variation and overcount on x86 64 machines, even when run in strictly controlled environments. These effects are non-intuitive to casual users and cause difﬁculties when strict determinism is desirable, such as when implementing deterministic replay or deterministic threading libraries.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  booktitle = {2013 {IEEE} {International} {Symposium} on {Performance} {Analysis} of {Systems} and {Software} ({ISPASS})},
+  publisher = {IEEE},
+  author    = {Weaver, Vincent M. and Terpstra, Dan and Moore, Shirley},
+  month     = apr,
+  year      = {2013},
+  pages     = {215--224},
+  file      = {todo.md:/home/pscholz/thesis/thesis/writing/notes/todo.md:text/markdown;Weaver et al. - 2013 - Non-determinism and overcount on modern hardware p.pdf:/home/pscholz/Zotero/storage/76GJC96L/Weaver et al. - 2013 - Non-determinism and overcount on modern hardware p.pdf:application/pdf}
+}
+
+@inproceedings{zaparanuks_accuracy_2009,
+  address   = {Boston, MA, USA},
+  title     = {Accuracy of performance counter measurements},
+  isbn      = {978-1-4244-4184-6},
+  url       = {http://ieeexplore.ieee.org/document/4919635/},
+  doi       = {10.1109/ISPASS.2009.4919635},
+  abstract  = {Many workload characterization studies depend on accurate measurements of the cost of executing a piece of code. Often these measurements are conducted using infrastructures to access hardware performance counters. Most modern processors provide such counters to count micro-architectural events such as retired instructions or clock cycles. These counters can be diﬃcult to conﬁgure, may not be programmable or readable from user-level code, and can not discriminate between events caused by diﬀerent software threads. Various software infrastructures address this problem, providing access to per-thread counters from application code. This paper constitutes the ﬁrst comparative study of the accuracy of three commonly used measurement infrastructures (perfctr, perfmon2, and PAPI) on three common processors (Pentium D, Core 2 Duo, and AMD ATHLON 64 X2). We ﬁnd signiﬁcant diﬀerences in accuracy of various usage patterns for the diﬀerent infrastructures and processors. Based on these results we provide guidelines for ﬁnding the best measurement approach.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  booktitle = {2009 {IEEE} {International} {Symposium} on {Performance} {Analysis} of {Systems} and {Software}},
+  publisher = {IEEE},
+  author    = {Zaparanuks, Dmitrijs and Jovic, Milan and Hauswirth, Matthias},
+  month     = apr,
+  year      = {2009},
+  pages     = {23--32},
+  file      = {accurarcy_of_performance_counters.md:/home/pscholz/thesis/thesis/writing/notes/accurarcy_of_performance_counters.md:text/markdown;Zaparanuks et al. - 2009 - Accuracy of performance counter measurements.pdf:/home/pscholz/Zotero/storage/2KLCRYST/Zaparanuks et al. - 2009 - Accuracy of performance counter measurements.pdf:application/pdf}
+}
+
+@article{chiappetta_real_2016,
+  title    = {Real time detection of cache-based side-channel attacks using hardware performance counters},
+  volume   = {49},
+  issn     = {15684946},
+  url      = {https://linkinghub.elsevier.com/retrieve/pii/S1568494616304732},
+  doi      = {10.1016/j.asoc.2016.09.014},
+  language = {en},
+  urldate  = {2024-10-21},
+  journal  = {Applied Soft Computing},
+  author   = {Chiappetta, Marco and Savas, Erkay and Yilmaz, Cemal},
+  month    = dec,
+  year     = {2016},
+  pages    = {1162--1174},
+  file     = {Chiappetta et al. - 2016 - Real time detection of cache-based side-channel at.pdf:/home/pscholz/Zotero/storage/WW9VU4JL/Chiappetta et al. - 2016 - Real time detection of cache-based side-channel at.pdf:application/pdf}
+}
+
+@article{li_mimosa_2021,
+  title      = {Mimosa: {Protecting} {Private} {Keys} {Against} {Memory} {Disclosure} {Attacks} {Using} {Hardware} {Transactional} {Memory}},
+  volume     = {18},
+  copyright  = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+  issn       = {1545-5971, 1941-0018, 2160-9209},
+  shorttitle = {Mimosa},
+  url        = {https://ieeexplore.ieee.org/document/8634944/},
+  doi        = {10.1109/TDSC.2019.2897666},
+  abstract   = {Cryptography is essential for computer and network security. When cryptosystems are deployed in computing or communication systems, it is extremely critical to protect the cryptographic keys. In practice, keys are loaded into the memory as plaintext during cryptographic computations. Therefore, the keys are subject to memory disclosure attacks that read unauthorized data from RAM. Such attacks could be performed through software exploitations, such as OpenSSL Heartbleed, even when the integrity of the victim system’s binaries is maintained. They could also be done through physical methods, such as cold-boot attacks, even if the system is free of software vulnerabilities. This paper presents Mimosa, to protect RSA private keys against both software-based and physical memory disclosure attacks. Mimosa uses hardware transactional memory (HTM) to ensure that (a) whenever a malicious thread other than Mimosa attempts to read the plaintext private key, the transaction aborts and all sensitive data are automatically cleared with hardware, due to the strong atomicity guarantee of HTM; and (b) all sensitive data, including private keys and intermediate states, appear as plaintext only within CPU-bound caches, and are never loaded to RAM chips. To the best of our knowledge, Mimosa is the ﬁrst solution to use transactional memory to protect sensitive data against memory attacks. However, the fragility of TSX transactions introduces extra cache-clogging denial-of-service (DoS) threats, and attackers could sharply degrade the performance by concurrent memory-intensive tasks. To mitigate the DoS threats, we further partition an RSA private-key computation into multiple transactional parts by analyzing the distribution of aborts, while (sensitive) intermediate results are still protected across transactional parts. Through extensive experiments, we show that Mimosa effectively protects cryptographic keys against attacks that attempt to read sensitive data in memory, and introduces only a small performance overhead, even with concurrent cache-clogging workloads.},
+  language   = {en},
+  number     = {3},
+  urldate    = {2024-10-21},
+  journal    = {IEEE Transactions on Dependable and Secure Computing},
+  author     = {Li, Congwu and Guan, Le and Lin, Jingqiang and Luo, Bo and Cai, Quanwei and Jing, Jiwu and Wang, Jing},
+  month      = may,
+  year       = {2021},
+  pages      = {1196--1213},
+  file       = {Li et al. - 2021 - Mimosa Protecting Private Keys Against Memory Dis.pdf:/home/pscholz/Zotero/storage/ZK33SEKI/Li et al. - 2021 - Mimosa Protecting Private Keys Against Memory Dis.pdf:application/pdf}
+}
+
+@inproceedings{shih_t-sgx_2017,
+  address    = {San Diego, CA},
+  title      = {T-{SGX}: {Eradicating} {Controlled}-{Channel} {Attacks} {Against} {Enclave} {Programs}},
+  isbn       = {978-1-891562-46-4},
+  shorttitle = {T-{SGX}},
+  url        = {https://www.ndss-symposium.org/ndss2017/ndss-2017-programme/t-sgx-eradicating-controlled-channel-attacks-against-enclave-programs/},
+  doi        = {10.14722/ndss.2017.23193},
+  abstract   = {Intel Software Guard Extensions (SGX) is a hardware-based trusted execution environment (TEE) that enables secure execution of a program in an isolated environment, an enclave. SGX hardware protects the running enclave against malicious software, including an operating system (OS), a hypervisor, and even low-level firmwares. This strong security property allows the trustworthy execution of programs in a hostile environment, such as a public cloud, without trusting anyone (e.g., a cloud provider) between the enclave and the SGX hardware. However, recent studies have demonstrated that enclave programs are vulnerable to an accurate controlled-channel attack: Since enclaves rely on the underlying OS, a curious or potentially malicious OS can observe a sequence of accessed addresses by intentionally triggering page faults.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {Proceedings 2017 {Network} and {Distributed} {System} {Security} {Symposium}},
+  publisher  = {Internet Society},
+  author     = {Shih, Ming-Wei and Lee, Sangho and Kim, Taesoo and Peinado, Marcus},
+  year       = {2017},
+  file       = {Shih et al. - 2017 - T-SGX Eradicating Controlled-Channel Attacks Agai.pdf:/home/pscholz/Zotero/storage/IPKLRHMR/Shih et al. - 2017 - T-SGX Eradicating Controlled-Channel Attacks Agai.pdf:application/pdf}
+}
+
+@inproceedings{goldreich_towards_1987,
+  address   = {New York, New York, United States},
+  title     = {Towards a theory of software protection and simulation by oblivious {RAMs}},
+  isbn      = {978-0-89791-221-1},
+  url       = {http://portal.acm.org/citation.cfm?doid=28395.28416},
+  doi       = {10.1145/28395.28416},
+  abstract  = {Software protection is one of the most important issues concerning computer practice. There exist many heuristics and ad-hoc methods for protection, but the problem as a whole has not received the theoretical treatment it deserves. In this ,paper, we make the first steps towards a theoretic treatment of software protection: First, we distill and formulate the key problem of learning about a program from its execution. Second, assuming the existence of one-way permutations, we present an efJicient way of executing programs such that it is infeasible to learn anything about the program by monitoring its executions.},
+  language  = {en},
+  urldate   = {2024-10-21},
+  booktitle = {Proceedings of the nineteenth annual {ACM} conference on {Theory} of computing  - {STOC} '87},
+  publisher = {ACM Press},
+  author    = {Goldreich, O.},
+  year      = {1987},
+  pages     = {182--194},
+  file      = {Goldreich - 1987 - Towards a theory of software protection and simula.pdf:/home/pscholz/Zotero/storage/NLEEMMQZ/Goldreich - 1987 - Towards a theory of software protection and simula.pdf:application/pdf;towards_self_monitoring_enclaves.md:/home/pscholz/thesis/thesis/writing/notes/towards_self_monitoring_enclaves.md:text/markdown}
+}
+
+@article{baumann_shielding_2015,
+  title    = {Shielding {Applications} from an {Untrusted} {Cloud} with {Haven}},
+  volume   = {33},
+  issn     = {0734-2071, 1557-7333},
+  url      = {https://dl.acm.org/doi/10.1145/2799647},
+  doi      = {10.1145/2799647},
+  abstract = {Today’s cloud computing infrastructure requires substantial trust. Cloud users rely on both the provider’s staﬀ and its globally-distributed software/hardware platform not to expose any of their private data.},
+  language = {en},
+  number   = {3},
+  urldate  = {2024-10-21},
+  journal  = {ACM Transactions on Computer Systems},
+  author   = {Baumann, Andrew and Peinado, Marcus and Hunt, Galen},
+  month    = sep,
+  year     = {2015},
+  pages    = {1--26},
+  file     = {Baumann et al. - 2015 - Shielding Applications from an Untrusted Cloud wit.pdf:/home/pscholz/Zotero/storage/4VH3SDXL/Baumann et al. - 2015 - Shielding Applications from an Untrusted Cloud wit.pdf:application/pdf}
+}
+
+@article{arnautov_scone_nodate,
+  title    = {{SCONE}: {Secure} {Linux} {Containers} with {Intel} {SGX}},
+  abstract = {In multi-tenant environments, Linux containers managed by Docker or Kubernetes have a lower resource footprint, faster startup times, and higher I/O performance compared to virtual machines (VMs) on hypervisors. Yet their weaker isolation guarantees, enforced through software kernel mechanisms, make it easier for attackers to compromise the conﬁdentiality and integrity of application data within containers.},
+  language = {en},
+  author   = {Arnautov, Sergei and Trach, Bohdan and Gregor, Franz and Knauth, Thomas and Martin, Andre and Priebe, Christian and Lind, Joshua and Muthukumaran, Divya and O’Keeffe, Dan and Stillwell, Mark L and Goltzsche, David and Eyers, David and Kapitza, Rudiger and Pietzuch, Peter and Fetzer, Christof},
+  file     = {Arnautov et al. - SCONE Secure Linux Containers with Intel SGX.pdf:/home/pscholz/Zotero/storage/YWBZIIXM/Arnautov et al. - SCONE Secure Linux Containers with Intel SGX.pdf:application/pdf}
+}
+
+@article{chen_overshadow_nodate,
+  title    = {Overshadow: {A} {Virtualization}-{Based} {Approach} to {Retroﬁtting} {Protection} in {Commodity} {Operating} {Systems}},
+  abstract = {Commodity operating systems entrusted with securing sensitive data are remarkably large and complex, and consequently, frequently prone to compromise. To address this limitation, we introduce a virtual-machine-based system called Overshadow that protects the privacy and integrity of application data, even in the event of a total OS compromise. Overshadow presents an application with a normal view of its resources, but the OS with an encrypted view. This allows the operating system to carry out the complex task of managing an application’s resources, without allowing it to read or modify them. Thus, Overshadow offers a last line of defense for application data.},
+  language = {en},
+  author   = {Chen, Xiaoxin and Garﬁnkel, Tal and Lewis, E Christopher and Subrahmanyam, Pratap and Waldspurger, Carl A and Boneh, Dan and Dwoskin, Jeffrey and Ports, Dan R K},
+  file     = {Chen et al. - Overshadow A Virtualization-Based Approach to Ret.pdf:/home/pscholz/Zotero/storage/VH8NGBAL/Chen et al. - Overshadow A Virtualization-Based Approach to Ret.pdf:application/pdf}
+}
+
+@article{coker_principles_2011,
+  title     = {Principles of remote attestation},
+  volume    = {10},
+  copyright = {http://www.springer.com/tdm},
+  issn      = {1615-5262, 1615-5270},
+  url       = {http://link.springer.com/10.1007/s10207-011-0124-7},
+  doi       = {10.1007/s10207-011-0124-7},
+  abstract  = {Remote attestation is the activity of making a claim about properties of a target by supplying evidence to an appraiser over a network. We identify ﬁve central principles to guide development of attestation systems. We argue that (i) attestation must be able to deliver temporally fresh evidence; (ii) comprehensive information about the target should be accessible; (iii) the target, or its owner, should be able to constrain disclosure of information about the target; (iv) attestation claims should have explicit semantics to allow decisions to be derived from several claims; and (v) the underlying attestation mechanism must be trustworthy. We illustrate how to acquire evidence from a running system, and how to transport it via protocols to remote appraisers.},
+  language  = {en},
+  number    = {2},
+  urldate   = {2024-10-21},
+  journal   = {International Journal of Information Security},
+  author    = {Coker, George and Guttman, Joshua and Loscocco, Peter and Herzog, Amy and Millen, Jonathan and O’Hanlon, Brian and Ramsdell, John and Segall, Ariel and Sheehy, Justin and Sniffen, Brian},
+  month     = jun,
+  year      = {2011},
+  pages     = {63--81},
+  file      = {Coker et al. - 2011 - Principles of remote attestation.pdf:/home/pscholz/Zotero/storage/SLREL7XK/Coker et al. - 2011 - Principles of remote attestation.pdf:application/pdf}
+}
+
+@article{costan_sanctum_nodate,
+  title    = {Sanctum: {Minimal} {Hardware} {Extensions} for {Strong} {Software} {Isolation}},
+  abstract = {Sanctum offers the same promise as Intel’s Software Guard Extensions (SGX), namely strong provable isolation of software modules running concurrently and sharing resources, but protects against an important class of additional software attacks that infer private information from a program’s memory access patterns. Sanctum shuns unnecessary complexity, leading to a simpler security analysis. We follow a principled approach to eliminating entire attack surfaces through isolation, rather than plugging attack-speciﬁc privacy leaks. Most of Sanctum’s logic is implemented in trusted software, which does not perform cryptographic operations using keys, and is easier to analyze than SGX’s opaque microcode, which does.},
+  language = {en},
+  author   = {Costan, Victor and Lebedev, Ilia and Devadas, Srinivas},
+  file     = {Costan et al. - Sanctum Minimal Hardware Extensions for Strong So.pdf:/home/pscholz/Zotero/storage/KWEZ9EWK/Costan et al. - Sanctum Minimal Hardware Extensions for Strong So.pdf:application/pdf}
+}
+
+@article{puddu_frontal_nodate,
+  title    = {Frontal {Attack}: {Leaking} {Control}-{Flow} in {SGX} via the {CPU} {Frontend}},
+  abstract = {We introduce a new timing side-channel attack on Intel CPU processors. Our Frontal attack exploits timing differences that arise from how the CPU frontend fetches and processes instructions while being interrupted. In particular, we observe that in modern Intel CPUs, some instructions’ execution times will depend on which operations precede and succeed them, and on their virtual addresses. Unlike previous attacks that could only proﬁle branches if they contained different code or had known branch targets, the Frontal attack allows the adversary to distinguish between instruction-wise identical branches. As the attack requires OS capabilities to set the interrupts, we use it to exploit SGX enclaves. Our attack further demonstrates that secret-dependent branches should not be used even alongside defenses to current controlledchannel attacks. We show that the adversary can use the Frontal attack to extract a secret from an SGX enclave if that secret was used as a branching condition for two instructionwise identical branches. We successfully tested the attack on all the available Intel CPUs with SGX (until 10th gen) and used it to leak information from two commonly used cryptographic libraries.},
+  language = {en},
+  author   = {Puddu, Ivan and Schneider, Moritz and Haller, Miro},
+  file     = {Puddu et al. - Frontal Attack Leaking Control-Flow in SGX via th.pdf:/home/pscholz/Zotero/storage/WDING6Y7/Puddu et al. - Frontal Attack Leaking Control-Flow in SGX via th.pdf:application/pdf}
+}
+
+@book{reiser_secure_2022,
+  address    = {Cham},
+  series     = {Lecture {Notes} in {Computer} {Science}},
+  title      = {Secure {IT} {Systems}: 27th {Nordic} {Conference}, {NordSec} 2022, {Reykjavic}, {Iceland}, {November} 30–{December} 2, 2022, {Proceedings}},
+  volume     = {13700},
+  copyright  = {https://www.springernature.com/gp/researchers/text-and-data-mining},
+  isbn       = {978-3-031-22294-8 978-3-031-22295-5},
+  shorttitle = {Secure {IT} {Systems}},
+  url        = {https://link.springer.com/10.1007/978-3-031-22295-5},
+  language   = {en},
+  urldate    = {2024-10-21},
+  publisher  = {Springer International Publishing},
+  editor     = {Reiser, Hans P. and Kyas, Marcel},
+  year       = {2022},
+  doi        = {10.1007/978-3-031-22295-5},
+  file       = {Reiser and Kyas - 2022 - Secure IT Systems 27th Nordic Conference, NordSec.pdf:/home/pscholz/Zotero/storage/K3EHX2ZH/Reiser and Kyas - 2022 - Secure IT Systems 27th Nordic Conference, NordSec.pdf:application/pdf;towards_self_monitoring_enclaves.md:/home/pscholz/thesis/thesis/writing/notes/towards_self_monitoring_enclaves.md:text/markdown}
+}
+
+@inproceedings{azab_sice_2011,
+  address    = {Chicago Illinois USA},
+  title      = {{SICE}: a hardware-level strongly isolated computing environment for x86 multi-core platforms},
+  isbn       = {978-1-4503-0948-6},
+  shorttitle = {{SICE}},
+  url        = {https://dl.acm.org/doi/10.1145/2046707.2046752},
+  doi        = {10.1145/2046707.2046752},
+  abstract   = {SICE is a novel framework to provide hardware-level isolation and protection for sensitive workloads running on x86 platforms in compute clouds. Unlike existing isolation techniques, SICE does not rely on any software component in the host environment (i.e., an OS or a hypervisor). Instead, the security of the isolated environments is guaranteed by a trusted computing base that only includes the hardware, the BIOS, and the System Management Mode (SMM). SICE provides fast context switching to and from an isolated environment, allowing isolated workloads to time-share the physical platform with untrusted workloads. Moreover, SICE supports a large range (up to 4GB) of isolated memory. Finally, the most unique feature of SICE is the use of multicore processors to allow the isolated environments to run concurrently and yet securely beside the untrusted host.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {Proceedings of the 18th {ACM} conference on {Computer} and communications security},
+  publisher  = {ACM},
+  author     = {Azab, Ahmed M. and Ning, Peng and Zhang, Xiaolan},
+  month      = oct,
+  year       = {2011},
+  pages      = {375--388},
+  file       = {Azab et al. - 2011 - SICE a hardware-level strongly isolated computing.pdf:/home/pscholz/Zotero/storage/94CBW8U7/Azab et al. - 2011 - SICE a hardware-level strongly isolated computing.pdf:application/pdf}
+}
+
+@article{wang_malicious_2016,
+  title     = {Malicious {Firmware} {Detection} with {Hardware} {Performance} {Counters}},
+  volume    = {2},
+  copyright = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+  issn      = {2332-7766},
+  url       = {http://ieeexplore.ieee.org/document/7470546/},
+  doi       = {10.1109/TMSCS.2016.2569467},
+  abstract  = {Critical infrastructure components nowadays use microprocessor-based embedded control systems. It is often infeasible, however, to employ the same level of security measures used in general purpose computing systems, due to the stringent performance and resource constraints of embedded control systems. Furthermore, as software sits atop and relies on the ﬁrmware for proper operation, software-level techniques cannot detect malicious behavior of the ﬁrmware. In this work, we propose ConFirm, a low-cost technique to detect malicious modiﬁcations in the ﬁrmware of embedded control systems by measuring the number of low-level hardware events that occur during the execution of the ﬁrmware. In order to count these events, ConFirm leverages the Hardware Performance Counters (HPCs), which readily exist in many embedded processors. We propose a comparison-based technique to detect malicious modiﬁcations in ﬁrmwares with simple control-ﬂows. For ﬁrmwares with more complex control-ﬂows, we use machine learning techniques to automatically extract the relations among different hardware events. This method signiﬁcantly reduces the number of pre-stored valid HPC signatures without compromising the detection accuracy. Finally, we reduce the consumption of local resources by implementing a remote-based detection mechanism. We evaluate the detection capability and performance overhead of the proposed technique on various types of ﬁrmware running on ARM- and PowerPC-based embedded processors. Experimental results demonstrate its practicality and effectiveness.},
+  language  = {en},
+  number    = {3},
+  urldate   = {2024-10-21},
+  journal   = {IEEE Transactions on Multi-Scale Computing Systems},
+  author    = {Wang, Xueyang and Konstantinou, Charalambos and Maniatakos, Michail and Karri, Ramesh and Lee, Serena and Robison, Patricia and Stergiou, Paul and Kim, Steve},
+  month     = jul,
+  year      = {2016},
+  pages     = {160--173},
+  file      = {malicious_firmware_detection_with_hardware_counters.md:/home/pscholz/thesis/thesis/writing/notes/malicious_firmware_detection_with_hardware_counters.md:text/markdown;Wang et al. - 2016 - Malicious Firmware Detection with Hardware Perform.pdf:/home/pscholz/Zotero/storage/ZZ8PBJKA/Wang et al. - 2016 - Malicious Firmware Detection with Hardware Perform.pdf:application/pdf}
+}
+
+@inproceedings{jung_trusted_2022,
+  address    = {Fortaleza/CE, Brazil},
+  title      = {Trusted {Monitor}: {TEE}-{Based} {System} {Monitoring}},
+  copyright  = {https://doi.org/10.15223/policy-029},
+  isbn       = {978-1-66547-425-2},
+  shorttitle = {Trusted {Monitor}},
+  url        = {https://ieeexplore.ieee.org/document/9964869/},
+  doi        = {10.1109/SBESC56799.2022.9964869},
+  abstract   = {As trusted computing becomes increasingly important, Trusted Execution Environments (TEEs) see more widespread use. A particular high demand for security arises in the context of embedded systems in critical infrastructures. We present a novel intrusion detection system called the Trusted Monitor (TM) that protects its integrity even in the presence of a system-level attacker by running inside the ARM TrustZone TEE. The TM constantly monitors the system using hardware performance counters and detects intrusions based on the classification by an application-specific machine learning model. Our evaluation shows that the TM correctly classifies 86\% of 183 evaluated workloads, while the performance overhead stays below 2\%. In particular, we show that a real-world kernel-level rootkit observably influences the hardware performance counters and, thus, can be detected.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {2022 {XII} {Brazilian} {Symposium} on {Computing} {Systems} {Engineering} ({SBESC})},
+  publisher  = {IEEE},
+  author     = {Jung, Benedikt and Eichler, Christian and Rockl, Jonas and Schlenk, Ralph and Honig, Timo and Muller, Tilo},
+  month      = nov,
+  year       = {2022},
+  pages      = {1--8},
+  file       = {Jung et al. - 2022 - Trusted Monitor TEE-Based System Monitoring.pdf:/home/pscholz/Zotero/storage/86BQ4HNP/Jung et al. - 2022 - Trusted Monitor TEE-Based System Monitoring.pdf:application/pdf}
+}
+
+@article{weis_protecting_nodate,
+  title    = {Protecting {Data} {In}-{Use} from {Firmware} and {Physical} {Attacks}},
+  abstract = {Defending computers from unauthorized physical access, malicious hardware devices, or other low-level attacks has proven extremely challenging. The risks from these attacks are exacerbated in cloud-computing environments, where users lack physical control over servers executing their workloads. This paper reviews several ﬁrmware and physical attacks against x86 platforms, including bootkits, ”cold booting”, and malicious devices. We discuss several existing tools and technologies that can mitigate these risk such as Trusted Execution Technology (TXT) and main memory encryption. We will also discuss upcoming technologies that may help protect against ﬁrmware and physical threats.},
+  language = {en},
+  author   = {Weis, Stephen},
+  file     = {Weis - Protecting Data In-Use from Firmware and Physical .pdf:/home/pscholz/Zotero/storage/A5GJ9G69/Weis - Protecting Data In-Use from Firmware and Physical .pdf:application/pdf}
+}
+
+@inproceedings{criswell_virtual_2014,
+  address    = {Salt Lake City Utah USA},
+  title      = {Virtual ghost: protecting applications from hostile operating systems},
+  isbn       = {978-1-4503-2305-5},
+  shorttitle = {Virtual ghost},
+  url        = {https://dl.acm.org/doi/10.1145/2541940.2541986},
+  doi        = {10.1145/2541940.2541986},
+  abstract   = {Applications that process sensitive data can be carefully designed and validated to be difﬁcult to attack, but they are usually run on monolithic, commodity operating systems, which may be less secure. An OS compromise gives the attacker complete access to all of an application’s data, regardless of how well the application is built. We propose a new system, Virtual Ghost, that protects applications from a compromised or even hostile OS. Virtual Ghost is the ﬁrst system to do so by combining compiler instrumentation and run-time checks on operating system code, which it uses to create ghost memory that the operating system cannot read or write. Virtual Ghost interposes a thin hardware abstraction layer between the kernel and the hardware that provides a set of operations that the kernel must use to manipulate hardware, and provides a few trusted services for secure applications such as ghost memory management, encryption and signing services, and key management. Unlike previous solutions, Virtual Ghost does not use a higher privilege level than the kernel.},
+  language   = {en},
+  urldate    = {2024-10-21},
+  booktitle  = {Proceedings of the 19th international conference on {Architectural} support for programming languages and operating systems},
+  publisher  = {ACM},
+  author     = {Criswell, John and Dautenhahn, Nathan and Adve, Vikram},
+  month      = feb,
+  year       = {2014},
+  pages      = {81--96},
+  file       = {Criswell et al. - 2014 - Virtual ghost protecting applications from hostil.pdf:/home/pscholz/Zotero/storage/KTE5X3IX/Criswell et al. - 2014 - Virtual ghost protecting applications from hostil.pdf:application/pdf}
+}
+
+@article{mytkowicz_producing_nodate,
+  title    = {Producing {Wrong} {Data} {Without} {Doing} {Anything} {Obviously} {Wrong}!},
+  abstract = {This paper presents a surprising result: changing a seemingly innocuous aspect of an experimental setup can cause a systems researcher to draw wrong conclusions from an experiment. What appears to be an innocuous aspect in the experimental setup may in fact introduce a signiﬁcant bias in an evaluation. This phenomenon is called measurement bias in the natural and social sciences.},
+  language = {en},
+  author   = {Mytkowicz, Todd and Diwan, Amer and Hauswirth, Matthias and Sweeney, Peter F},
+  file     = {Mytkowicz et al. - Producing Wrong Data Without Doing Anything Obviou.pdf:/home/pscholz/Zotero/storage/Q6GEVNFT/Mytkowicz et al. - Producing Wrong Data Without Doing Anything Obviou.pdf:application/pdf}
+}
+
+@article{chang_target_nodate,
+  title    = {Target {Prediction} for {Indirect} {Jumps}},
+  abstract = {As the issue rate and pipeline depth of high performance superscalar processors increase, the amount of speculative work issued also increases. Because speculative work must be thrown away in the event of a branch misprediction, wide-issue, deeply pipelined processors must employ accurate branch predictors to effectively exploit their performance potential. Many existing branch prediction schemes are capable of accurately predicting the direction of conditional branches. However, these schemes are ineffective in predicting the targets of indirect jumps achieving, on average, a prediction accuracy rate of 51.8\% for the SPECmt95 benchmarks. In this paper, we propose a new prediction mechanism, the target cache, for predicting indirect jump targets. For the per1 and gee benchmarks, thii mechanism reduces the indirect jump misprediction rate by 93.4\% and 63.3\% and the overall execution time by 14\% and 5\%.},
+  language = {en},
+  author   = {Chang, Po-Yung and Hao, Eric and Patt, Yale N},
+  file     = {Chang et al. - Target Prediction for Indirect Jumps.pdf:/home/pscholz/Zotero/storage/J278HF7E/Chang et al. - Target Prediction for Indirect Jumps.pdf:application/pdf;target_prediction_for_indirect_branches.md:/home/pscholz/thesis/thesis/writing/notes/target_prediction_for_indirect_branches.md:text/markdown}
+}
+
+@inproceedings{van_bulck_lvi_2020,
+  address    = {San Francisco, CA, USA},
+  title      = {{LVI}: {Hijacking} {Transient} {Execution} through {Microarchitectural} {Load} {Value} {Injection}},
+  copyright  = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+  isbn       = {978-1-72813-497-0},
+  shorttitle = {{LVI}},
+  url        = {https://ieeexplore.ieee.org/document/9152763/},
+  doi        = {10.1109/SP40000.2020.00089},
+  abstract   = {The recent Spectre attack ﬁrst showed how to inject incorrect branch targets into a victim domain by poisoning microarchitectural branch prediction history. In this paper, we generalize injection-based methodologies to the memory hierarchy by directly injecting incorrect, attacker-controlled values into a victim’s transient execution. We propose Load Value Injection (LVI) as an innovative technique to reversely exploit Meltdowntype microarchitectural data leakage. LVI abuses that faulting or assisted loads, executed by a legitimate victim program, may transiently use dummy values or poisoned data from various microarchitectural buffers, before eventually being re-issued by the processor. We show how LVI gadgets allow to expose victim secrets and hijack transient control ﬂow. We practically demonstrate LVI in several proof-of-concept attacks against Intel SGX enclaves, and we discuss implications for traditional user process and kernel isolation.},
+  language   = {en},
+  urldate    = {2024-10-29},
+  booktitle  = {2020 {IEEE} {Symposium} on {Security} and {Privacy} ({SP})},
+  publisher  = {IEEE},
+  author     = {Van Bulck, Jo and Moghimi, Daniel and Schwarz, Michael and Lippi, Moritz and Minkin, Marina and Genkin, Daniel and Yarom, Yuval and Sunar, Berk and Gruss, Daniel and Piessens, Frank},
+  month      = may,
+  year       = {2020},
+  pages      = {54--72},
+  file       = {Van Bulck et al. - 2020 - LVI Hijacking Transient Execution through Microar.pdf:/home/pscholz/Zotero/storage/GMSHTTQE/Van Bulck et al. - 2020 - LVI Hijacking Transient Execution through Microar.pdf:application/pdf}
+}
+
+@article{spisak_hardware-assisted_nodate,
+  title    = {Hardware-{Assisted} {Rootkits}: {Abusing} {Performance} {Counters} on the {ARM} and x86 {Architectures}},
+  abstract = {In this paper, a novel hardware-assisted rootkit is introduced, which leverages the performance monitoring unit (PMU) of a CPU. By conﬁguring hardware performance counters to count speciﬁc architectural events, this research effort proves it is possible to transparently trap system calls and other interrupts driven entirely by the PMU. This offers an attacker the opportunity to redirect control ﬂow to malicious code without requiring modiﬁcations to a kernel image.},
+  language = {en},
+  author   = {Spisak, Matt},
+  file     = {Spisak - Hardware-Assisted Rootkits Abusing Performance Co.pdf:/home/pscholz/Zotero/storage/S2L7Y8BY/Spisak - Hardware-Assisted Rootkits Abusing Performance Co.pdf:application/pdf}
+}
+
+@inproceedings{bicakci_open-tee_2019,
+  address    = {Los Angeles, CA, USA},
+  title      = {Open-{TEE} is {No} {Longer} {Virtual}: {Towards} {Software}-{Only} {Trusted} {Execution} {Environments} {Using} {White}-{Box} {Cryptography}},
+  copyright  = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+  isbn       = {978-1-72816-741-1},
+  shorttitle = {Open-{TEE} is {No} {Longer} {Virtual}},
+  url        = {https://ieeexplore.ieee.org/document/9014373/},
+  doi        = {10.1109/TPS-ISA48467.2019.00029},
+  abstract   = {Trusted Execution Environments (TEEs) provide hardware support to isolate the execution of sensitive operations on mobile phones for improved security. However, they are not always available to use for application developers. To provide a consistent user experience to those who have and do not have a TEE-enabled device, we could get help from Open-TEE, an opensource GlobalPlatform (GP)-compliant software TEE emulator. However, Open-TEE does not offer any of the security properties hardware TEEs have. In this paper, we propose WhiteBoxTEE which integrates white-box cryptography with Open-TEE to provide better security while still remaining complaint with GP TEE speciﬁcations. We discuss the architecture, provisioning mechanism, implementation highlights, security properties and performance issues of WhiteBox-TEE and propose possible revisions to TEE speciﬁcations to have better use of white-box cryptography in software-only TEEs.},
+  language   = {en},
+  urldate    = {2024-10-30},
+  booktitle  = {2019 {First} {IEEE} {International} {Conference} on {Trust}, {Privacy} and {Security} in {Intelligent} {Systems} and {Applications} ({TPS}-{ISA})},
+  publisher  = {IEEE},
+  author     = {Bicakci, Kemal and Ak, Ihsan Kagan and Ozdemir, Betul Askin and Gozutok, Mesut},
+  month      = dec,
+  year       = {2019},
+  pages      = {177--183},
+  file       = {Bicakci et al. - 2019 - Open-TEE is No Longer Virtual Towards Software-On.pdf:/home/pscholz/Zotero/storage/FM2BSF4H/Bicakci et al. - 2019 - Open-TEE is No Longer Virtual Towards Software-On.pdf:application/pdf}
+}
+
+@book{goos_digital_2003,
+  address      = {Berlin/Heidelberg},
+  edition      = {1st ed},
+  title        = {Digital {Rights} {Management}: {ACM} {CCS}-9 {Workshop}, {DRM} 2002, {Washington}, {DC}, {USA}, {November} 18, 2002. {Revised} {Papers}},
+  isbn         = {978-3-540-40410-1 978-3-540-44993-5},
+  shorttitle   = {Digital {Rights} {Management}},
+  abstract     = {Intro -- Digital Rights Management -- Copyright -- Preface -- Program Committee -- Organization -- Table of Contents},
+  language     = {en},
+  publisher    = {Springer Berlin Heidelberg},
+  author       = {Goos, Gerhard},
+  collaborator = {Hartmanis, Juris and van Leeuwen, Jan},
+  year         = {2003},
+  file         = {Goos - 2003 - Digital Rights Management ACM CCS-9 Workshop, DRM.pdf:/home/pscholz/Zotero/storage/NPNM9N93/Goos - 2003 - Digital Rights Management ACM CCS-9 Workshop, DRM.pdf:application/pdf}
+}
+
+@article{milenkoski_virtual_nodate,
+  title    = {Virtual {Secure} {Mode}: {Architecture} {Overview}},
+  language = {en},
+  author   = {Milenkoski, Aleksandar and Phillips, Dominik},
+  file     = {Milenkoski and Phillips - Virtual Secure Mode Architecture Overview.pdf:/home/pscholz/Zotero/storage/QMQ5X5GY/Milenkoski and Phillips - Virtual Secure Mode Architecture Overview.pdf:application/pdf}
+}
+
+@article{noauthor_root_nodate,
+  title    = {Root of {Trust} {Definitions} and {Requirements} v1.1.1},
+  language = {en},
+  file     = {Root of Trust Definitions and Requirements v1.1.1.pdf:/home/pscholz/Zotero/storage/2IT4XWPD/Root of Trust Definitions and Requirements v1.1.1.pdf:application/pdf}
+}
+
+@article{kaplan_amd_nodate,
+  title    = {{AMD} {SEV}-{SNP}: {Strengthening} {VM} {Isolation} with {Integrity} {Protection} and {More}},
+  language = {en},
+  author   = {Kaplan, David},
+  file     = {Kaplan - AMD SEV-SNP Strengthening VM Isolation with Integ.pdf:/home/pscholz/Zotero/storage/W28JNW4D/Kaplan - AMD SEV-SNP Strengthening VM Isolation with Integ.pdf:application/pdf}
+}
+
+@article{pinto_demystifying_2019,
+  title      = {Demystifying {Arm} {TrustZone}: {A} {Comprehensive} {Survey}},
+  volume     = {51},
+  issn       = {0360-0300, 1557-7341},
+  shorttitle = {Demystifying {Arm} {TrustZone}},
+  url        = {https://dl.acm.org/doi/10.1145/3291047},
+  doi        = {10.1145/3291047},
+  abstract   = {The world is undergoing an unprecedented technological transformation, evolving into a state where ubiquitous Internet-enabled “things” will be able to generate and share large amounts of security- and privacy-sensitive data. To cope with the security threats that are thus foreseeable, system designers can find in Arm TrustZone hardware technology a most valuable resource. TrustZone is a System-on-Chip and CPU system-wide security solution, available on today’s Arm application processors and present in the new generation Arm microcontrollers, which are expected to dominate the market of smart “things.” Although this technology has remained relatively underground since its inception in 2004, over the past years, numerous initiatives have significantly advanced the state of the art involving Arm TrustZone. Motivated by this revival of interest, this paper presents an in-depth study of TrustZone technology. We provide a comprehensive survey of relevant work from academia and industry, presenting existing systems into two main areas, namely, Trusted Execution Environments and hardware-assisted virtualization. Furthermore, we analyze the most relevant weaknesses of existing systems and propose new research directions within the realm of tiniest devices and the Internet of Things, which we believe to have potential to yield high-impact contributions in the future.},
+  language   = {en},
+  number     = {6},
+  urldate    = {2024-11-12},
+  journal    = {ACM Computing Surveys},
+  author     = {Pinto, Sandro and Santos, Nuno},
+  month      = nov,
+  year       = {2019},
+  pages      = {1--36},
+  file       = {demystify_arm_trustzone.md:/home/pscholz/thesis/thesis/writing/notes/demystify_arm_trustzone.md:text/markdown;Pinto and Santos - 2019 - Demystifying Arm TrustZone A Comprehensive Survey.pdf:/home/pscholz/Zotero/storage/KKMUMMEE/Pinto and Santos - 2019 - Demystifying Arm TrustZone A Comprehensive Survey.pdf:application/pdf}
+}
+
+@article{moghimi_downfall_nodate,
+  title    = {Downfall: {Exploiting} {Speculative} {Data} {Gathering}},
+  abstract = {We introduce Downfall attacks, new transient execution attacks that undermine the security of computers running everywhere across the internet. We exploit the gather instruction on high-performance x86 CPUs to leak data across boundaries of user-kernel, processes, virtual machines, and trusted execution environments. We also develop practical and end-to-end attacks to steal cryptographic keys, program’s runtime data, and even data at rest (arbitrary data). Our findings, exploitation techniques, and demonstrated attacks defeat all previous defenses, calling for critical hardware fixes and security updates for widely-used client and server computers.},
+  language = {en},
+  author   = {Moghimi, Daniel},
+  file     = {Moghimi - Downfall Exploiting Speculative Data Gathering.pdf:/home/pscholz/Zotero/storage/BHELCYBC/Moghimi - Downfall Exploiting Speculative Data Gathering.pdf:application/pdf}
+}
+
+@article{ragab_ghostrace_nodate,
+  title    = {{GhostRace}: {Exploiting} and {Mitigating} {Speculative} {Race} {Conditions}},
+  abstract = {Race conditions arise when multiple threads attempt to access a shared resource without proper synchronization, often leading to vulnerabilities such as concurrent use-after-free. To mitigate their occurrence, operating systems rely on synchronization primitives such as mutexes, spinlocks, etc.},
+  language = {en},
+  author   = {Ragab, Hany and Mambretti, Andrea and Kurmus, Anil and Giuffrida, Cristiano},
+  file     = {Ragab et al. - GhostRace Exploiting and Mitigating Speculative R.pdf:/home/pscholz/Zotero/storage/SWY7NP73/Ragab et al. - GhostRace Exploiting and Mitigating Speculative R.pdf:application/pdf}
+}
+
+@article{misono_confidential_nodate,
+  title    = {Confidential {VMs} {Explained}: {An} {Empirical} {Analysis} of {AMD} {SEV}-{SNP} and {Intel} {TDX}},
+  volume   = {8},
+  abstract = {Confidential computing is gaining traction in the cloud, driven by the increasing security and privacy concerns across various industries. Recent trusted hardware advancements introduce Confidential Virtual Machines (CVMs) to alleviate the programmability and usability challenges of the previously proposed enclave-based trusted computing technologies. CVM hardware extensions facilitate secure, hardware-isolated encrypted VMs, promoting programmability and easier deployment in cloud infrastructures. However, differing microarchitectural features, interfaces, and security properties among hardware vendors complicate the evaluation of CVMs for different use cases. Understanding the performance implications, functional limitations, and security guarantees of CVMs is a crucial step toward their adoption. This paper presents a detailed empirical analysis of two leading CVM technologies: AMD Secure Encrypted Virtualization–Secure Nested Paging (SEV-SNP) and Intel Trust Domain Extensions (TDX). We review their microarchitectural components and conduct a thorough performance evaluation across various aspects, including memory management, computational performance, storage and network stacks, and attestation primitives. We further present a security analysis through a trusted computing base (TCB) evaluation and Common Vulnerabilities and Exposures (CVE) analysis. Our key findings demonstrate, among others, the effect of CVMs on boot time, memory management and I/O, and identify inefficiencies in their context switch mechanisms. We further provide insights into the performance implications of CVMs and highlight potential room for improvement. CCS Concepts: • General and reference → Surveys and overviews; • Security and privacy → Virtualization and security.},
+  language = {en},
+  number   = {3},
+  author   = {Misono, Masanori},
+  file     = {Misono - Confidential VMs Explained An Empirical Analysis .pdf:/home/pscholz/Zotero/storage/VR6KB92Q/Misono - Confidential VMs Explained An Empirical Analysis .pdf:application/pdf}
+}
+
+@article{kocher_spectre_nodate,
+  title    = {Spectre {Attacks}: {Exploiting} {Speculative} {Execution}},
+  abstract = {Modern processors use branch prediction and speculative execution to maximize performance. For example, if the destination of a branch depends on a memory value that is in the process of being read, CPUs will try to guess the destination and attempt to execute ahead. When the memory value ﬁnally arrives, the CPU either discards or commits the speculative computation. Speculative logic is unfaithful in how it executes, can access the victim’s memory and registers, and can perform operations with measurable side effects.},
+  language = {en},
+  author   = {Kocher, Paul and Horn, Jann and Fogh, Anders and Genkin, Daniel and Gruss, Daniel and Haas, Werner and Hamburg, Mike and Lipp, Moritz and Mangard, Stefan and Prescher, Thomas and Schwarz, Michael and Yarom, Yuval},
+  file     = {Kocher et al. - Spectre Attacks Exploiting Speculative Execution.pdf:/home/pscholz/Zotero/storage/X83R8UC9/Kocher et al. - Spectre Attacks Exploiting Speculative Execution.pdf:application/pdf}
+}
+
+@article{lipp_meltdown_2020,
+  title      = {Meltdown: reading kernel memory from user space},
+  volume     = {63},
+  issn       = {0001-0782, 1557-7317},
+  shorttitle = {Meltdown},
+  url        = {https://dl.acm.org/doi/10.1145/3357033},
+  doi        = {10.1145/3357033},
+  abstract   = {The security of computer systems fundamentally relies on memory isolation, e.g., kernel address ranges are marked as non-accessible and are protected from user access. In this paper, we present Meltdown. Meltdown exploits side effects of out-of-order execution on modern processors to read arbitrary kernel-memory locations including personal data and passwords. Out-of-order execution is an indispensable performance feature and present in a wide range of modern processors. The attack is independent of the operating system, and it does not rely on any software vulnerabilities. Meltdown breaks all security guarantees provided by address space isolation as well as paravirtualized environments and, thus, every security mechanism building upon this foundation. On affected systems, Meltdown enables an adversary to read memory of other processes or virtual machines in the cloud without any permissions or privileges, affecting millions of customers and virtually every user of a personal computer. We show that the KAISER defense mechanism for KASLR has the important (but inadvertent) side effect of impeding Meltdown. We stress that KAISER must be deployed immediately to prevent largescale exploitation of this severe information leakage.},
+  language   = {en},
+  number     = {6},
+  urldate    = {2024-11-14},
+  journal    = {Communications of the ACM},
+  author     = {Lipp, Moritz and Schwarz, Michael and Gruss, Daniel and Prescher, Thomas and Haas, Werner and Horn, Jann and Mangard, Stefan and Kocher, Paul and Genkin, Daniel and Yarom, Yuval and Hamburg, Mike and Strackx, Raoul},
+  month      = may,
+  year       = {2020},
+  pages      = {46--56},
+  file       = {Lipp et al. - 2020 - Meltdown reading kernel memory from user space.pdf:/home/pscholz/Zotero/storage/JACYBTIP/Lipp et al. - 2020 - Meltdown reading kernel memory from user space.pdf:application/pdf}
+}
+
+@article{felton_smc_2013,
+  title    = {{SMC} {Calling} {Convention}},
+  language = {en},
+  author   = {Felton, D and ARM},
+  year     = {2013},
+  file     = {Felton - 2013 - SMC Calling Convention.pdf:/home/pscholz/Zotero/storage/SAJS25WG/Felton - 2013 - SMC Calling Convention.pdf:application/pdf}
+}
+
+@inproceedings{cerdeira_sok_2020,
+  address    = {San Francisco, CA, USA},
+  title      = {{SoK}: {Understanding} the {Prevailing} {Security} {Vulnerabilities} in {TrustZone}-assisted {TEE} {Systems}},
+  copyright  = {https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html},
+  isbn       = {978-1-72813-497-0},
+  shorttitle = {{SoK}},
+  url        = {https://ieeexplore.ieee.org/document/9152801/},
+  doi        = {10.1109/SP40000.2020.00061},
+  abstract   = {Hundreds of millions of mobile devices worldwide rely on Trusted Execution Environments (TEEs) built with Arm TrustZone for the protection of security-critical applications (e.g., DRM) and operating system (OS) components (e.g., Android keystore). TEEs are often assumed to be highly secure; however, over the past years, TEEs have been successfully attacked multiple times, with highly damaging impact across various platforms. Unfortunately, these attacks have been possible by the presence of security ﬂaws in TEE systems. In this paper, we aim to understand which types of vulnerabilities and limitations affect existing TrustZone-assisted TEE systems, what are the main challenges to build them correctly, and what contributions can be borrowed from the research community to overcome them. To this end, we present a security analysis of popular TrustZone-assisted TEE systems (targeting Cortex-A processors) developed by Qualcomm, Trustonic, Huawei, Nvidia, and Linaro. By studying publicly documented exploits and vulnerabilities as well as by reverse engineering the TEE ﬁrmware, we identiﬁed several critical vulnerabilities across existing systems which makes it legitimate to raise reasonable concerns about the security of commercial TEE implementations.},
+  language   = {en},
+  urldate    = {2024-11-18},
+  booktitle  = {2020 {IEEE} {Symposium} on {Security} and {Privacy} ({SP})},
+  publisher  = {IEEE},
+  author     = {Cerdeira, David and Santos, Nuno and Fonseca, Pedro and Pinto, Sandro},
+  month      = may,
+  year       = {2020},
+  pages      = {1416--1432},
+  file       = {Cerdeira et al. - 2020 - SoK Understanding the Prevailing Security Vulnera.pdf:/home/pscholz/Zotero/storage/TP9A9Y5H/Cerdeira et al. - 2020 - SoK Understanding the Prevailing Security Vulnera.pdf:application/pdf}
+}
+
+@article{zhang_timing_2024,
+  title    = {Timing {Side}-channel {Attacks} and {Countermeasures} in {CPU} {Microarchitectures}},
+  volume   = {56},
+  issn     = {0360-0300, 1557-7341},
+  url      = {https://dl.acm.org/doi/10.1145/3645109},
+  doi      = {10.1145/3645109},
+  abstract = {Microarchitectural vulnerabilities, such as Meltdown and Spectre, exploit subtle microarchitecture state to steal the user’s secret data and even compromise the operating systems. In recent years, considerable discussion lies in understanding the attack-defense mechanisms and exploitability of such vulnerabilities. Unfortunately, there have been few investigations into a systematic elaboration of threat models, attack scenarios and requirements, and defense targets of the resulting attacks. In this article, we fill this gap and make the following contributions. We first propose two sets of taxonomies for classifying microarchitectural timing side-channel attacks and their countermeasures according to various attack conditions. Based on the taxonomies proposed, we then review published attacks and existing defenses and systematically analyze their internals. In particular, we also provide a comprehensive analysis of the similarities and differences among those attacks, uncovering the corresponding practicality and severity by identifying the attack targets/platforms and the security boundaries that can be bypassed to reveal information. We further examine the scalability of those defenses through specifying expected defense goals and costs. We also discuss corresponding detection methods based on different classifications. Finally, we propose several key challenges of existing countermeasures and the attack trends, and discuss directions for future research.},
+  language = {en},
+  number   = {7},
+  urldate  = {2024-11-27},
+  journal  = {ACM Computing Surveys},
+  author   = {Zhang, Jiliang and Chen, Congcong and Cui, Jinhua and Li, Keqin},
+  month    = jul,
+  year     = {2024},
+  pages    = {1--40},
+  file     = {Zhang et al. - 2024 - Timing Side-channel Attacks and Countermeasures in.pdf:/home/pscholz/Zotero/storage/WN238RLW/Zhang et al. - 2024 - Timing Side-channel Attacks and Countermeasures in.pdf:application/pdf}
+}
+
+@misc{cui_quanshield_2023,
+  title      = {{QuanShield}: {Protecting} against {Side}-{Channels} {Attacks} using {Self}-{Destructing} {Enclaves}},
+  shorttitle = {{QuanShield}},
+  url        = {http://arxiv.org/abs/2312.11796},
+  doi        = {10.48550/arXiv.2312.11796},
+  abstract   = {Trusted Execution Environments (TEEs) allow user processes to create enclaves that protect security-sensitive computation against access from the OS kernel and the hypervisor. Recent work has shown that TEEs are vulnerable to side-channel attacks that allow an adversary to learn secrets shielded in enclaves. The majority of such attacks trigger exceptions or interrupts to trace the control or data flow of enclave execution. We propose QuanShield, a system that protects enclaves from side-channel attacks that interrupt enclave execution. The main idea behind QuanShield is to strengthen resource isolation by creating an interrupt-free environment on a dedicated CPU core for running enclaves in which enclaves terminate when interrupts occur. QuanShield avoids interrupts by exploiting the tickless scheduling mode supported by recent OS kernels. QuanShield then uses the save area (SA) of the enclave, which is used by the hardware to support interrupt handling, as a second stack. Through an LLVM-based compiler pass, QuanShield modifies enclave instructions to store/load memory references, such as function frame base addresses, to/from the SA. When an interrupt occurs, the hardware overwrites the data in the SA with CPU state, thus ensuring that enclave execution fails. Our evaluation shows that QuanShield significantly raises the bar for interrupt-based attacks with practical overhead.},
+  language   = {en},
+  urldate    = {2024-11-27},
+  publisher  = {arXiv},
+  author     = {Cui, Shujie and Li, Haohua and Li, Yuanhong and Zhang, Zhi and Vilanova, Lluís and Pietzuch, Peter},
+  month      = dec,
+  year       = {2023},
+  note       = {arXiv:2312.11796 [cs]},
+  keywords   = {Computer Science - Cryptography and Security},
+  file       = {Cui et al. - 2023 - QuanShield Protecting against Side-Channels Attac.pdf:/home/pscholz/Zotero/storage/QS7DG6TH/Cui et al. - 2023 - QuanShield Protecting against Side-Channels Attac.pdf:application/pdf}
+}

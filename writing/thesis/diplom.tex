@@ -58,7 +58,7 @@ plainpages=false,pdfpagelabels=true]{hyperref}
 \selectlanguage{english}
 
 \begin{abstract}
-\input{content/02_abstract.tex}
+    \input{content/02_abstract.tex}
 \end{abstract}
 
 \cleardoublepage
@@ -98,10 +98,10 @@ its \acrlong{a_tee}, which is abbreviated \acrshort{a_tee}
 \printglossary[style=altlist]
 \printglossary[type=\acronymtype,style=long]
 
-\printbibliography
 \iffalse
     % an aid for Kile autocompletion
     \bibliography{own.bib}
 \fi
+\printbibliography
 
 \end{document}
