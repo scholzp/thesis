@@ -22,6 +22,33 @@
   year    = {2016}
 }
 
+@misc{tpm_architecture,
+  title     = {{Trusted} {Platform} {Module} {Library} {Part 1}: {Architecture}},
+  url       = {https://trustedcomputinggroup.org/wp-content/uploads/TPM-2.0-1.83-Part-1-Architecture.pdf},
+  abstract  = {In modern computing environments, hardware resources are commonly shared, and parallel computation is widely used. Parallel tasks can cause privacy and security problems if proper isolation is not enforced. Intel proposed SGX to create a trusted execution environment within the processor. SGX relies on the hardware, and claims runtime protection even if the OS and other software components are malicious. However, SGX disregards side-channel attacks. We introduce a powerful cache side-channel attack that provides system adversaries a high resolution channel. Our attack tool named CacheZoom is able to virtually track all memory accesses of SGX enclaves with high spatial and temporal precision. As proof of concept, we demonstrate AES key recovery attacks on commonly used implementations including those that were believed to be resistant in previous scenarios. Our results show that SGX cannot protect critical data sensitive computations, and efficient AES key recovery is possible in a practical environment. In contrast to previous works which require hundreds of measurements, this is the first cache side-channel attack on a real system that can recover AES keys with a minimal number of measurements. We can successfully recover AES keys from T-Table based implementations with as few as ten measurements.},
+  language  = {en},
+  urldate   = {2024-12-30},
+  publisher = {Trusted Computing Group (TCG)},
+  author    = {Trusted Computing Group (TCG)},
+  month     = jan,
+  year      = {2024}
+}
+
+@misc{wang2005collision,
+  title     = {Collision search attacks on SHA1},
+  author    = {Wang, Xiaoyun and Yin, Yiqun Lisa and Yu, Hongbo},
+  year      = {2005},
+  publisher = {Feb}
+}
+
+@inproceedings{pirker2024brief,
+  title     = {A Brief Reflection on Trusted Platform Module Support.},
+  author    = {Pirker, Martin and Haas, Robert},
+  booktitle = {ICISSP},
+  pages     = {890--898},
+  year      = {2024}
+}
+
 @misc{moghimi_cachezoom_2017,
   title      = {{CacheZoom}: {How} {SGX} {Amplifies} {The} {Power} of {Cache} {Attacks}},
   shorttitle = {{CacheZoom}},

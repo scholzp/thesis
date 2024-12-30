@@ -35,6 +35,31 @@ solutions.
 
 \subsection{Hardware Root of Trust}
 \subsubsection{TPM}
+\todo{A lot of passive to fix here}
+The Trusted Platform Module, or short TPM, is specified by the Trusted Computing Group as a system component with
+a state separate from the host system on which it reports.\cite{tpm_architecture} The host system cannot
+manipulate the state of the TPM directly but has to use a defined interface to interact with the TPM. To separate
+the state between the host system and the TPM, the TPM is implemented using dedicated hardware, such as processor, RAM,
+ROM, and Flash memory, all physically protected from the host system. Other means of physical separation can be used to
+implement TPM services, such as unique processor modes with dedicated memory access rights.
+
+Currently, two versions of TPM are specified. The first family of TPM is widely used and employs version 1.2. One major drawback
+of version 1.2 was the required usage of SHA-1 as a hashing algorithm. SHA-1 was first broken in 2005 by Wang
+et al.\cite{wang2005collision}. In 2011, NIST deprecated SHA-1 because of security concerns. Replacing the now-considered
+insecure hash function, TPM 2.0 offers many additional security features, such as SHA-256 for hashing,
+compared to version 1.0 while not being backward compatible. In x86 systems, TPM 2.0 is today widely spread and one of
+Windows 11s system requirements. Often, TPM is not implemented as a dedicated hardware module but rather as a so-called
+firmware TPM. The firmware TPM is part of the Intel Platform Trust Technology (Intel PTT) on Intel platforms. AMD
+platforms use an implementation called fTPM, which is integrated within the platform security processor.\cite{pirker2024brief}
+
+TPMs offer different features that can be used to establish a trusted execution platform. For example, TPM offers a save random number
+generator. Moreover, a TPM implements Platform Configuration Registers (PCR) to store integrity metrics.
+PCR store the value of a measurement. For example, bootfow integrity can be verified by performing multiple measurements,
+one for each stage in the boot chain. With each measurement, the loaded code is part of the resulting hash. This hash is
+stored in a PCR and can then be read by a user to compare the values with the expected ones. Registers 0 to 7 are
+reserved for use by the TPM, and the user or the operating system can freely use the remaining registers. A TPM offers
+at least 16 PCRs.
+A TPM can sign and attest to the value of some internal TPM data.
 
 \subsubsection{Intel SGX}
 \todo{A lot of passive to fix here}
