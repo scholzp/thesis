@@ -98,3 +98,32 @@ party can check the quoting enclave's signature to verify the enclave's state an
 
 \subsubsection{Confidential VM Extensions}
 \subsubsection{ARM TrustZone}
+As another widely spread ISA ARM dominates the mobile sector. Like x86, the ARM architecture offers technology to allow
+isolated program
+execution. On ARM, this technology is called ARM TrustZone. TrustZone is optional for ARM processor implementations and
+slightly differs between the ARM Cortex-A application processors and the ARM Cortex-M microcontroller-aimed processors.
+In the following, we will concentrate on the implementation of ARM application processors. Pinto and Santos did an
+extensive review of ARM TrustZone in 2019.\cite{pinto_demystifying_2019}
+Conceptually, ARM TrustZone-enabled processors offer three processor operation modes. The most privileged mode is the
+Secure Monitor mode or short SM mode. The Secure Monitor mode is the mode in which the processor boots and the firmware
+and Bootloader
+executes. The second most privileged mode is the Secure World. This mode is intended to execute code isolated from the
+third and least privileged mode, the Normal World. The Bootloader is responsible for installing software intended to run
+in the Secure World. Isolation is achieved by hardware. For example, some registers exist twice to allow fast context
+switches between the Normal
+and Secure World. The TrustZone Address Space Controller can be used to partition memory
+into regions only accessible from the Secure World and those accessible by both worlds.
+Changing between worlds can be done synchronously using the dedicated SMC (System Monitor Call) instruction or
+asynchronously due to an interrupt. The SMC instruction also triggers an interrupt. These interrupts are served by
+invoking the
+SM, which decides upon its configuration if the interrupt received serves as an entry point to the secure world. If
+so, the Secure Monitor invokes secure world code to serve the interrupt.
+
+ARM TrustZone does not implement remote attestation in hardware. Such functionality has to be implemented by the code
+running in the Secure World. TEE and remote attestation functionality can be implemented by a bare metal application or
+by using a trusted OS to host secure applications in the Secure World. The first solution minimizes code size, while the
+second offers the ability
+to host multiple applications in the Secure World. The trusted OS would be responsible for isolating services running
+in the Secure World against each other because applications running in the Secure World are not isolated from other
+applications in the Secure World by hardware. Using a trusted OS brings the downside of an increased trusted computing
+base compared to a bare metal trusted application. TrustZone does not encrypt the memory of the secure world.
