@@ -97,6 +97,33 @@ private keys to sign the report to attest that the report was indeed generated f
 party can check the quoting enclave's signature to verify the enclave's state and identity.
 
 \subsubsection{Confidential VM Extensions}
+The goal of confidential Virtual machines is to protect the entire VM from the influence of a malicious hypervisor or
+other high-privileged software. Intel and AMD offer individual ISA extensions for their processors to host confidential
+Virtual Machines. Intel calls its solution Intel TDX, while AMDs solution is called AMD
+SEV-SNP.\cite{tdx_whitepaper,kaplan_amd_nodate} Both solutions use the
+same fundamental building blocks to achieve the goals of confidential VMs. Misano et al. did a extensive comparison of
+both technologies.\cite{misono_confidential_nodate}
+Intel uses the SGX module for its implementation. Additionally, to interact with a confidential VM, the CPU must be in
+the dedicated CPU operation mode
+called SEAM mode. Memory access is only allowed in SEAM mode to protect confidential VMs. Once in SEAM mode, the CPU
+uses its VMX capabilities to host and interact with the VM. For cryptographical features, Intel processors utilize the
+Intel Trusted Execution Engine.
+
+For SEV-SNP, AMD uses the already implemented SEV capabilities. Unlike Intel's implementation, AMD processors do not
+utilize a dedicated CPU mode but extend the existing VM control structure by fields to enable Secure Nested paging. For
+cryptography, the integrated AMD Platform Security Processor, short PSP, is used. Both solutions encrypt the VM's
+memory to protect the VM from being manipulated by system software. While in Intel's implementation, each VM is
+encrypted separately, AMD's implementation encrypts, once activated, the whole memory.
+
+Both solutions use the trustee's knowledge of the initial state of the VM image. The assumption that the approach
+follows is that if the VM is started in a known state and protected from manipulation by the hypervisor or other highly
+privileged software, then the VM can be trusted in the following. To follow this approach, a measurement of the initial
+VM image is created and cryptographically bound to the respective VM instance through a MAC. Before the trustee
+interacts with the VM, they request the VM to verify its identity. For this, the VM requests the cryptographical
+hardware to sign a report. The signed report is then handed to the trustee. The trustee trusts the implementation in
+the CPU and verifies the signature of the CPU signed report. With this, the trustee knows if the VM images were
+expected. In the following, both the trustee and the VM exchange keys for further communication.
+
 \subsubsection{ARM TrustZone}
 As another widely spread ISA ARM dominates the mobile sector. Like x86, the ARM architecture offers technology to allow
 isolated program
