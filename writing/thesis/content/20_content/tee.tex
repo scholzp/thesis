@@ -34,6 +34,27 @@ solutions.
 \todo{Explain measurements, how the majority implements RA}
 
 \subsection{Hardware Root of Trust}
+A root of trust is defined by the Trusted Computing Group as follows:
+\begin{quote}
+    \textit{
+        A minimal set of system elements that have to be trusted because misbehavior is not detectable. \\
+    }
+    \mbox{ -- Trusted Computing Group\cite{tpm_architecture}}
+\end{quote}
+
+The Trusted Computing Group specifies that a
+hardware root of trust must be available to enable remote attestation in a confidential computing environment.\cite{tpm_architecture}
+A hardware root of trust is a device in a computer system that the system can not manipulate. Moreover, it
+implements security functionality such as encryption and random number generation. While misbehavior is impossible
+to detect, hardware manufacturers can verify that their devices work as intended by providing certificates. These
+certificates can be embedded into the device with the help of tamper-resistant memory, such as ROM or eFuses. A user can
+then check the validity of a certificate by consulting the respective manufacturer's service.
+
+Hardware roots of trust are necessary because system software could tamper with software or memory to manipulate a
+possible software solution. The following sections will review the most widely spread solutions to the hardware root
+of trust. These implementations rely on dedicated hardware modules such as add-in cards or unique, secure operation
+modes in CPU hardware.
+
 \subsubsection{TPM}
 \todo{A lot of passive to fix here}
 The Trusted Platform Module, or short TPM, is specified by the Trusted Computing Group as a system component with
@@ -54,7 +75,7 @@ platforms use an implementation called fTPM, which is integrated within the plat
 
 TPMs offer different features that can be used to establish a trusted execution platform. For example, TPM offers a save random number
 generator. Moreover, a TPM implements Platform Configuration Registers (PCR) to store integrity metrics.
-PCR store the value of a measurement. For example, bootfow integrity can be verified by performing multiple measurements,
+PCR store the value of a measurement. For example, bootflow integrity can be verified by performing multiple measurements,
 one for each stage in the boot chain. With each measurement, the loaded code is part of the resulting hash. This hash is
 stored in a PCR and can then be read by a user to compare the values with the expected ones. Registers 0 to 7 are
 reserved for use by the TPM, and the user or the operating system can freely use the remaining registers. A TPM offers
