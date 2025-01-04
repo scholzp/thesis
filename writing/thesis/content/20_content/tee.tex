@@ -175,3 +175,23 @@ to host multiple applications in the Secure World. The trusted OS would be respo
 in the Secure World against each other because applications running in the Secure World are not isolated from other
 applications in the Secure World by hardware. Using a trusted OS brings the downside of an increased trusted computing
 base compared to a bare metal trusted application. TrustZone does not encrypt the memory of the secure world.
+
+\subsection{Security of hardware solutions}
+All hardware solutions isolate critical functions to protect them from being tampered with by highly
+privileged software. Because the TPM protects only its state, we will consider it when comparing the other hardware
+solutions. All x86 solutions protect against adversaries that can tap the memory bus. These attacks become infeasible
+because all three solutions encrypt the memory content of the respective enclaves or VMs. An adversary must break the
+respective cryptographic algorithms to inspect the memory content, as the processor decrypts the memory only once
+loaded. While an advisory cannot read the memory content, no solutions protect memory access patterns from recording.
+ARM TrustZone does not encrypt memory, so tapping the memory bus is possible. All solutions are vulnerable to
+side-channel attacks. Concerning the trusted computing base, ARM TrustZone relies conceptually on the functionally
+largest software stack. All x86 solutions only rely on their respective implementation in the CPU SoC. High-privileged
+software or firmware running in SMM cannot access the memory of enclaves or VMs. On the contrary, ARM TrustZone
+relies on the Bootloader or firmware to install applications into the secure world. The processor's implementation does
+not protect the secure world application from being manipulated by the firmware. We could argue that ARM TrustZone's TCB
+is larger than that of the x86 solutions. As a side note, the x86 is a closed source but could be considered rather
+complex. The respective security processors on the respective x86 SoCs are running a small operating system themselves,
+making it hard to compare the TCB. Nevertheless, in the x86, the whole SoC implementation is manufactured by the same
+vendor, which the user ultimately has to trust. Contrary to this, in the ARM world, the user would have to trust the
+SoC manufacturer and the vendors of the Bootloader, firmware, and secure world application.
+
