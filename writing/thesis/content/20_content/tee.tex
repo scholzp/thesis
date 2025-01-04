@@ -121,9 +121,9 @@ party can check the quoting enclave's signature to verify the enclave's state an
 The goal of confidential Virtual machines is to protect the entire VM from the influence of a malicious hypervisor or
 other high-privileged software. Intel and AMD offer individual ISA extensions for their processors to host confidential
 Virtual Machines. Intel calls its solution Intel TDX, while AMDs solution is called AMD
-SEV-SNP.\cite{tdx_whitepaper,kaplan_amd_nodate} Both solutions use the
+SEV-SNP.\cite{tdx_whitepaper,kaplan_amd_2020} Both solutions use the
 same fundamental building blocks to achieve the goals of confidential VMs. Misano et al. did a extensive comparison of
-both technologies.\cite{misono_confidential_nodate}
+both technologies.\cite{misono_confidential_2024}
 Intel uses the SGX module for its implementation. Additionally, to interact with a confidential VM, the CPU must be in
 the dedicated CPU operation mode
 called SEAM mode. Memory access is only allowed in SEAM mode to protect confidential VMs. Once in SEAM mode, the CPU
