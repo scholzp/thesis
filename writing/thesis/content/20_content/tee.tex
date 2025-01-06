@@ -34,6 +34,7 @@ solutions.
 \todo{Explain measurements, how the majority implements RA}
 
 \subsection{Hardware Root of Trust}
+\label{sec:20:hardware_root_of_trust}
 A root of trust is defined by the Trusted Computing Group as follows:
 \begin{quote}
     \textit{
@@ -56,6 +57,7 @@ of trust. These implementations rely on dedicated hardware modules such as add-i
 modes in CPU hardware.
 
 \subsubsection{TPM}
+\label{sec:20:tpm}
 \todo{A lot of passive to fix here}
 The Trusted Platform Module, or short TPM, is specified by the Trusted Computing Group as a system component with
 a state separate from the host system on which it reports.\cite{tpm_architecture} The host system cannot
@@ -83,6 +85,7 @@ at least 16 PCRs.
 A TPM can sign and attest to the value of some internal TPM data.
 
 \subsubsection{Intel SGX}
+\label{sec:20:sgx}
 \todo{A lot of passive to fix here}
 Intel SGX is an extension in some x86\_64 processors manufactured by Intel. Intel first shipped SGX in 2015, with
 processors implementing the Skylake microarchitecture. While server-grade CPUs are still implementing SGX, Intel marked
@@ -118,6 +121,7 @@ private keys to sign the report to attest that the report was indeed generated f
 party can check the quoting enclave's signature to verify the enclave's state and identity.
 
 \subsubsection{Confidential VM Extensions}
+\label{section:20:confidential_vms}
 The goal of confidential Virtual machines is to protect the entire VM from the influence of a malicious hypervisor or
 other high-privileged software. Intel and AMD offer individual ISA extensions for their processors to host confidential
 Virtual Machines. Intel calls its solution Intel TDX, while AMDs solution is called AMD
@@ -146,6 +150,7 @@ the CPU and verifies the signature of the CPU signed report. With this, the trus
 expected. In the following, both the trustee and the VM exchange keys for further communication.
 
 \subsubsection{ARM TrustZone}
+\label{sec:20:trustzone}
 As another widely spread ISA ARM dominates the mobile sector. Like x86, the ARM architecture offers technology to allow
 isolated program
 execution. On ARM, this technology is called ARM TrustZone. TrustZone is optional for ARM processor implementations and
@@ -176,7 +181,7 @@ in the Secure World against each other because applications running in the Secur
 applications in the Secure World by hardware. Using a trusted OS brings the downside of an increased trusted computing
 base compared to a bare metal trusted application. TrustZone does not encrypt the memory of the secure world.
 
-\subsection{Security of hardware solutions}
+\subsection{Security of Hardware Solutions}
 All hardware solutions isolate critical functions to protect them from being tampered with by highly
 privileged software. Because the TPM protects only its state, we will consider it when comparing the other hardware
 solutions. All x86 solutions protect against adversaries that can tap the memory bus. These attacks become infeasible
@@ -195,11 +200,12 @@ making it hard to compare the TCB. Nevertheless, in the x86, the whole SoC imple
 vendor, which the user ultimately has to trust. Contrary to this, in the ARM world, the user would have to trust the
 SoC manufacturer and the vendors of the Bootloader, firmware, and secure world application.
 
-\subsection{Software enhancements}
+\subsection{Software Enhancements}
 In this section we will review solutions that do implement TEE functionality or enhanced isolation through software.
 Work in this field can be considered as inspiration to my work.
 
 \subsubsection{Enma}
+\label{sec:20:enma}
 Enma is short for Enclave Manager and is a software solution to implement TEEs for the L4Re operating system framework.
 \cite{reitz_isolierende_2019}
 L4Re uses the Fiasco.OC microkernel that is part of the L4 microkernel family. The microkernel approach aims for
@@ -223,4 +229,31 @@ much as the firmware and hardware. Enma utilizes a TPM as the hardware root of t
 that the expected versions of L4Re and Enma were booted. The so-called soft backend of Enma, which we described in this
 section, can also be replaced by another backend. The authors propose an SGX back end that utilizes hardware features.
 
+\subsection{Iago Attack Protection}
+\label{sec:20:iago}
+Checkoway et al. first published the class of Iago attacks in 2013.\cite{checkoway2013iago}. The attacker model in this
+attack class can neither manipulate the application's code nor read the data from its memory. The
+application is assumed to be unmodified and linked against unmodified libraries but running on a malicious kernel.
+These application properties equal those of SGX. The attack aims to manipulate the application through
+malicious system call returns answered by the kernel. Such unexpected return values can cause the application to work
+against its security interest or even manipulate the control flow.
+SGX applications are potential targets for Iago attacks because they depend on the runtime outside the
+enclave. Intel TDX and AMD SEV-SNP rely on an untrusted hypervisor.\cite{tdx_whitepaper,kaplan_amd_2020}
+This untrusted hypervisor could mount Iago attacks similar to malicious kernels. The WeSee attack on
+AMD SEV-SNP, published by Schlüter et al. in 2024, shows that such an attack is possible on AMD SEV-SNP by
+injecting specific interrupts into the confidential VM.\cite{schluter2024wesee}
 
+Arnautov et al. and Baumann et al. published two potential countermeasures against Iago attacks in 2016 and 2015,
+SCONE and Haven, respectively. SCONE aims to protect applications in Linux environments, while Haven protects
+applications in Windows environments.\cite{arnautov_scone_2016, baumann_shielding_2015}
+Both SCONE and Haven try to solve two problems with using SGX. The first problem is the threat described through Iago
+attacks, and the second is to make legacy applications executable with SGX enclaves without
+modifying them. SCONE achieves this by integrating a modified Linux library OS consisting of the Linux Kernel Library
+and the musl libc implementation, aiming for a similar solution as Haven. Haven uses a reduced Windows runtime
+environment to create a library OS as part of the enclave. In both cases, the library OS implements or emulates system
+calls that the legacy application would otherwise perform to the potentially malicious OS. Additionally, in both
+solutions, the library OS emulates instructions that the execution of SGX enclaves otherwise forbids. Haven and SCONE
+implement a shielding component for system calls that the library OS cannot emulate. This shielding component
+reduces the interface through which system calls to the host kernel are made. Moreover, the shielding component in both
+solutions implements sanity checks of the values returned by the host OS system calls. Both solutions reduce the TCB by
+integrating a reduced subset of the respective systems' runtime environment.
