@@ -257,3 +257,21 @@ implement a shielding component for system calls that the library OS cannot emul
 reduces the interface through which system calls to the host kernel are made. Moreover, the shielding component in both
 solutions implements sanity checks of the values returned by the host OS system calls. Both solutions reduce the TCB by
 integrating a reduced subset of the respective systems' runtime environment.
+
+\subsection{Isolation through SMM}
+An early work on how to isolate processes was done by Azab et al. in 2011.\cite{azab_sice_2011}
+The work dates before introducing TEE extensions in x86 hardware and uses the SMM to isolate tasks. The problem
+SICE tries to protect the memory integrity of isolated tasks and virtual machines.
+In principle, SICE uses the strong hardware-enforced
+isolation of the SMM and its SMRAM to install applications into it. The authors used an AMD platform for
+their practical implementation because AMD platforms allow the adjustment of SMRAM size and location after the SMM code
+locks the SMRAM.\cite{bios2014amd} To switch
+to the isolated task residing in SMRAM, the firmware SMI handler was modified to transfer control to the
+management runtime of the isolation environment. The strong hardware isolation guaranteed that even a malicious
+operating system could not access the memory of the isolated task. A downside to this approach is that it works only on
+a small amount of hardware. The implementation depends on the resizeable SMRAM to react to the growing
+memory demands of applications isolated through SICE. As the authors mentioned, they used AMD platforms for their
+implementation because of this. Intel platforms did not support this feature, and adapting SICE to those platforms
+was left as an open problem. Moreover, firmware modifications have to be implemented by the user to install the correct
+SMI handler. These modifications require the firmware to be open source to implement the SMI handler. This requirement
+further reduces the amount of hardware used for this approach.
