@@ -295,7 +295,7 @@ no other workload is to be executed by this core. The authors turned off all oth
 authors used a Linux kernel that runs in tickless mode to ensure that the kernel does not send scheduling interrupts to
 the isolated core. The authors built tickless kernels by using the kernel KConfig option
 \textit{CONFIG\_NO\_HZ\_FULL=y}. In this mode, the kernel does not send scheduling interrupts to cores that are either
-idle or for which only one task is ready. All remaining interrupts are considered to be attacks on the enclave.
+idle or for which only one task is ready.\cite{linuxtickless} All remaining interrupts are considered to be attacks on the enclave.
 QuanShield uses unused parts of the state save area to terminate the enclave upon receiving any interrupt. The state
 save area is protected enclave memory in which the CPU stores its state on context switches, e.g., when stopping to
 execute enclave code. QuanShield stores non-canonical memory addresses in these unused parts. Once the control returns,
@@ -308,4 +308,3 @@ code fault as fast as possible. QuanShield uses a library OS to support legacy a
 protection mechanism by utilizing SGX-LKL to manage the second stack in the state save area. SGX-LKL is a Linux kernel
 port that can run in an SGX enclave as a LibraryOS, similar to the approach used by SCONE and
 Haven(see~\ref{sec:20:iago}).\cite{priebe2019sgx}
-\todo{add reference to \url{https://www.kernel.org/doc/html/latest/timers/no_hz.html}}
