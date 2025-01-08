@@ -1,24 +1,23 @@
 \section{Contributions}
 \label{sec:10:contributions}
 As described in the motivation (see chapter~\ref{sec:10:motivation}) for this
-work, we see a big problem in the general vulnerability against side channel
+work, we see a big problem in the general vulnerability against the side channel
 attacks of commodity processors.
 To fully exclude side channels, we propose <Fancy Name\todo{think about a
     really fancy name}> to tackle the following goals:
 
 \begin{enumerate}
-    \item We create an execution environment that is fully isolated from the
-          remaining system by utilizing features found in all commodity CPU. This
-          means that we do not use any vendor specific ISA extensions.
-    \item We propose a TEE design able to detect side channel attacks and react
-          in a appropriate manner.
-    \item Our design ensure that only core local resources are used. This means
+    \item We create an execution environment fully isolated from the
+          remaining system by utilizing features found in all commodity CPUs. This
+          means that we do not use any vendor-specific ISA extensions.
+    \item We propose a TEE design to detect side-channel attacks and react
+          appropriately.
+    \item Our design ensures the usage of only core local resources. This means
           we implement a policy that is restricted to core local caches.
     \item We evaluate ways to enable such an execution environment to offer
           remote attestation features.
-    \item We evaluate our implementation regarding system resources. In detail
-          we will evaluate what workload can fit next to the runtime
-          environment in the local cache.
+    \item We evaluate our implementation regarding system resources. In detail,
+          we will evaluate what workload fits next to the local cache's runtime environment.
     \item We evaluate the TCB and against what attacker model our sole software
           solution can defend.
 \end{enumerate}
