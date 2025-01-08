@@ -1,35 +1,11 @@
 \section{Trusted Execution Environments}
-\label{sec:state:tee}
+\label{sec:20:tee}
 % \begin{figure}
 %     \begin{tikzpicture}
 %         \draw (1,0) -- (0,0) -- (0,1) -- cycle;
 %     \end{tikzpicture}
 %     \caption{Tikz test}
 % \end{figure}
-
-Suppose we are the developers of the messenger Signal. While we aim to implement a mechanism for automatic contact
-discovery, we also want to follow our claims to ensure the privacy of communication for our users. This is because we do not
-want to learn who is communicating with whom, nor do we want to learn about the communication itself.
-
-While we could encrypt our users' phonebooks before uploading them to our servers for processing, encryption
-alone is not enough to fulfill our privacy claims. For example, through encryption alone, the user is not able to
-verify that they are communicating with a Signal server. While this problem could be solved with cryptographic
-signatures, the user is still not able to verify that the server application is the expected one. For example, if
-the Signal Foundation was malicious, it could install an application designed to spy on the communication. In another
-scenario, the Signal server application could fall victim to malicious privileged entities.
-Maintenance personnel with access to the server hardware could tap the memory bus. Privileged software, such as operating
-systems or hypervisors, could manipulate the memory of the server application in a way that leaks information or
-simply reads the memory containing all secrets. It is, therefore, necessary to protect not only the communication channels
-between user and server but also the integrity and confidentiality of the server application. Moreover, the user should
-be able to verify these claims on the server application.
-
-The latter is the goal of remote attestation, a feature offered by many Trusted Execution Environments to verify that
-software is executed as intended and that no information leak is possible. For TEEs to work, a system must contain a
-so-called hardware root of trust. A hardware root of trust is a device that is self-protecting on the hardware level,
-unable to be
-modified even by privileged software, and often implementing cryptographic functions. Different solutions exist to
-implement the functionality of Trusted Execution Environments. The following section will give us an overview of these
-solutions.
 
 \todo{Explain measurements, how the majority implements RA}
 
