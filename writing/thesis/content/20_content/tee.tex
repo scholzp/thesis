@@ -30,6 +30,7 @@ unable to be
 modified even by privileged software, and often implementing cryptographic functions. Different solutions exist to
 implement the functionality of Trusted Execution Environments. The following section will give us an overview of these
 solutions.
+\todo{rewrite entire TEE section; Now duplicates with intro}
 
 \todo{Explain measurements, how the majority implements RA}
 
@@ -229,7 +230,7 @@ much as the firmware and hardware. Enma utilizes a TPM as the hardware root of t
 that the expected versions of L4Re and Enma were booted. The so-called soft backend of Enma, which we described in this
 section, can also be replaced by another backend. The authors propose an SGX back end that utilizes hardware features.
 
-\subsection{Iago Attack Protection}
+\subsubsection{Iago Attack Protection}
 \label{sec:20:iago}
 Checkoway et al. first published the class of Iago attacks in 2013.\cite{checkoway2013iago}. The attacker model in this
 attack class can neither manipulate the application's code nor read the data from its memory. The
@@ -258,7 +259,7 @@ reduces the interface through which system calls to the host kernel are made. Mo
 solutions implements sanity checks of the values returned by the host OS system calls. Both solutions reduce the TCB by
 integrating a reduced subset of the respective systems' runtime environment.
 
-\subsection{Isolation through SMM}
+\subsubsection{Isolation through SMM}
 \label{sec:20:isolation_smm}
 An early work on how to isolate processes was done by Azab et al. in 2011.\cite{azab_sice_2011}
 The work dates before introducing TEE extensions in x86 hardware and uses the SMM to isolate tasks. The problem
@@ -308,3 +309,78 @@ code fault as fast as possible. QuanShield uses a library OS to support legacy a
 protection mechanism by utilizing SGX-LKL to manage the second stack in the state save area. SGX-LKL is a Linux kernel
 port that can run in an SGX enclave as a LibraryOS, similar to the approach used by SCONE and
 Haven(see~\ref{sec:20:iago}).\cite{priebe2019sgx}
+
+\subsection{Transient Execution Attacks}
+\label{sec:20:transientattacks}
+In 2018, researchers published the Spectre and Meltdown attacks.\cite{kocher_spectre_2020, lipp_meltdown_2020}
+These attacks were the first to exploit the side effects of transient execution in modern CPUs and affected all commodity
+architectures. For example, CPUs of the vendors AMD, Intel, Qualcomm, and other ARM designs were affected. This class of
+new transient execution side-channel attacks abuses the speculative execution feature of modern CPU and defines an entirely
+new class of attacks. Furthermore, they are the first class of attacks that abuse microarchitectural bugs. We will review
+this class of attacks in more detail as we aim to implement a TEE that can defend against such an attack.
+
+Modern CPUs use speculative execution to hide memory latencies. If, for example, the control flow forks, the decision of
+which path to take often depends on a value stored in memory. If this value is not
+persistent in the CPU cache, the CPU needs to fetch the value from the main memory. While waiting for the result, the CPU
+precalculates the most likely path. The CPU uses a dedicated buffer called Branch Target Buffer (BTB) to decide what
+path to precalculate. The Buffer records the n-th last paths taken, from which the CPU decides the most likely path.
+If the value arrives from the main memory, the CPU checks its decision and corrects its mistake, if any, to take the
+correct path. Overall, speculative execution can lead to a huge performance increase. Older publications see a
+performance increase from 27\% up to 87\%.\cite{espasa1997out, mock2005empirical}
+
+In some cases, the decision about what path to precalculate is wrong. For performance reasons, the CPU does not revert
+its microarchitectural state, like cache content, on mistakes. Furthermore, if the wrongly speculatively
+executed code produces an exception, the CPU does not serve it because the CPU should never have executed the
+code path. Spectre and Meltdown-like attacks exploit this design decision to read arbitrary memory. The attacker trains
+the BTB to predict a path dependent on a memory address to prepare an attack. In the training phase, the attacker uses
+valid addresses when the control flow branches, which leads the CPU in the actual attack phase to predict that the path
+in the training will be valid. In the attack phase, the attacker chooses an arbitrary address. In preparation, the
+attacker evicts the value on which the chosen path depends from the cache. Now, the attacker chooses a value that would
+result in the decision to take a different code path. Because the attacker trained the CPU before to take the now
+invalid path, it executes this one speculatively until the requested value arrives. In the meantime, the CPU executes a
+malicious read to the main memory using the address chosen by the attacker. Later, the result of the malicious read
+returns and is stored in the CPU cache. In the meantime, the CPU notices its mistake and takes the other path. The
+value load resulting from the manipulated address still leaves traces on the microarchitectural state of the CPU (in this
+example, the cache), and the CPU does not throw an exception because the CPU should have never executed the in this path.
+The attacker can now extract the secret through a side channel of their choice.
+Because these attacks target microarchitectural behavior, a complete redesign is necessary to
+fix the issue. Software mitigations are available for specific attacks. For example, the Linux Kernel uses techniques
+called retpopline and Kernel Page Table Isolation (KPTI) to mitigate Spectre version 2 and Meltdown, respectively. On
+the other hand, software mitigations can greatly impact performance, reaching from a 10\% to 800\% overhead, depending
+on the workload.\cite{low2018overview} The class of transient execution attacks is still highly relevant today, with at
+least five attacks published in the last since 2023.
+\cite{ormandy2023zenbleed,trujillo2023inception, moghimi2023downfall,ragab_ghostrace_2024, wilke2024tdxdown}
+TEE solutions are affected, too, because these attacks enable attackers to read arbitrary memory. The problem
+persists, and no solution exists to mitigate transient execution attacks in general.
+
+Another approach for systems to defend against side-channel attacks, in general, is active detection of the attack and
+reacting appropriately. Quanshield implements such a solution for interrupt-based side channel
+attacks described in chapter~\ref{sec:20:interrupt_sca}. For attacks abusing transient execution, this approach of
+deactivating transient execution would come with a high-performance penalty. Instead, existing solutions attempt to
+monitor the cache and other microarchitectural behavior through hardware performance counters to find any anomaly. Early
+works on anomaly detection come from the field of malware detection. For example, Yubin et al. experimented in 2012
+using performance counters to monitor the control flow integrity of a program. \cite{yubin_xia_cfimon_2012} The idea
+behind this approach is that a program shows specific behavior. This behavior results from the instructions it executes
+and their order, which leaves a kind of footprint. When monitoring the hardware performance counters closely enough, the
+observer can deduce what parts of code have been executed by the CPU. If the performance counter traces of the program
+are known beforehand, an Observer can compare the values of the counters with the known state and then reason if the
+control flow was highjacked, for example, by an ROP attack. As a side note, monitoring through hardware Performance
+counters can also be used for attacks, which is why performance counters are unavailable while the CPU operates in SGX
+mode. \cite{uhsadel2008exploiting,costan2016intel}
+Like ROP attacks, transient execution attacks show special behavior when preparing the attack or side channel.
+Li et al. and Van Bulck et al. examined how to trace the behavior of transient execution attacks with performance
+counters on the examples of Spectre and Load Value injection attacks, respectivley.
+\cite{li_detecting_2021, van_bulck_lvi_2020}
+They found that when in the preparation phase, while the attacker trains the branch predictor, fewer instructions are
+retired compared to typical workloads. Moreover, employing the cache side channel leaves traces, too. For a cache-based
+side-channel to work, the attacker tries to evict pages that map to addresses they want to use for the attack. This
+results in a high amount of TLB flushes. Later addresses are accessed by the side channel code to retrieve information.
+Because the cache was flushed, the number of cache misses increased significantly. An observer can detect all of these
+side effects by using performance counters. Still, an attacker can hide their activities by slowing down their attack.
+While the total number of cache misses induced by the attack, for example, does not change this way, the attack
+distributes the misses more evenly over time. Because events such as cache misses and TLB flushes are normal behavior of
+a running system, the environment in which an attack runs introduces noise that can help hide an attack. Thus, detecting
+said attack becomes nearly impossible if an attacker distributes the effects of their attack over time. Consequently,
+the results of Li et al. and Van Bulck et al. lead us to conclude that a detection approach using hardware performance
+counters in this way is unreliable. Kosasih et al. came to a similar conclusion in their survey of knowledge in
+2024.\cite{kosasih2024sok}
