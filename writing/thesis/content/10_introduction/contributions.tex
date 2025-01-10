@@ -1,8 +1,8 @@
 \section{Contributions}
 \label{sec:10:contributions}
 As described in the motivation (see chapter~\ref{sec:10:motivation}) for this
-work, we see a big problem in the general vulnerability against the side channel
-attacks of commodity processors.
+thesis, we see a big problem in the general vulnerability by side channel
+attacks on commodity processors.
 To fully exclude side channels, we propose <Fancy Name\todo{think about a
     really fancy name}> to tackle the following goals:
 
@@ -21,3 +21,14 @@ To fully exclude side channels, we propose <Fancy Name\todo{think about a
     \item We evaluate the TCB and against what attacker model our sole software
           solution can defend.
 \end{enumerate}
+
+With complete isolation and the exclusion of possible side channels, we aim for a
+TEE solution that can withstand a wide array of possible attacks. Because
+of time constraints in this thesis, we cannot implement a fully working TEE
+; instead, we can show the properties and concepts on a working proof of concept
+implementation. We show that our solution can run next to a commodity
+operating system such as Linux, implement communication channels through a
+well-defined interface, and show that we can protect our implementation
+from being interfered with by the commodity OS. Because we explore the technical
+feasibility, our solution still depends on the commodity to install the
+environment.
