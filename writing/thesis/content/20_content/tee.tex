@@ -211,9 +211,16 @@ Enma is short for Enclave Manager and is a software solution to implement TEEs f
 \cite{reitz_isolierende_2019}
 L4Re uses the Fiasco.OC microkernel that is part of the L4 microkernel family. The microkernel approach aims for
 minimized code to run in the supervisor mode. The creator of L4 defined the concept of microkernels as follows:
-"More precisely, a concept is tolerated inside the \mu-kernel only if moving it outside the kernel, i.e., permitting
-competing implementations, would prevent the implementation of the system's required functionality."
-- Liedke\cite{liedtke1995micro}
+
+\begin{quote}
+    \textit{
+        More precisely, a concept is tolerated inside the \mu-kernel only if moving it outside the kernel, i.e.,
+        permitting competing implementations, would prevent the implementation of the system's required
+        functionality. \\
+    }
+    \mbox{ -- Liedke\cite{liedtke1995micro}}
+\end{quote}
+
 
 Following this philosophy, Fiasco.OC only implements the mere minimal services. All other services, such as memory
 management, are implemented as user space applications. The minimal setup of a L4Re system consists of the Fiasco.OC
