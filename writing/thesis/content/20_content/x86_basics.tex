@@ -1,4 +1,15 @@
 \section{Technical Background}
 \label{sec:state:technical}
-dummy text
-\todo{Write technical background}
+This chapter will give us an overview of important mechanisms used by modern
+CPUs. While there are other widely used architectures, such as ARM on
+mobile devices, we will explore these features in the example of the x86\_64
+architecture. \\
+
+We decided to do so because our proof of concept implementation will target
+the x86\_64 architecture. Moreover, behavior and implementations of similar
+concepts can differ between \gls{isa} (\acrshort{a_isa}) and even
+implementations of the same \acrshort{a_isa} on the microarchitectural plane.
+We will, therefore, note differences in implementations of x86\_64 whenever
+appropriate. Until then, we will stick to the general behavior described in
+the AMD64 specification so that the Intel 64-bit extensions are largely
+compatible.
