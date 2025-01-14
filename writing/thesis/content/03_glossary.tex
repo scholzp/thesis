@@ -1,4 +1,13 @@
 % This file is alphabetically sorted by key (which happens to be the acronym)
+
+%
+% E ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{eoi}
+{
+    name=end of interrupt,
+    description={Signal send to the interrupt controller by the CPU to signal the of an interrupt serving routine}
+}
+%
 % G ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{gdt}
 {
@@ -8,6 +17,17 @@
 }
 %
 % I ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{idt}
+{
+    name=interrupt descriptor table,
+    description={Data structure that holds a table of interrupt handlers. The interrupt vector is used by the CPU to
+            call the respective interrupt handler routine.}
+}
+\newglossaryentry{ipi}
+{
+    name=inter-processor interrupt,
+    description={Interrupt send from one processor in a multiprocessor system to another}
+}
 \newglossaryentry{isa}
 {
     name=instruction set architecture,
@@ -16,6 +36,13 @@
 }
 %
 % L ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{lapic}
+{
+    name=local advanced programmable interrupt controller,
+    description={The advanced programmable interrupt controller (APIC) is the successor of the legacy programmable
+            interrupt controller (PIC) in x86 and x86\_64 systems. In systems with multiple CPU cores the LAPIC is the
+            APIC local to the respective core}
+}
 \newglossaryentry{lmode}
 {
     name=long mode,
@@ -27,6 +54,14 @@
 {
     name=memory management unit,
     description={Coprocessor that translates virtual memory addresses to physical memory addresses}
+}
+%
+% N ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{nmi}
+{
+    name=non-maskable interrupt,
+    description={Interrupt that can not be masked. That means, delivering of non-maskable interrupts can not be
+            deactivated}
 }
 %
 % P ----------------------------------------------------------------------------------------------------------------
@@ -52,6 +87,12 @@
     description={Hardware extension in supported AMD processors able to create isolated execution environments for
             virtual machines and prove integrity and identity of the running VM through remote attestation}
 }
+\newglossaryentry{sgx}
+{
+    name=Intel SGX,
+    description={Hardware extension in supported Intel processors able to create isolated execution environments and
+            prove integrity and identity of the running program through remote attestation}
+}
 \newglossaryentry{simd}
 {
     name={single instruction multiple data},
@@ -74,12 +115,6 @@
     name=system management mode RAM,
     description={Hardware protected area of main memory to store \acrshort{a_smm} data and code, such as the
             \acrshort{a_smi} handler}
-}
-\newglossaryentry{sgx}
-{
-    name=Intel SGX,
-    description={Hardware extension in supported Intel processors able to create isolated execution environments and
-            prove integrity and identity of the running program through remote attestation}
 }
 %
 % T ----------------------------------------------------------------------------------------------------------------
