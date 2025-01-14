@@ -92,3 +92,74 @@ Unless otherwise stated, all references we make to \gls{lmode} in
 the remaining parts of this thesis mean the combination of both sub-modes and
 therefore the whole extension implemented by AMD64.
 
+\subsection{Interrupts and Exceptions}
+\label{sec:state:technical:interrupts}
+Interrupts and Exceptions are used to call system-specific functions and respond
+to special conditions in the CPU or system. Exceptions occur while executing
+software and result from program or CPU internal errors. Interrupts, on the
+other hand, are either the result of software interrupt instructions or the
+interaction of the CPU with other system components, such as keyboard input.
+Exceptions can be divided into three types:
+\begin{enumerate}
+    \item Faults: Result of an error with the instruction to execute
+    \item Traps: Result of breakpoint and software interrupt instructions
+    \item Aborts
+\end{enumerate}
+Interrupts, on the other hand, can be divided into two classes:
+\begin{enumerate}
+    \item Maskable Interrupts: Can be masked. Masking an interrupt means that
+          software can temporarily disable them. The interrupt controller
+          holds them back until interrupts are enabled again.
+    \item \Gls{nmi}~(\acrshort{a_nmi}): Software cannot
+          turn off \acrshort{a_nmi}s. The interrupt controller delivers~
+          \acrshort{a_nmi}s to the CPU unless it currently serves another~
+          \acrshort{a_nmi}. When the CPU executes the IRET instruction in the
+          interrupt handler, the interrupt controller can deliver the next~
+          \acrshort{a_nmi}.
+\end{enumerate}
+The CPU serves exceptions and interrupts by calling the respective interrupt or
+exception handler routine. System software can install an interrupt handler by
+writing its address into the \gls{idt}, short \acrshort{a_idt}. The
+\acrshort{a_idt} is a data structure containing pointers to interrupt handling
+routines. The specification assigns a so-called vector to each interrupt or
+exception. With the help of this vector, the CPU determines what handler to call
+by using the interrupt vector as an index in the \acrshort{a_idt}. It finds the
+\acrshort{a_idt} by reading the value of the interrupt descriptor table register
+(IDTR). System software is expected to create the \acrshort{a_idt} and install
+handlers for at least the predefined vectors. Then, the address of the
+\acrshort{a_idt} will be provided by writing to the IDTR before interrupts can
+be activated. \\
+
+Over time, interrupt controllers were improved and adapted to new use cases
+similar to CPUs. In \gls{rmode}, the CPU falls back to using the Intel 8259 or a
+compatible programmable interrupt controller, short PIC, that delivers
+interrupts to the CPU. Once the PIC delivers an interrupt to the CPU, the CPUs
+must serve it and signal the PIC with an \gls{eoi}, short \acrshort{a_eoi}, that
+the serving routine is done, before it can receive the next interrupt. \\
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=.6\textwidth]{images/lapic_placeholder.png}
+        \caption{Illustration of how \acrshort{a_lapic}s integrate in a multiprocessor system}
+        \label{fig:state:technical:lapic}
+    \end{center}
+\end{figure}
+\todo{This is a placeholder}
+
+Intel later introduced the advanced programmable interrupt controller, short
+APIC with its 486 processor line to allow the system to operate with multiple
+CPUs. In modern CPUs, multiprocessor configurations are prevalent, and each processor
+core has its own APIC. Because the APIC is CPU local, these APICs are called
+local APICs or \gls{lapic}, short \acrshort{a_lapic}. \acrshort{a_lapic}s forward
+interrupts from different sources to the respective CPU core. For example, the
+\gls{lapic} receives interrupts such as \gls{ipi} (\acrshort{a_ipi}) from other
+\acrshort{a_lapic}s, interrupts from devices connected to the IOAPIC, and legacy
+interrupts from the PIC. Figure~\ref{fig:state:technical:lapic} shows a
+schematic view on how the LAPIC of each CPU core integrates into the system.
+System software must change the CPU to \gls{pmode} to
+activate the \acrshort{lapic} system. After changing to \gls{pmode}, system
+software must write a valid address to the APIC base address register. All APIC
+registers are then mapped to the 4-KiB APIC register space starting at the
+address specified in APIC base address register. System software can then access
+APIC registers with memory reads and writes to the APIC register space.
+
