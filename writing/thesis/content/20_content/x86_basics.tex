@@ -13,3 +13,82 @@ We will, therefore, note differences in implementations of x86\_64 whenever
 appropriate. Until then, we will stick to the general behavior described in
 the AMD64 specification so that the Intel 64-bit extensions are largely
 compatible.
+
+\subsection{Operation Modes}
+\label{sec:state:technical:modes}
+The x86 architecture is rooted in the Intel 8086, designed in 1978. As
+a 16-bit microprocessor design, the Intel 8086 physically can only address 64
+KiB of memory. To overcome this limitation, Intel introduced a
+segmentation-based addressing mode that, together with the 20-bit address bus,
+allowed the CPU to address slightly more than 1 MiB of main memory. Intel 8086
+missed features such as memory protection, code privileges, and multitasking.
+These features were important to allow advanced operating systems. These
+features extended the instruction set and microarchitecture
+implemented by the Intel 80286. The Intel 80286 could address, for example,
+16 MiB of physical memory through 24 address bus bits and could address 1 GiB of
+virtual memory. Moreover, segment registers now contain an index in a
+data structure called \gls{gdt}, short \acrshort{a_gdt}.
+The \acrshort{a_gdt} contains descriptors that store information on segments,
+such as base address and access rights. The Intel 80286 implements access rights
+as so-called rings, and the lower the numerical access level, the higher the
+privileges of the executing software are. The introduction of the
+\acrshort{a_gdt} allowed virtual memory implementation with memory protection.
+A new \gls{mmu}, short \acrshort{a_mmu}, added for the first time on chip in
+the 80286 allowed fast virtual to physical address translation. \\
+
+When using the features newly added to the 80286
+the processor was incompatible with the original Intel 8086. Because the result
+would have been that all software already existing for the Intel 8086 would have
+been to at least be recompiled to run on the Intel 80286, Intel designed the new
+features as an extension to the older 8086. Deactivating these new features
+allowed the Intel 80286 to run programs written for the 8086. For this, Intel
+introduced two operation modes in the 80286. The operation mode offering
+compatibility was called \textbf{\gls{rmode}} because the address
+calculation in the 8086 always yielded real physical addresses. Because the new
+80286 offered memory protection, the mode was called \textbf{\gls{pmode}}. To
+maintain compatibility with the Intel 8086, the 80286 first boots in
+\gls{rmode}, as all successors of the 80286 do. On startup, the code for
+entering other operation modes must, therefore, reside in the first MiB of
+memory. \\
+
+The successor of the Intel 80286, the Intel 80386 extended the architecture to
+32-bit and introduced paging to the architecture, allowing paged virtual memory
+(cf. \ref{sec:state:technical:paging}). The registers of the 80386 were also
+extended to 32-bit. To differentiate between the registers and their extensions,
+they are prefixed with ''E''. For example, the instruction pointer register,
+formerly identified by IP, becomes EIP with. The Intel 80386 also added the
+\textbf{\gls{smm}} or short \acrshort{a_smm}. The \acrshort{a_smm} is intended
+for firmware to execute special tasks such as energy management or other tasks
+executed by the firmware. The \acrshort{a_smm} code resides in a specially
+protected area of the main memory, referred to as \gls{smram}. \acrshort{a_smm}
+executes with the highest privileges in x86, which is ring -2. With these
+changes, the Intel 80386 formed the base for the architecture today known as x86
+or IA-32.\\
+
+Successors of the 80386 added support for optional floating point units and
+\acrshort{a_simd} extensions to the architecture but left the fundamental
+\acrshort{a_isa} unchanged. It was not until the year 2000 that AMD released
+its extensions of the x86 architecture to 64 bit that introduced a new processor
+operation mode called \textbf{\gls{lmode}} and two sub modes called
+\textbf{Compatibility Mode} and \textbf{64-Bit mode}. This extension by AMD to
+the x86 \acrshort{a_isa} was first called AMD64 and later largely adopted by
+Intel as Intel 64. Today it is also known by the name x86\_64.
+Compatibility mode allows the execution of legacy 32-bit and 16-bit code.
+64-bit mode extends the \acrshort{a_isa} by 64-bit operands and addresses, and
+extends all general purpose registers to 64-bit. Moreover, the 64-bit mode
+adds eight additional general-purpose registers and allows instruction pointer
+relative addressing. x86 allowed the latter only in control transfer
+instructions. AMD64 implements floating-point arithmetic through the mandatory
+SSE2 \acrshort{a_simd} extension that was introduced to x86 in 2000 with the Intel
+Pentium 4 processor. The number of SSE2 registers is doubled compared to the
+number in the original x86 extension. Moreover, to allow differentiating between
+x86 and AMD64 registers, AMD added the REX prefix to the specification. As a
+result, general purpose registers are prefixed with the letter ''R''. For
+example, the instruction pointer registers of x86 (IP) becomes RIP. The number
+of page table levels to translate virtual to physical addresses was increased
+from two to at least four.\\
+
+Unless otherwise stated, all references we make to \gls{lmode} in
+the remaining parts of this thesis mean the combination of both sub-modes and
+therefore the whole extension implemented by AMD64.
+
