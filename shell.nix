@@ -7,6 +7,9 @@ pkgs.mkShell {
     gnumake
     niv
     rustup
+    pkgs.niv
+    pkgs.cmake-format
+    clang-tools
   ];
 
   # Environment variables
