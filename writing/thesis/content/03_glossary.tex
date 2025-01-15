@@ -65,6 +65,12 @@
 }
 %
 % P ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{pf}
+{
+    name=page fault,
+    description={Fault resulting from erroneous memory access. This can be for example a missing page table entry or
+            rights violation }
+}
 \newglossaryentry{pmode}
 {
     name=protected mode,
@@ -123,4 +129,9 @@
     name=trusted execution environment,
     description={An execution environment that is eligible to run applications isolated and protected from the rest of
             the system. Offers the ability to prove these features through remote attestation}
+}
+\newglossaryentry{tlb}
+{
+    name=translation lookaside buffer,
+    description={Cache structure that stores translations from virtual to physical addresses}
 }

@@ -163,3 +163,101 @@ registers are then mapped to the 4-KiB APIC register space starting at the
 address specified in APIC base address register. System software can then access
 APIC registers with memory reads and writes to the APIC register space.
 
+\subsection{Paging}
+\label{sec:state:technical:paging}
+\begin{center}
+    \begin{figure}
+        \includegraphics[width=\textwidth]{images/paging_placeholder.png}
+        \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables}
+        \label{fig:state:technical:paging}
+    \end{figure}
+    \todo{This is a placeholder}
+\end{center}
+
+Historically, paging replaced segmentation in x86 for working with virtual
+memory. Virtual memory is an abstraction that does not allow direct addressing
+of physical main memory through programs. Instead, a program sees the whole
+address space as available. Once the program tries to allocate memory, system
+software creates a virtual memory address and hands it to the program. System
+software decides through its mapping implementation, through which physical
+memory the respective virtual memory is backed. Virtual memory, therefore,
+allows system software to decide if a given virtual address is backed by main
+memory or to move it to secondary memory, such as disk storage. Moreover, two
+or more virtual addresses can be mapped to the same physical memory, allowing
+efficient use of shared program libraries. Mapping happens transparently to the
+program, which means that the program does not have to worry about what memory
+is used to back its virtual memory physically.\\
+
+Paging is an approach to virtual memory that replaces segment-based virtual
+memory in modern x86 CPUs. With paging, the system divides memory into chunks
+equal to the page size. System software uses so-called pages to manage memory on
+allocation requests from programs. Pages are virtual memory chunks mapped to
+page frames in physical memory. Access rights are controlled by system software
+that sets the respective rights in the pages and is enforced by hardware with
+page granularity. Hardware translates virtual to physical addresses. This
+process is called page translation. In the following, we will view the paging
+implementation of x86\_64 in more detail to explain page translation in more
+detail.\\
+
+Hardware uses so-called page tables for page translation that are hierarchically
+organized. Each page table forms a level in the table hierarchy and is the size
+of one page, storing references (addresses) to the next lower level. The last
+page table in this hierarchy stores the address of the physical page frame. By
+default, x86\_64 uses pages of size 4 KiB. Because x86\_64 uses 64-bit
+addresses, each page table can store 512 entries. Figure
+~\ref{fig:state:technical:paging}~shows the page translation of a virtual 64-bit
+address in x86\_64 with a page table hierarchy of four levels and a page size of
+4 KiB. \\
+
+The virtual address is divided into a 12-bit field used as an index in the
+physical page and four 9-bit fields, which the hardware uses as an index to
+access the content of the respective page level. The remaining address bits are
+sign extensions of bit 52, forming a canonical address. The hardware must
+perform a page table walk to resolve the virtual address. For the first step of
+a page table walk, the processor locates the address of the first page table, in
+this case, the PML4 table. The address of the PML4 is written by system software
+to CR3 after it creates the page table. In doing so, the system software does
+not write the entire 64-bit address to CR3. Instead, it writes the most
+significant bits beginning from bit 12 because memory is accessed at page
+granularity, meaning the lower 12 bits are irrelevant to addressing the page
+frame. Most x86\_64 implementations furthermore only support $2^{52}$ byte of
+addressable memory and therefore use 52 bits of the 64-bit address space. This
+results in the 40 bits stored in CR3, as seen in
+~Figure~\ref{fig:state:technical:paging}. To access PML4, the CPU reconstructs
+its address from CR3. It uses the 9-bit index of the PML4 offset field in the
+virtual address to find the Page-Map-Level 4 entry containing the address of the
+next page table, the Page-Directory-Pointer table. The CPU accesses this table
+and all successor tables similarly until it locates the physical page. To access
+the data that belongs to the virtual address, the CPU uses the last 12 bits of
+the virtual address to locate the data on the physical page. \\
+
+As the page table walk is expensive, the \acrshort{a_mmu} automatically stores
+the translated addresses in a cache called \gls{tlb}, short \acrshort{a_tlb}.
+Each CPU manages its page tables and \acrshort{a_tlb}. System software must
+maintain consistency between page tables and each \acrshort{a_tlb} by
+invalidating individual entries or the entire \acrshort{a_tlb}. If system
+software invalidates an entry, the CPU has to complete a page walk for this
+virtual address, upon which the MMU updates the \acrshort{a_tlb}. The INVLPGB
+can additionally be used to invalidate a range of TLB entries and broadcast
+these invalidations to other CPUs. \\
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=.6\textwidth]{images/paging_rights_placeholder.png}
+        \caption{Layout of the lowest 12 bits in a page table entry}
+        \label{fig:state:technical:paging_rights}
+    \end{center}
+\end{figure}
+\todo{This is a placeholder}
+
+The unused lower 12 bits of each table entry are used for management properties,
+such as access rights management. Figure~\ref{fig:state:technical:paging_rights}
+shows the layout of the lower 12 bits of a page table entry. The present bit is
+another property stored in the lowest 12 if of a page table's entry. It
+indicates if the page the respective entry points to was initialized and loaded
+to the page table. If this bit equals 0, the CPU generates a \gls{pf}
+(\acrshort{a_pf}) exception and expects system software to load the respective
+entry. The CPU also generates a \acrshort{a_pf} if software violates access
+rights. A second bit important for this thesis is the Page-Level Cache Disable
+(PCD) bit. If the PCD bit is set, the CPU cannot cache the respective page.
+
