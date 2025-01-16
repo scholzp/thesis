@@ -163,6 +163,63 @@ registers are then mapped to the 4-KiB APIC register space starting at the
 address specified in APIC base address register. System software can then access
 APIC registers with memory reads and writes to the APIC register space.
 
+\todo{Caches}
+\subsection{Caches}
+\label{sec:state:technical:caches}
+- modern CPUs have a multilevel cache hierarchy
+- smallest cache is fastest
+- locality:
+- the slower the cache, the bigger
+- cache makes up x\% of chip area
+- organized in core local parts and shared
+- to implement synchronization algorithms such as Mesi are used
+- in general CPUs looks up in smallest cache
+- if data not found then next hierarchy level is queried
+- main memory queried last, data then loaded to cache
+- locality principle: programs addresses memory regions that are neighboring each other
+- gives speedup in program execution
+- caches are organized in so called pages?
+- pages can have different attributes: write-back, write-through, uncacheable
+- caches can be set-assozitive
+- cache can be included or exclusive of the lower levels, NINE policy
+
+\todo{write HPC}
+\subsection{Hardware Performance counters}
+\label{sec:state:technical:hpc}
+The first x86 CPU implementing hardware \gls{pmc} \acrshort{a_pmc} and
+documenting them was the Intel Pentium Pro in 1995, implementing the P6
+microarchitecture.\cite{intel_sdm} The AMD64 \acrshort{a_isa} specificities four
+freely programmable architectural hardware \acrshort{a_pmc}s.\cite{amd_manual}
+Concrete processor implementation can offer additional counters. Similarly, the
+\acrshort{a_isa} specifies architectural events that must be present in every
+processor implementing AMD64. Additional events are vendor and
+implementation-specific. The four counters can be programmed to count any event
+supported by the respective processor implementation. Vendors of x86 CPUs
+publish what processor supports what additional events in their manuals.
+Moreover, a CPU notes what events it supports in the result of the \gls{CPUID}
+instruction. \\
+
+In x86 hardware, Performance counters are implemented by a set of two \gls{msr}s
+(\acrshort{a_msr}) per counter. One \acrshort{a_msr} can be programmed by system
+software with the event to measure, while a second \acrshort{a_msr} counts the
+occurrence of
+the respective event. As noted, programming has to be done by system software
+with elevated privileges. Reading \acrlong{a_pmc}s can be done
+with privileged instruction or from user space with the RDPMC instruction.
+In this way, a program can poll the values of counters. The system software
+can also program a threshold for a \gls{pmi}, short \acrshort{a_pmi}.
+Once the \acrshort{a_pmc} values exceed the threshold, the \acrshort{a_pmi} is
+triggered, offering an alternative to expensive polling techniques.\\
+
+When we use hardware \acrshort{a_pmc}, we must use the proper
+technique adopted to the environment in which we read the counter values. Das et
+al. found in a comprehensive survey that noise from the system is often present,
+e.g. context switches influence the values of performance counters.
+\cite{das_sok_2019} Moreover, some counter events are over-counted while the CPU
+can undercount others.\cite{weaver_non-determinism_2013} It is therefore
+important to check the right conditions for using hardware counters and verify
+that they work correctly.
+
 \subsection{Paging}
 \label{sec:state:technical:paging}
 \begin{center}
@@ -261,3 +318,6 @@ entry. The CPU also generates a \acrshort{a_pf} if software violates access
 rights. A second bit important for this thesis is the Page-Level Cache Disable
 (PCD) bit. If the PCD bit is set, the CPU cannot cache the respective page.
 
+\todo{write about bootflow}
+\subsection{Bootflow of Modern x86 CPUs}
+\label{sec:state:technical:boot}
