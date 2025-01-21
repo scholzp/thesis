@@ -163,27 +163,153 @@ registers are then mapped to the 4-KiB APIC register space starting at the
 address specified in APIC base address register. System software can then access
 APIC registers with memory reads and writes to the APIC register space.
 
-\todo{Caches}
 \subsection{Caches}
 \label{sec:state:technical:caches}
-- modern CPUs have a multilevel cache hierarchy
-- smallest cache is fastest
-- locality:
-- the slower the cache, the bigger
-- cache makes up x\% of chip area
-- organized in core local parts and shared
-- to implement synchronization algorithms such as Mesi are used
-- in general CPUs looks up in smallest cache
-- if data not found then next hierarchy level is queried
-- main memory queried last, data then loaded to cache
-- locality principle: programs addresses memory regions that are neighboring each other
-- gives speedup in program execution
-- caches are organized in so called pages?
-- pages can have different attributes: write-back, write-through, uncacheable
-- caches can be set-assozitive
-- cache can be included or exclusive of the lower levels, NINE policy
+Since 1980, the performance growth of memory and processors has diverged
+steadily with an ever-growing gap. Hennessy et al. note a difference in
+performance growth of factor 1,000 for a single CPU core and memory
+technologies. To highlight the problem, they show the difference between the
+peak bandwidth offered by memory and the peak memory bandwidth demand of an
+Intel i7 processor of the Nehalem architecture employing four CPU cores. This
+processor, which Intel introduced in the year 2009, can generate an instruction
+stream that peaks in a maximum bandwidth need of 409.6 GB/sec, while its
+dual-channel DDR3 memory interface can yield a maximum bandwidth of 25GB per
+second.\cite{hennessy2011computer} With processor implementations growing
+further in width, the demand for fast memory further grows. For example, from
+November 2023 to January 2024, the number of systems in the TOP500 list that
+employed CPUs with 96 cores per socket increased from 0 to 3, with the former
+maximum number of cores per socket being 72.\cite{top500} To hide latencies and
+bridge the gap between CPU demand and actual main memory bandwidth, CPUs today
+employ fast local on-chip memory to buffer data they already accessed. If they
+reaccess this memory item, they can use these buffers to speed up access. This
+on-chip buffer described is called cache.\\
 
-\todo{write HPC}
+The cache is an integral component organized in a multi-level hierarchy in
+modern CPUs. In this hierarchy, the lowest and the nearest to the core level,
+called the L1 cache, implements the fastest access. Most modern x86 CPUs divide
+their L1 cache into two parts: L1D for data and L1I instructions. With
+increasing levels, caches grow in size but tend to be slower. For example, while
+the L1 Cache of Nehalem CPUs offers only one cycle of latency, the L3 Cache of
+the same CPU has a latency of 35 cycles.\cite{hennessy2011computer}\\
+
+When the CPU tries to access data, it first queries the fastest cache. If the
+CPU can locate the data in the cache, this is called a cache hit. On a cache
+hit, the CPU can profit from reduced access time and improved bandwidth. The
+opposite of a cache hit is called a cache miss, in which the CPU subsequently
+queries the next level in the memory hierarchy. If it finds the data needed, it
+loads these into the nearest cache for faster access. Caches can only store a
+limited number of items, so-called cache lines. Each cache line is either 32 or
+64 bytes in size, with x86\_64 processors mainly implement a cache line size of
+64 bytes. Cache lines are a copy of the main memory, and the processor uses this
+copy for all of its operations unless otherwise configured. The processor loads
+data in cache line size granularity from the main memory. Modern x86 CPU designs
+organize caches in so-called sets. In a set, all of the cache lines are
+exclusively mapped to a specific, non-overlapping address range of physical
+memory. The number of cache lines a physical address can be mapped to is
+indirectly proportional to the number of sets in a cache, which is called the
+associativity of the cache. For example, a cache with one cache line per set is
+called a direct mapped cache because a physical address can only be mapped to
+one set and its cache line. The hardware cost of a mapped cache is the lowest.
+Direct-mapped caches bring the drawback of a higher probability of conflict
+misses. A conflict miss in caching describes the situation in which the
+processor loads data from the main memory and has to evict lines from the cache
+because no suitable cache line is available. Because a physical address range
+with multiple cache line-sized chunks is exclusively mapped to one line in a
+directly mapped cache, loads from the same range can cause conflict misses.
+Conversely, in a cache with a single set containing all cache lines, all
+physical addresses can be mapped to each line in the set. Such a cache is called
+fully associative and has the highest hardware costs but comes with the
+advantage of minimal fragmentation. Often, processors implement a trade-off
+between hardware cost and flexibility of the cache. Such caches are called
+$n$-way set associative, where $n$ is the number of cache lines in each set. On
+a cache fill, the processor first finds the set of cache lines to which it can
+map the physical address. Once it identifies the set, the processor can place
+the data in any line. \\
+
+Caches use the principle of locality, which consists of two kinds of locality.
+The first is called spatial locality, which describes that if a program accesses
+data from the main memory, it will access data located near the last loaded data
+with a high probability. In this case, the CPU tries to guess the size of the
+loaded structure to load parts missing in the cache in advance. If the CPU then
+accesses the neighbor of the first data, it already resides in the cache,
+lowering the latency. The second principle is temporal locality, which states
+that a program soon reuses memory references with a high probability. The CPU
+can, therefore, gain performance by storing recently used data in the cache for
+reuse.\\
+
+Modern caches are still small compared to the size of the main memory. For
+example, CPUs of the recent AMD Zen 5 microarchitecture have an L1
+cache size of 92 KiB (data and instruction combined) and 32 MiB of L3 cache
+shared between the cores, from which eight physically exist on the same chiplet.
+The same CPU supports 128 GiB of main memory, which is seven orders of magnitude
+larger than the L1 and 4 orders of magnitude larger than the L3 cache.\todo{cite amd zen five paper (When writing this SLUB Shibboleth was broken...)}
+Caches, therefore, can not buffer the content of the whole main memory and need
+strategies for their management. For example, CPUs of the Nehalem
+microarchitecture use a pseudo least recently used (LRU) strategy to manage
+their cache's content.\cite{hennessy2011computer} With this, cache lines are
+marked as frequently or less frequently used. The least frequently used lines
+are evicted from the cache and replaced by the newly cached data. Evicted
+lines are moved one level up in the hierarchy. Other management strategies are
+the least frequently used (LFU) or a first-in-first-out (FIFO) policy. Next to
+eviction strategies, different strategies for writing data back to main memory
+exist:
+\begin{itemize}
+    \item \textbf{write-back}: Data modified in the cache is stored and
+          written back to the main memory later. Until cache and main memory are
+          synchronized, the region in main memory is marked as dirty through a
+          dedicated status bit. Cache coherency protocols are required to
+          allow multiple devices to access the same memory range.
+    \item \textbf{write-through}: The Changes in the cache are instantly written
+          to the main memory. These writes can slow down program execution
+          because of costly main memory writes.
+    \item \textbf{cache-disable}: The CPU cache is disabled, and the CPU
+          performs all memory operations using the main memory.
+\end{itemize}
+Legacy x86 control cache settings with configuration bits in the control
+register CR0. In modern x86\_64 processors, systems software sets the write-back
+strategy on page granularity (c.f.~\ref{sec:state:technical:paging}). X86\_64
+processors ignore the write-through setting and use the page-level settings
+instead. \cite{amd_manual} The default in x86\_64 processors ist to use a
+write-back strategy. For this, processors implement coherency protocols. A
+widely used coherency protocol is called MESI. MESI is an acronym of the four
+states "modified," "exclusive," "shared," and "invalid." An extension to MESI is
+MOESI protocol, which additionally introduces the "owned" state. The states of a
+cache line, as specified by the AMD programmers manual, are:
+\begin{itemize}
+    \item \textbf{Modified}: The copy in the processor's cache is the most
+          recent and modified. The copy in the main memory needs to be updated.
+          No other processor in the system maintains a copy.
+    \item \textbf{Owned}: Similar to shared state, but copy in main memory can
+          be stale. All other processors must hold their copy in the shared
+          state.
+    \item \textbf{Shared}:  The copy is the most recent and correct copy of the
+          data. Other processors may hold copies, too. Main memory holds the
+          most recent and correct copy, too, if no processor holds a copy with
+          \textbf{Owned} state.
+    \item \textbf{Exclusive}: The processors and the main memory's copy are the
+          most recent and correct copies. No other processor holds a copy.
+    \item \textbf{Invalid}: The local copy is invalid. Either main memory or
+          other processors hold a valid copy.
+\end{itemize}
+\todo{inclusiviy}
+
+An interesting difference in the implementations of Intel 64 and AMD64
+processors are the cache coherency and inclusion policies. AMD64 specifies MOESI
+as a cache coherency protocol to use, as mentioned before.\cite{amd_manual}
+Intel 64, on the other hand, specifies MESI as a coherency protocol.
+\cite{intel_sdm} The use of different coherency protocols to synchronize data
+between multiple CPU cores has a direct effect on the inclusivity of the cache
+implementation. On all current x86\_64 multicore CPUs, the \acrfull{a_llc} is
+shared among all cores for synchronization and uses one of the coherency
+protocols. CPUs produced by Intel largely use an inclusive \acrshort{a_llc}. An
+inclusive cache describes a cache containing items in lower cache levels. If an
+item is modified in a lower cache level, the changes are automatically
+propagated to the higher inclusive cache level. The opposite of an inclusive
+cache is an exclusive cache design, as used by most AMD64 CPUS. Exclusive caches
+do not necessarily contain items of lower cache levels, and the synchronization
+of modified items needs to be propagated in other ways. The additional "owned"
+state of the MOESI protocol solves this issue.
+
 \subsection{Hardware Performance counters}
 \label{sec:state:technical:hpc}
 The first x86 CPU implementing hardware \gls{pmc} \acrshort{a_pmc} and
@@ -316,7 +442,9 @@ to the page table. If this bit equals 0, the CPU generates a \gls{pf}
 (\acrshort{a_pf}) exception and expects system software to load the respective
 entry. The CPU also generates a \acrshort{a_pf} if software violates access
 rights. A second bit important for this thesis is the Page-Level Cache Disable
-(PCD) bit. If the PCD bit is set, the CPU cannot cache the respective page.
+(PCD) bit. If the PCD bit is set, the CPU cannot cache the respective page. Bit
+3 (PWT) controls page-level write-through. If system software sets this bit, the
+page table has a write-through caching policy.
 
 \todo{write about bootflow}
 \subsection{Bootflow of Modern x86 CPUs}
