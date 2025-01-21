@@ -61,13 +61,13 @@ misbehavior is impossible to detect, hardware manufacturers can verify that
 their devices work as intended by providing certificates. These certificates can
 be embedded into the device with the help of tamper-resistant memory, such as
 ROM or eFuses. A user can then check the validity of a certificate by consulting
-the respective manufacturer's service.
+the respective manufacturer's service. \\
 
 Hardware roots of trust are necessary because system software could tamper with
 software or memory to manipulate a possible software solution. The following
 sections will review the most widely spread solutions to the hardware root of
 trust. These implementations rely on dedicated hardware modules such as add-in
-cards or unique, secure operation modes in CPU hardware.
+cards or unique, secure operation modes in CPU hardware. \\
 
 \subsubsection{TPM}
 \label{sec:20:tpm}
@@ -80,7 +80,7 @@ To separate the state between the host system and the TPM, the TPM is
 implemented using dedicated hardware, such as processor, RAM, ROM, and Flash
 memory, all physically protected from the host system. Other means of physical
 separation can be used to implement TPM services, such as unique processor modes
-with dedicated memory access rights.
+with dedicated memory access rights. \\
 
 Currently, two versions of TPM are specified. The first family of TPM is widely
 used and employs version 1.2. One major drawback of version 1.2 was the required
@@ -94,7 +94,7 @@ not implemented as a dedicated hardware module but rather as a so-called
 firmware TPM. The firmware TPM is part of the Intel Platform Trust Technology
 (Intel PTT) on Intel platforms. AMD platforms use an implementation called fTPM,
 which is integrated within the platform security
-processor.\cite{pirker2024brief}
+processor.\cite{pirker2024brief} \\
 
 TPMs offer different features that can be used to establish a trusted execution
 platform. For example, TPM offers a save random number generator. Moreover, a
@@ -106,7 +106,7 @@ hash. This hash is stored in a PCR and can then be read by a user to compare the
 values with the expected ones. Registers 0 to 7 are reserved for use by the TPM,
 and the user or the operating system can freely use the remaining registers. A
 TPM offers at least 16 PCRs. A TPM can sign and attest to the value of some
-internal TPM data.
+internal TPM data. \\
 
 \subsubsection{Intel SGX}
 \label{sec:20:sgx}
@@ -116,7 +116,7 @@ Intel first shipped SGX in 2015, with processors implementing the Skylake
 microarchitecture. While server-grade CPUs are still implementing SGX, Intel
 marked SGX was deprecated in 2021 in consumer-grade CPUs, beginning from CPUs
 implementing the Rocket Lake microarchitecture. Costan et al. did an extensive
-review of SGX in 2016.\cite{costan2016intel}
+review of SGX in 2016.\cite{costan2016intel} \\
 
 Features of SGX include the creation of so-called enclaves. Enclaves are
 especially access-protected and encrypted system memory regions, with SGX
@@ -137,13 +137,13 @@ enclave's memory, only parts of the data were handed to enclaves. Again,
 communications between the enclave and user applications use special CPU
 instructions. In cases where applications are split into parts residing in and
 outside of the enclave, an application might want to verify the identity before
-sharing secrets. For this, SGX implements so-called local attestation.
+sharing secrets. For this, SGX implements so-called local attestation.\\
 
 As mentioned, SGX implements processor instructions dedicated to managing and
 interacting with enclaves. Furthermore, SGX implementations create at least a
 so-called Launch Enclave signed by Intel. The Launch Enclave is a requirement
 for the successful initialization of enclaves, which Intel does not provide. It
-is necessary in all cases when SGX is used.
+is necessary in all cases when SGX is used.\\
 
 To implement software attestation, SGX uses a second enclave provided by Intel,
 the so-called Quoting Enclave. The quoting enclave is used to verify the state
@@ -155,7 +155,7 @@ enclave. The generated report structure is handed to the quoting enclave for
 remote attestation. The quoting enclave then uses private keys to sign the
 report to attest that the report was indeed generated from the enclave in
 question. A remote party can check the quoting enclave's signature to verify the
-enclave's state and identity.
+enclave's state and identity.\\
 
 \subsubsection{Confidential VM Extensions}
 \label{section:20:confidential_vms}
@@ -171,7 +171,7 @@ implementation. Additionally, to interact with a confidential VM, the CPU must
 be in the dedicated CPU operation mode called SEAM mode. Memory access is only
 allowed in SEAM mode to protect confidential VMs. Once in SEAM mode, the CPU
 uses its VMX capabilities to host and interact with the VM. For cryptographical
-features, Intel processors utilize the Intel Trusted Execution Engine.
+features, Intel processors utilize the Intel Trusted Execution Engine.\\
 
 For SEV-SNP, AMD uses the already implemented SEV capabilities. Unlike Intel's
 implementation, AMD processors do not utilize a dedicated CPU mode but extend
@@ -180,7 +180,7 @@ cryptography, the integrated AMD Platform Security Processor, short PSP, is
 used. Both solutions encrypt the VM's memory to protect the VM from being
 manipulated by system software. While in Intel's implementation, each VM is
 encrypted separately, AMD's implementation encrypts, once activated, the whole
-memory.
+memory.\\
 
 Both solutions use the trustee's knowledge of the initial state of the VM image.
 The assumption that the approach follows is that if the VM is started in a known
@@ -193,7 +193,7 @@ requests the cryptographical hardware to sign a report. The signed report is
 then handed to the trustee. The trustee trusts the implementation in the CPU and
 verifies the signature of the CPU signed report. With this, the trustee knows if
 the VM images were expected. In the following, both the trustee and the VM
-exchange keys for further communication.
+exchange keys for further communication.\\
 
 \subsubsection{ARM TrustZone}
 \label{sec:20:trustzone}
@@ -220,7 +220,7 @@ Changing between worlds can be done synchronously using the dedicated SMC
 instruction also triggers an interrupt. These interrupts are served by invoking
 the SM, which decides upon its configuration if the interrupt received serves as
 an entry point to the secure world. If so, the Secure Monitor invokes secure
-world code to serve the interrupt.
+world code to serve the interrupt.\\
 
 ARM TrustZone does not implement remote attestation in hardware. Such
 functionality has to be implemented by the code running in the Secure World. TEE
@@ -232,7 +232,8 @@ be responsible for isolating services running in the Secure World against each
 other because applications running in the Secure World are not isolated from
 other applications in the Secure World by hardware. Using a trusted OS brings
 the downside of an increased trusted computing base compared to a bare metal
-trusted application. TrustZone does not encrypt the memory of the secure world.
+trusted application. TrustZone does not encrypt the memory of the secure
+world.\\
 
 \subsection{Security of Hardware Solutions}
 All hardware solutions isolate critical functions to protect them from being
@@ -260,7 +261,7 @@ hard to compare the TCB. Nevertheless, in the x86, the whole SoC implementation
 is manufactured by the same vendor, which the user ultimately has to trust.
 Contrary to this, in the ARM world, the user would have to trust the SoC
 manufacturer and the vendors of the Bootloader, firmware, and secure world
-application.
+application.\\
 
 \subsection{Software Enhancements}
 In this section we will review solutions that do implement TEE functionality or
@@ -292,7 +293,7 @@ kernel, Sigma0, which manages memory, and moe, which is responsible for loading
 applications. The kernel ensures that only applications with proper rights can
 access their respective memory. It vigorously enforces isolation between threads
 and applications. Enma uses these properties to create isolated enclaves in
-which programs can execute isolated.
+which programs can execute isolated.\\
 
 Enma follows the same approach as SGX for implementing remote attestation. Enma
 hosts a quoting enclave that sings reports to verify the state of an enclave.
@@ -323,7 +324,7 @@ untrusted hypervisor.\cite{tdx_whitepaper,kaplan_amd_2020} This untrusted
 hypervisor could mount Iago attacks similar to malicious kernels. The WeSee
 attack on AMD SEV-SNP, published by Schlüter et al. in 2024, shows that such an
 attack is possible on AMD SEV-SNP by injecting specific interrupts into the
-confidential VM.\cite{schluter2024wesee}
+confidential VM.\cite{schluter2024wesee}\\
 
 Arnautov et al. and Baumann et al. published two potential countermeasures
 against Iago attacks in 2016 and 2015, SCONE and Haven, respectively. SCONE aims
@@ -382,7 +383,7 @@ dirty bits of pages. System software thus can single-step the enclave or VM with
 a high enough frequency of malicious interrupts at instruction level
 granularity. Attacks that utilize interrupts to learn about the state of trusted
 execution environments exist for Intel SGX, ARM TrustZone, and AMD
-SEV.\cite{van2017sgx, kou2021load, wilke2023sev}
+SEV.\cite{van2017sgx, kou2021load, wilke2023sev}\\
 
 To defend against interrupt-based side-channel attacks, Cui et al. proposed a
 defense solution in 2023 that they call QuanShield.\cite{cui_quanshield_2023}
@@ -404,7 +405,7 @@ switches, e.g., when stopping to execute enclave code. QuanShield stores
 non-canonical memory addresses in these unused parts. Once the control returns,
 the enclave code uses one of these non-canonical addresses, which results in a
 CPU exception and leads to the termination of the enclave, effectively stopping
-the attack.
+the attack.\\
 
 QuanShield uses code instrumentation to make the enclave use one of the
 manipulated addresses. For this, the authors added code to the LLVM compiler.
@@ -426,7 +427,7 @@ transient execution side-channel attacks abuses the speculative execution
 feature of modern CPU and defines an entirely new class of attacks. Furthermore,
 they are the first class of attacks that abuse microarchitectural bugs. We will
 review this class of attacks in more detail as we aim to implement a TEE that
-can defend against such an attack.
+can defend against such an attack.\\
 
 Modern CPUs use speculative execution to hide memory latencies. If, for example,
 the control flow forks, the decision of which path to take often depends on a
@@ -439,7 +440,7 @@ likely path. If the value arrives from the main memory, the CPU checks its
 decision and corrects its mistake, if any, to take the correct path. Overall,
 speculative execution can lead to a huge performance increase. Older
 publications see a performance increase from 27\% up to
-87\%.\cite{espasa1997out, mock2005empirical}
+87\%.\cite{espasa1997out, mock2005empirical}\\
 
 In some cases, the decision about what path to precalculate is wrong. For
 performance reasons, the CPU does not revert its microarchitectural state, like
@@ -475,7 +476,7 @@ published in the last since 2023.
 \cite{ormandy2023zenbleed,trujillo2023inception, moghimi2023downfall,ragab_ghostrace_2024, wilke2024tdxdown}
 TEE solutions are affected, too, because these attacks enable attackers to read
 arbitrary memory. The problem persists, and no solution exists to mitigate
-transient execution attacks in general.
+transient execution attacks in general.\\
 
 Another approach for systems to defend against side-channel attacks, in general,
 is active detection of the attack and reacting appropriately. Quanshield
