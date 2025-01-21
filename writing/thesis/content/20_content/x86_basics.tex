@@ -1,55 +1,52 @@
 \section{Technical Background}
 \label{sec:state:technical}
 This chapter will give us an overview of important mechanisms used by modern
-CPUs. While there are other widely used architectures, such as ARM on
-mobile devices, we will explore these features in the example of the x86\_64
+CPUs. While there are other widely used architectures, such as ARM on mobile
+devices, we will explore these features in the example of the x86\_64
 architecture. \\
 
-We decided to do so because our proof of concept implementation will target
-the x86\_64 architecture. Moreover, behavior and implementations of similar
-concepts can differ between \gls{isa} (\acrshort{a_isa}) and even
-implementations of the same \acrshort{a_isa} on the microarchitectural plane.
-We will, therefore, note differences in implementations of x86\_64 whenever
-appropriate. Until then, we will stick to the general behavior described in
-the AMD64 specification so that the Intel 64-bit extensions are largely
-compatible.
+We decided to do so because our proof of concept implementation will target the
+x86\_64 architecture. Moreover, behavior and implementations of similar concepts
+can differ between \gls{isa} (\acrshort{a_isa}) and even implementations of the
+same \acrshort{a_isa} on the microarchitectural plane. We will, therefore, note
+differences in implementations of x86\_64 whenever appropriate. Until then, we
+will stick to the general behavior described in the AMD64 specification so that
+the Intel 64-bit extensions are largely compatible.
 
 \subsection{Operation Modes}
 \label{sec:state:technical:modes}
-The x86 architecture is rooted in the Intel 8086, designed in 1978. As
-a 16-bit microprocessor design, the Intel 8086 physically can only address 64
-KiB of memory. To overcome this limitation, Intel introduced a
-segmentation-based addressing mode that, together with the 20-bit address bus,
-allowed the CPU to address slightly more than 1 MiB of main memory. Intel 8086
-missed features such as memory protection, code privileges, and multitasking.
-These features were important to allow advanced operating systems. These
-features extended the instruction set and microarchitecture
-implemented by the Intel 80286. The Intel 80286 could address, for example,
-16 MiB of physical memory through 24 address bus bits and could address 1 GiB of
-virtual memory. Moreover, segment registers now contain an index in a
-data structure called \gls{gdt}, short \acrshort{a_gdt}.
-The \acrshort{a_gdt} contains descriptors that store information on segments,
-such as base address and access rights. The Intel 80286 implements access rights
-as so-called rings, and the lower the numerical access level, the higher the
-privileges of the executing software are. The introduction of the
-\acrshort{a_gdt} allowed virtual memory implementation with memory protection.
-A new \gls{mmu}, short \acrshort{a_mmu}, added for the first time on chip in
-the 80286 allowed fast virtual to physical address translation. \\
+The x86 architecture is rooted in the Intel 8086, designed in 1978. As a 16-bit
+microprocessor design, the Intel 8086 physically can only address 64 KiB of
+memory. To overcome this limitation, Intel introduced a segmentation-based
+addressing mode that, together with the 20-bit address bus, allowed the CPU to
+address slightly more than 1 MiB of main memory. Intel 8086 missed features such
+as memory protection, code privileges, and multitasking. These features were
+important to allow advanced operating systems. These features extended the
+instruction set and microarchitecture implemented by the Intel 80286. The Intel
+80286 could address, for example, 16 MiB of physical memory through 24 address
+bus bits and could address 1 GiB of virtual memory. Moreover, segment registers
+now contain an index in a data structure called \gls{gdt}, short
+\acrshort{a_gdt}. The \acrshort{a_gdt} contains descriptors that store
+information on segments, such as base address and access rights. The Intel 80286
+implements access rights as so-called rings, and the lower the numerical access
+level, the higher the privileges of the executing software are. The introduction
+of the \acrshort{a_gdt} allowed virtual memory implementation with memory
+protection. A new \gls{mmu}, short \acrshort{a_mmu}, added for the first time on
+chip in the 80286 allowed fast virtual to physical address translation. \\
 
-When using the features newly added to the 80286
-the processor was incompatible with the original Intel 8086. Because the result
-would have been that all software already existing for the Intel 8086 would have
-been to at least be recompiled to run on the Intel 80286, Intel designed the new
-features as an extension to the older 8086. Deactivating these new features
-allowed the Intel 80286 to run programs written for the 8086. For this, Intel
-introduced two operation modes in the 80286. The operation mode offering
-compatibility was called \textbf{\gls{rmode}} because the address
-calculation in the 8086 always yielded real physical addresses. Because the new
-80286 offered memory protection, the mode was called \textbf{\gls{pmode}}. To
-maintain compatibility with the Intel 8086, the 80286 first boots in
-\gls{rmode}, as all successors of the 80286 do. On startup, the code for
-entering other operation modes must, therefore, reside in the first MiB of
-memory. \\
+When using the features newly added to the 80286 the processor was incompatible
+with the original Intel 8086. Because the result would have been that all
+software already existing for the Intel 8086 would have been to at least be
+recompiled to run on the Intel 80286, Intel designed the new features as an
+extension to the older 8086. Deactivating these new features allowed the Intel
+80286 to run programs written for the 8086. For this, Intel introduced two
+operation modes in the 80286. The operation mode offering compatibility was
+called \textbf{\gls{rmode}} because the address calculation in the 8086 always
+yielded real physical addresses. Because the new 80286 offered memory
+protection, the mode was called \textbf{\gls{pmode}}. To maintain compatibility
+with the Intel 8086, the 80286 first boots in \gls{rmode}, as all successors of
+the 80286 do. On startup, the code for entering other operation modes must,
+therefore, reside in the first MiB of memory. \\
 
 The successor of the Intel 80286, the Intel 80386 extended the architecture to
 32-bit and introduced paging to the architecture, allowing paged virtual memory
@@ -67,30 +64,30 @@ or IA-32.\\
 
 Successors of the 80386 added support for optional floating point units and
 \acrshort{a_simd} extensions to the architecture but left the fundamental
-\acrshort{a_isa} unchanged. It was not until the year 2000 that AMD released
-its extensions of the x86 architecture to 64 bit that introduced a new processor
+\acrshort{a_isa} unchanged. It was not until the year 2000 that AMD released its
+extensions of the x86 architecture to 64 bit that introduced a new processor
 operation mode called \textbf{\gls{lmode}} and two sub modes called
 \textbf{Compatibility Mode} and \textbf{64-Bit mode}. This extension by AMD to
 the x86 \acrshort{a_isa} was first called AMD64 and later largely adopted by
-Intel as Intel 64. Today it is also known by the name x86\_64.
-Compatibility mode allows the execution of legacy 32-bit and 16-bit code.
-64-bit mode extends the \acrshort{a_isa} by 64-bit operands and addresses, and
-extends all general purpose registers to 64-bit. Moreover, the 64-bit mode
-adds eight additional general-purpose registers and allows instruction pointer
-relative addressing. x86 allowed the latter only in control transfer
-instructions. AMD64 implements floating-point arithmetic through the mandatory
-SSE2 \acrshort{a_simd} extension that was introduced to x86 in 2000 with the Intel
-Pentium 4 processor. The number of SSE2 registers is doubled compared to the
-number in the original x86 extension. Moreover, to allow differentiating between
-x86 and AMD64 registers, AMD added the REX prefix to the specification. As a
-result, general purpose registers are prefixed with the letter ''R''. For
-example, the instruction pointer registers of x86 (IP) becomes RIP. The number
-of page table levels to translate virtual to physical addresses was increased
-from two to at least four.\\
+Intel as Intel 64. Today it is also known by the name x86\_64. Compatibility
+mode allows the execution of legacy 32-bit and 16-bit code. 64-bit mode extends
+the \acrshort{a_isa} by 64-bit operands and addresses, and extends all general
+purpose registers to 64-bit. Moreover, the 64-bit mode adds eight additional
+general-purpose registers and allows instruction pointer relative addressing.
+x86 allowed the latter only in control transfer instructions. AMD64 implements
+floating-point arithmetic through the mandatory SSE2 \acrshort{a_simd} extension
+that was introduced to x86 in 2000 with the Intel Pentium 4 processor. The
+number of SSE2 registers is doubled compared to the number in the original x86
+extension. Moreover, to allow differentiating between x86 and AMD64 registers,
+AMD added the REX prefix to the specification. As a result, general purpose
+registers are prefixed with the letter ''R''. For example, the instruction
+pointer registers of x86 (IP) becomes RIP. The number of page table levels to
+translate virtual to physical addresses was increased from two to at least
+four.\\
 
-Unless otherwise stated, all references we make to \gls{lmode} in
-the remaining parts of this thesis mean the combination of both sub-modes and
-therefore the whole extension implemented by AMD64.
+Unless otherwise stated, all references we make to \gls{lmode} in the remaining
+parts of this thesis mean the combination of both sub-modes and therefore the
+whole extension implemented by AMD64.
 
 \subsection{Interrupts and Exceptions}
 \label{sec:state:technical:interrupts}
@@ -108,10 +105,10 @@ Exceptions can be divided into three types:
 Interrupts, on the other hand, can be divided into two classes:
 \begin{enumerate}
     \item Maskable Interrupts: Can be masked. Masking an interrupt means that
-          software can temporarily disable them. The interrupt controller
-          holds them back until interrupts are enabled again.
-    \item \Gls{nmi}~(\acrshort{a_nmi}): Software cannot
-          turn off \acrshort{a_nmi}s. The interrupt controller delivers~
+          software can temporarily disable them. The interrupt controller holds
+          them back until interrupts are enabled again.
+    \item \Gls{nmi}~(\acrshort{a_nmi}): Software cannot turn off
+          \acrshort{a_nmi}s. The interrupt controller delivers~
           \acrshort{a_nmi}s to the CPU unless it currently serves another~
           \acrshort{a_nmi}. When the CPU executes the IRET instruction in the
           interrupt handler, the interrupt controller can deliver the next~
@@ -140,7 +137,8 @@ the serving routine is done, before it can receive the next interrupt. \\
 \begin{figure}
     \begin{center}
         \includegraphics[width=.6\textwidth]{images/lapic_placeholder.png}
-        \caption{Illustration of how \acrshort{a_lapic}s integrate in a multiprocessor system}
+        \caption{Illustration of how \acrshort{a_lapic}s integrate in a
+            multiprocessor system}
         \label{fig:state:technical:lapic}
     \end{center}
 \end{figure}
@@ -148,20 +146,21 @@ the serving routine is done, before it can receive the next interrupt. \\
 
 Intel later introduced the advanced programmable interrupt controller, short
 APIC with its 486 processor line to allow the system to operate with multiple
-CPUs. In modern CPUs, multiprocessor configurations are prevalent, and each processor
-core has its own APIC. Because the APIC is CPU local, these APICs are called
-local APICs or \gls{lapic}, short \acrshort{a_lapic}. \acrshort{a_lapic}s forward
-interrupts from different sources to the respective CPU core. For example, the
-\gls{lapic} receives interrupts such as \gls{ipi} (\acrshort{a_ipi}) from other
-\acrshort{a_lapic}s, interrupts from devices connected to the IOAPIC, and legacy
-interrupts from the PIC. Figure~\ref{fig:state:technical:lapic} shows a
-schematic view on how the LAPIC of each CPU core integrates into the system.
-System software must change the CPU to \gls{pmode} to
-activate the \acrshort{lapic} system. After changing to \gls{pmode}, system
-software must write a valid address to the APIC base address register. All APIC
-registers are then mapped to the 4-KiB APIC register space starting at the
-address specified in APIC base address register. System software can then access
-APIC registers with memory reads and writes to the APIC register space.
+CPUs. In modern CPUs, multiprocessor configurations are prevalent, and each
+processor core has its own APIC. Because the APIC is CPU local, these APICs are
+called local APICs or \gls{lapic}, short \acrshort{a_lapic}. \acrshort{a_lapic}s
+forward interrupts from different sources to the respective CPU core. For
+example, the \gls{lapic} receives interrupts such as \gls{ipi}
+(\acrshort{a_ipi}) from other \acrshort{a_lapic}s, interrupts from devices
+connected to the IOAPIC, and legacy interrupts from the PIC.
+Figure~\ref{fig:state:technical:lapic} shows a schematic view on how the LAPIC
+of each CPU core integrates into the system. System software must change the CPU
+to \gls{pmode} to activate the \acrshort{lapic} system. After changing to
+\gls{pmode}, system software must write a valid address to the APIC base address
+register. All APIC registers are then mapped to the 4-KiB APIC register space
+starting at the address specified in APIC base address register. System software
+can then access APIC registers with memory reads and writes to the APIC register
+space.
 
 \subsection{Caches}
 \label{sec:state:technical:caches}
@@ -238,27 +237,27 @@ can, therefore, gain performance by storing recently used data in the cache for
 reuse.\\
 
 Modern caches are still small compared to the size of the main memory. For
-example, CPUs of the recent AMD Zen 5 microarchitecture have an L1
-cache size of 92 KiB (data and instruction combined) and 32 MiB of L3 cache
-shared between the cores, from which eight physically exist on the same chiplet.
-The same CPU supports 128 GiB of main memory, which is seven orders of magnitude
-larger than the L1 and 4 orders of magnitude larger than the L3 cache.\todo{cite amd zen five paper (When writing this SLUB Shibboleth was broken...)}
-Caches, therefore, can not buffer the content of the whole main memory and need
-strategies for their management. For example, CPUs of the Nehalem
-microarchitecture use a pseudo least recently used (LRU) strategy to manage
-their cache's content.\cite{hennessy2011computer} With this, cache lines are
-marked as frequently or less frequently used. The least frequently used lines
-are evicted from the cache and replaced by the newly cached data. Evicted
-lines are moved one level up in the hierarchy. Other management strategies are
-the least frequently used (LFU) or a first-in-first-out (FIFO) policy. Next to
-eviction strategies, different strategies for writing data back to main memory
-exist:
+example, CPUs of the recent AMD Zen 5 microarchitecture have an L1 cache size of
+92 KiB (data and instruction combined) and 32 MiB of L3 cache shared between the
+cores, from which eight physically exist on the same chiplet. The same CPU
+supports 128 GiB of main memory, which is seven orders of magnitude larger than
+the L1 and 4 orders of magnitude larger than the L3 cache.\todo{cite amd zen
+    five paper (When writing this SLUB Shibboleth was broken...)} Caches, therefore,
+can not buffer the content of the whole main memory and need strategies for
+their management. For example, CPUs of the Nehalem microarchitecture use a
+pseudo least recently used (LRU) strategy to manage their cache's
+content.\cite{hennessy2011computer} With this, cache lines are marked as
+frequently or less frequently used. The least frequently used lines are evicted
+from the cache and replaced by the newly cached data. Evicted lines are moved
+one level up in the hierarchy. Other management strategies are the least
+frequently used (LFU) or a first-in-first-out (FIFO) policy. Next to eviction
+strategies, different strategies for writing data back to main memory exist:
 \begin{itemize}
-    \item \textbf{write-back}: Data modified in the cache is stored and
-          written back to the main memory later. Until cache and main memory are
+    \item \textbf{write-back}: Data modified in the cache is stored and written
+          back to the main memory later. Until cache and main memory are
           synchronized, the region in main memory is marked as dirty through a
-          dedicated status bit. Cache coherency protocols are required to
-          allow multiple devices to access the same memory range.
+          dedicated status bit. Cache coherency protocols are required to allow
+          multiple devices to access the same memory range.
     \item \textbf{write-through}: The Changes in the cache are instantly written
           to the main memory. These writes can slow down program execution
           because of costly main memory writes.
@@ -328,23 +327,22 @@ instruction. \\
 In x86 hardware, Performance counters are implemented by a set of two \gls{msr}s
 (\acrshort{a_msr}) per counter. One \acrshort{a_msr} can be programmed by system
 software with the event to measure, while a second \acrshort{a_msr} counts the
-occurrence of
-the respective event. As noted, programming has to be done by system software
-with elevated privileges. Reading \acrlong{a_pmc}s can be done
-with privileged instruction or from user space with the RDPMC instruction.
-In this way, a program can poll the values of counters. The system software
-can also program a threshold for a \gls{pmi}, short \acrshort{a_pmi}.
-Once the \acrshort{a_pmc} values exceed the threshold, the \acrshort{a_pmi} is
-triggered, offering an alternative to expensive polling techniques.\\
+occurrence of the respective event. As noted, programming has to be done by
+system software with elevated privileges. Reading \acrlong{a_pmc}s can be done
+with privileged instruction or from user space with the RDPMC instruction. In
+this way, a program can poll the values of counters. The system software can
+also program a threshold for a \gls{pmi}, short \acrshort{a_pmi}. Once the
+\acrshort{a_pmc} values exceed the threshold, the \acrshort{a_pmi} is triggered,
+offering an alternative to expensive polling techniques.\\
 
-When we use hardware \acrshort{a_pmc}, we must use the proper
-technique adopted to the environment in which we read the counter values. Das et
-al. found in a comprehensive survey that noise from the system is often present,
-e.g. context switches influence the values of performance counters.
-\cite{das_sok_2019} Moreover, some counter events are over-counted while the CPU
-can undercount others.\cite{weaver_non-determinism_2013} It is therefore
-important to check the right conditions for using hardware counters and verify
-that they work correctly.
+When we use hardware \acrshort{a_pmc}, we must use the proper technique adopted
+to the environment in which we read the counter values. Das et al. found in a
+comprehensive survey that noise from the system is often present, e.g. context
+switches influence the values of performance counters. \cite{das_sok_2019}
+Moreover, some counter events are over-counted while the CPU can undercount
+others.\cite{weaver_non-determinism_2013} It is therefore important to check the
+right conditions for using hardware counters and verify that they work
+correctly.
 
 \subsection{Paging}
 \label{sec:state:technical:paging}
@@ -365,8 +363,8 @@ software creates a virtual memory address and hands it to the program. System
 software decides through its mapping implementation, through which physical
 memory the respective virtual memory is backed. Virtual memory, therefore,
 allows system software to decide if a given virtual address is backed by main
-memory or to move it to secondary memory, such as disk storage. Moreover, two
-or more virtual addresses can be mapped to the same physical memory, allowing
+memory or to move it to secondary memory, such as disk storage. Moreover, two or
+more virtual addresses can be mapped to the same physical memory, allowing
 efficient use of shared program libraries. Mapping happens transparently to the
 program, which means that the program does not have to worry about what memory
 is used to back its virtual memory physically.\\
