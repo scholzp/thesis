@@ -1,46 +1,76 @@
 \section{Trusted Execution Environments}
 \label{sec:state:tee}
-% \begin{figure}
-%     \begin{tikzpicture}
-%         \draw (1,0) -- (0,0) -- (0,1) -- cycle;
-%     \end{tikzpicture}
-%     \caption{Tikz test}
-% \end{figure}
 
-Suppose we are the developers of the messenger Signal. While we aim to implement
-a mechanism for automatic contact discovery, we also want to follow our claims
-to ensure the privacy of communication for our users. This is because we do not
-want to learn who is communicating with whom, nor do we want to learn about the
-communication itself.
+GlobalPlatform first used the term trusted execution environment to define a
+solution for mobile trusted computing solutions.\cite{globaltee} Since then,
+many definitions inconsistent and unspecific definitions have been published for
+TEEs until the first precise definition was proposed by Sabt
+et.al.\cite{sabt2015trusted}. They define the TEE in the following way:
+\begin{quote}
+    \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
+        environment that runs on a separation kernel. It guarantees the authenticity of
+        the executed code, the integrity of the runtime states (e.g., CPU registers,
+        memory, and sensitive I/O), and the confidentiality of its code, data, and
+        runtime states are stored on persistent memory. In addition, it shall be able
+        to provide a remote attestation that proves its trustworthiness for third
+        parties. The content of TEE is not static; it can be securely updated. The TEE
+        resists all software attacks as well as physical attacks performed on the
+        system's main memory. Attacks performed by exploiting backdoor security flaws
+        are not possible. \\
+    } \mbox{ -- Sabt et al.\cite{sabt2015trusted}}
+\end{quote}
 
-While we could encrypt our users' phonebooks before uploading them to our
-servers for processing, encryption alone is not enough to fulfill our privacy
-claims. For example, through encryption alone, the user is not able to verify
-that they are communicating with a Signal server. While this problem could be
-solved with cryptographic signatures, the user is still not able to verify that
-the server application is the expected one. For example, if the Signal
-Foundation was malicious, it could install an application designed to spy on the
-communication. In another scenario, the Signal server application could fall
-victim to malicious privileged entities. Maintenance personnel with access to
-the server hardware could tap the memory bus. Privileged software, such as
-operating systems or hypervisors, could manipulate the memory of the server
-application in a way that leaks information or simply reads the memory
-containing all secrets. It is, therefore, necessary to protect not only the
-communication channels between user and server but also the integrity and
-confidentiality of the server application. Moreover, the user should be able to
-verify these claims on the server application.
+The first half of the definition describes a secure execution environment. A
+secure execution environment can protect the integrity, authenticity, and
+confidentiality of the application hosted by the SEE. Malicious privileged
+software is thus neither able to modify the code, tamper with the runtime state,
+nor observe code and data through the runtime. Contrary to TEEs, a SEE cannot
+prove these claims against an appraisal, lest a third party outside the system.
+This is because it does not require a root of trust to present in the system. To
+prove its trustworthiness, TEEs employ remote attestation.\\
 
-The latter is the goal of remote attestation, a feature offered by many Trusted
-Execution Environments to verify that software is executed as intended and that
-no information leak is possible. For TEEs to work, a system must contain a
-so-called hardware root of trust. A hardware root of trust is a device that is
-self-protecting on the hardware level, unable to be modified even by privileged
-software, and often implementing cryptographic functions. Different solutions
-exist to implement the functionality of Trusted Execution Environments. The
-following section will give us an overview of these solutions.
-\todo{rewrite entire TEE section; Now duplicates with intro}
+Trusted execution environment consists of several building blocks. The first
+building block Sabt et al. propose is a secure boot. This building block allows
+TEEs are used to verify that only a specific code of a particular state is
+loaded. For a secure boot, a chain of trust is formed by verifying each
+component's state. To generalize the secure boot requirement, a TEE must be
+capable of verifying what code it loads to the environment. The second building
+block is secure scheduling. Task executing in the TEE should not be able to
+disrupt the main OS. Moreover, a TEE should implement means to allow
+communication between the insecure world outside the TEE and the application
+executing inside of it. Secure storage is one more building block. It allows the
+application in the TEE to store data in a confidentiality, integrity, and
+freshness-conserving way. Trusted I/O paths secure the communication between a
+TEE and its users.
 
-\todo{Explain measurements, how the majority implements RA}
+\subsection{Remote attestation}Remote attestation proves claims about a target
+by delivering evidence to an appraiser over a network that supports these
+claims. Before we further proceed to explain remote attestation, we want to
+define the following terms similar to Coker et. al.\cite{coker_principles_2011}
+\begin{itemize}
+    \item \textbf{Appraiser}: Member of a network. Makes decisions about other
+          parties on the base of delivered evidence.
+    \item \textbf{Target}: Member of a network. Party about which properties the
+          appraiser makes decisions.
+    \item \textbf{Attestation}: Action of making claims about the target and
+          delivering supportive evidence.
+    \item \textbf{Measurement}: Collect evidence through direct and local
+          observation
+    \item \textbf{Attestation protocol}: Cryptographic protocol transmitting
+          evidence about the claim. Trusted by appraiser
+\end{itemize}
+
+The appraiser and the target both follow orthogonal goals. While the appraiser
+ideally wants to get as much information as possible about the target, the
+target wants to preserve its privacy as well as possible and, therefore, conceal
+as much information as possible. Both goals can be realized by employing a
+trusted third party local to the target who can measure the target. This
+third-party party then sends a signed report of the evidence on behalf of the
+target. This report can contain the full raw measurement result, a reduced
+variant, or a complete measurement substitute. For example, the reduced
+measurement could be from a hash of the raw data. The substitute could be a
+signature associated with the trusted third party that verifies that the target
+fulfills the claims.
 
 \subsection{Hardware Root of Trust}
 \label{sec:20:hardware_root_of_trust}
