@@ -266,10 +266,10 @@ strategies, different strategies for writing data back to main memory exist:
 \end{itemize}
 Legacy x86 control cache settings with configuration bits in the control
 register CR0. In modern x86\_64 processors, systems software sets the write-back
-strategy on page granularity (c.f.~\ref{sec:state:technical:paging}). X86\_64
-processors ignore the write-through setting and use the page-level settings
-instead. \cite{amd_manual} The default in x86\_64 processors ist to use a
-write-back strategy. For this, processors implement coherency protocols. A
+strategy on page granularity (c.f. Chapter~\ref{sec:state:technical:paging}).
+X86\_64 processors ignore the write-through setting and use the page-level
+settings instead. \cite{amd_manual} The default in x86\_64 processors ist to use
+a write-back strategy. For this, processors implement coherency protocols. A
 widely used coherency protocol is called MESI. MESI is an acronym of the four
 states "modified," "exclusive," "shared," and "invalid." An extension to MESI is
 MOESI protocol, which additionally introduces the "owned" state. The states of a
@@ -385,10 +385,10 @@ organized. Each page table forms a level in the table hierarchy and is the size
 of one page, storing references (addresses) to the next lower level. The last
 page table in this hierarchy stores the address of the physical page frame. By
 default, x86\_64 uses pages of size 4 KiB. Because x86\_64 uses 64-bit
-addresses, each page table can store 512 entries. Figure
-~\ref{fig:state:technical:paging}~shows the page translation of a virtual 64-bit
-address in x86\_64 with a page table hierarchy of four levels and a page size of
-4 KiB. \\
+addresses, each page table can store 512 entries.
+Figure~\ref{fig:state:technical:paging} shows the page translation of a virtual
+64-bit address in x86\_64 with a page table hierarchy of four levels and a page
+size of 4 KiB. \\
 
 The virtual address is divided into a 12-bit field used as an index in the
 physical page and four 9-bit fields, which the hardware uses as an index to

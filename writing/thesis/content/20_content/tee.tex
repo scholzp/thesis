@@ -48,8 +48,7 @@ A root of trust is defined by the Trusted Computing Group as follows:
 \begin{quote}
     \textit{ A minimal set of system elements that have to be trusted because
         misbehavior is not detectable. \\
-    }
-    \mbox{ -- Trusted Computing Group\cite{tpm_architecture}}
+    } \mbox{ -- Trusted Computing Group\cite{tpm_architecture}}
 \end{quote}
 
 The Trusted Computing Group specifies that a hardware root of trust must be
@@ -271,18 +270,17 @@ inspiration to my work.
 \subsubsection{Enma}
 \label{sec:20:enma}
 Enma is short for Enclave Manager and is a software solution to implement TEEs
-for the L4Re operating system framework. \cite{reitz_isolierende_2019}
-L4Re uses the Fiasco.OC microkernel that is part of the L4 microkernel family.
-The microkernel approach aims for minimized code to run in the supervisor mode.
-The creator of L4 defined the concept of microkernels as follows:
+for the L4Re operating system framework. \cite{reitz_isolierende_2019} L4Re uses
+the Fiasco.OC microkernel that is part of the L4 microkernel family. The
+microkernel approach aims for minimized code to run in the supervisor mode. The
+creator of L4 defined the concept of microkernels as follows:
 
 \begin{quote}
     \textit{ More precisely, a concept is tolerated inside the \mu-kernel only
         if moving it outside the kernel, i.e., permitting competing
         implementations, would prevent the implementation of the system's
         required functionality. \\
-    }
-    \mbox{ -- Liedke\cite{liedtke1995micro}}
+    } \mbox{ -- Liedke\cite{liedtke1995micro}}
 \end{quote}
 
 
