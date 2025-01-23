@@ -4,6 +4,7 @@
 
 { kernel
 , initrd
+, start_address
 , writeShellScript
 , qemu
 }:
@@ -19,7 +20,7 @@ writeShellScript "run_qemu_demo" ''
     -cpu host \
     -accel kvm \
     -smp 4 \
-    -append "nr_cpus=3 console=ttyS0 memmap=4K!900K" \
+    -append "nr_cpus=3 console=ttyS0 memmap=4K!${start_address}K" \
     -initrd ${initrdPath} \
     -serial stdio \
     -m 512M \
