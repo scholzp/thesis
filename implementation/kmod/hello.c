@@ -1,16 +1,23 @@
 #include <linux/module.h>	/* Needed by all modules */
 #include <linux/kernel.h>	/* Needed for KERN_INFO */
+#include <linux/fs.h>
+#include <asm/e820/api.h>
+#include <asm/uaccess.h>
+
+MODULE_LICENSE("GPL");
 
 void test(void);
+int get_bash_result(char *filename);
 
-
-MODULE_LICENSE("Proprietary");
+const size_t BOOTCODE_ADDRESS = START_ADDRESS * 1024;
 
 int init_module(void)
 {
-	printk(KERN_INFO "Hello world 1.\n");
+	
+	pr_info("***KMOD: Hello world 1.\n");
+	
 	test();
-
+	pr_info("***KMOD: Using address 0x%016lx\n", BOOTCODE_ADDRESS);
 	/* 
 	 * A non 0 return means init_module failed; module can't be loaded. 
 	 */

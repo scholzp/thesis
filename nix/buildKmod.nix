@@ -1,4 +1,4 @@
-{ lib, stdenv, kernel}:
+{ lib, stdenv, kernel, start_address}:
 stdenv.mkDerivation {
   pname = "kmod";
   version = "0.0.1";
@@ -15,6 +15,7 @@ stdenv.mkDerivation {
   makeFlags = [
     "KERNELDIR=${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
     "INSTALL_MOD_PATH=$(out)"
+    "START_ADDRESS=${start_address}"
   ];
 
   installTargets = [ "install" ];
