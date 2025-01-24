@@ -20,7 +20,7 @@ writeShellScript "run_qemu_demo" ''
     -cpu host \
     -accel kvm \
     -smp 4 \
-    -append "nr_cpus=3 console=ttyS0 memmap=4K!${start_address}K" \
+    -append "nr_cpus=3 console=ttyS0 memmap=4K!${start_address}K nox2apic loglevel=7" \
     -initrd ${initrdPath} \
     -serial stdio \
     -m 512M \
