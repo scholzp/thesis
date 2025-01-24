@@ -1,26 +1,113 @@
 #include <linux/module.h>	/* Needed by all modules */
 #include <linux/kernel.h>	/* Needed for KERN_INFO */
-#include <linux/fs.h>
-#include <asm/e820/api.h>
+#include <linux/smp.h>	/* Needed for KERN_INFO */
 #include <asm/uaccess.h>
+#include <asm/io.h>
+#include <asm/msr.h>
+#include <asm/smp.h>
+#include <asm/processor.h>
+#include <asm/delay.h>
 
 MODULE_LICENSE("GPL");
 
 void test(void);
 int get_bash_result(char *filename);
 
-const size_t BOOTCODE_ADDRESS = START_ADDRESS * 1024;
+const size_t AP_LOWMEM_ADDRESS = START_ADDRESS * 1024;
+// currently 1 page. TODO: Make this also use configurable from nix 
+const size_t AP_LOWMEM_SIZE = 4 * 1024;
+// APIC ID of the AP to use
+const u8 AP_ID = 3;
+
+unsigned char startup_o[] = {
+	// Make the AP print "1337 AP ALIVE\n", then halt
+	0xba, 0xf8, 0x03, 0xb8, 0x31, 0x00, 0xee, 0xb8, 0x33, 0x00,
+	0xee, 0xb8, 0x33, 0x00, 0xee, 0xb8, 0x37, 0x00, 0xee, 0xb8,
+	0x20, 0x00, 0xee, 0xb8, 0x41, 0x00, 0xee, 0xb8, 0x50, 0x00,
+	0xee, 0xb8, 0x20, 0x00, 0xee, 0xb8, 0x41, 0x00, 0xee, 0xb8,
+	0x4c, 0x00, 0xee, 0xb8, 0x49, 0x00, 0xee, 0xb8, 0x56, 0x00,
+	0xee, 0xb8, 0x45, 0x00, 0xee, 0xb8, 0x0a, 0x00, 0xee, 0xf4 
+};
+
+unsigned int startup_o_len = 60;
 
 int init_module(void)
 {
-	
+	void __iomem *lowmem_region;
+	unsigned int lowmem_offset = 0;
 	pr_info("***KMOD: Hello world 1.\n");
+
 	
 	test();
-	pr_info("***KMOD: Using address 0x%016lx\n", BOOTCODE_ADDRESS);
+	pr_info("***KMOD: Using address 0x%016lx\n", AP_LOWMEM_ADDRESS);
 	/* 
 	 * A non 0 return means init_module failed; module can't be loaded. 
 	 */
+
+	lowmem_region = ioremap(AP_LOWMEM_ADDRESS, AP_LOWMEM_SIZE);
+	while (lowmem_offset < startup_o_len) {
+		iowrite8(startup_o[lowmem_offset], lowmem_region + lowmem_offset);
+		++lowmem_offset;
+	}
+
+	// Activate the AP
+	{
+		// send INIT IPI via LAPIC. Does not work for x2APIC mode
+		u64 lapic_addr;
+		void __iomem *lapic_page;
+		unsigned long flags;
+		size_t num_startups = 0;
+		// int cpu;
+
+		//Disable Interrupts because the following better does not get
+		//interrupted...
+		local_irq_save(flags);
+
+		pr_info("***KMOD: I'm CPU %d of a total of %d CPUs.", smp_processor_id(), num_online_cpus());
+		// Read the address from the APIC Base Address Register of the CPU
+		rdmsrl(0x0000001b, lapic_addr);
+		// Bits 12-51 contain the pages address. The lowest 12 bits contain
+		// additional information about the APIC but are *NOT* part of the
+		// address ~~> Mask them to get the address of the physical frame
+		lapic_page = ioremap(lapic_addr & (~0xFFFu), 4096);
+		
+		// We now got the physical address mapped. Let's do the IPI
+		pr_info("***KMOD: LAPIC ADDRESS: 0x%016llx MAPPED TO: 0x%016lx\n", lapic_addr & (~0xFFFu), ((size_t)lapic_page));
+		pr_info("***KMOD: lapic ID 0x%08x\n", ioread32(lapic_page + 0x20) );
+		pr_info("***KMOD: lapic version 0x%08x\n", ioread32(lapic_page + 0x30));
+
+		// Clear APIC errors
+		iowrite32(0 , lapic_page + 0x280);
+		// Select AP
+		iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+		// Trigger INIT IPI and wait for delivery
+		iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x00C500, lapic_page + 0x300);
+		do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+		// Select AP again and deassert, then wait for delivery
+		iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+		iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x008500, lapic_page + 0x300);
+		do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+		//Wait 10 ms
+		udelay(10000);
+
+		// send STARTUP IPI (twice)
+		for(num_startups = 0; num_startups < 2; ++num_startups) {
+			// Clear errors; Seclect AP; Trigger STARTUP IP; wait
+			iowrite32(0, lapic_page + 0x280); 
+			iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+			// set delivery mode to 0x6 (startup) and vector to 0xc8 (segment of reserved low mem)
+			iowrite32((ioread32(lapic_page + 0x300) & 0xfff0f800) | 0x0006c8, lapic_page + 0x300);
+			udelay(200);
+			do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+		}
+		// Release ressources; Enable interrupts
+		iounmap(lapic_page);
+		local_irq_restore(flags);
+	}
+
+	// Release lowmem
+	iounmap(lowmem_region);
+	pr_info("***KMOD: All done; quit\n");
 	return 0;
 }
 
