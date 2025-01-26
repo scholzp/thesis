@@ -10,6 +10,7 @@ pkgs.mkShell {
     pkgs.niv
     pkgs.cmake-format
     clang-tools
+    unixtools.xxd
   ];
 
   # Environment variables
