@@ -11,7 +11,7 @@ EXTRA_CFLAGS := -Werror -I$(BUILD_DIR) -DSTART_ADDRESS=$(START_ADDRESS)
 .PHONY: all
 all: kbuild
 .PHONY: kbuild
-kbuild:
+kbuild: startup
 	$(MAKE) -C $(KERNELDIR) M=$(BUILD_DIR) src=$(SRC) EXTRA_CFLAGS="$(EXTRA_CFLAGS)" modules
 .PHONY: install
 install:
@@ -19,3 +19,9 @@ install:
 .PHONY: clean
 clean:
 	$(MAKE) -C $(KERNELDIR) M=$(BUILD_DIR) src=$(SRC) clean
+.PHONY: startup
+#generates bytecode from startup.S for insertion
+startup:
+	as -q -o ${SRC}/startup.o -mx86-used-note=no -c ${SRC}/startup.S
+	ld -w -Ttext 200000 --oformat binary -o ${SRC}/startup.bin ${SRC}/startup.o
+	xxd -n STARTUP_CODE -i ${SRC}/startup.bin startup_code.h
