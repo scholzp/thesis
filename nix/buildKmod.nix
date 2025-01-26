@@ -1,4 +1,4 @@
-{ lib, stdenv, kernel, start_address}:
+{ lib, stdenv, kernel, start_address, pkgs}:
 stdenv.mkDerivation {
   pname = "kmod";
   version = "0.0.1";
@@ -6,6 +6,8 @@ stdenv.mkDerivation {
   src = ../implementation/kmod;
 
   nativeBuildInputs = kernel.moduleBuildDependencies;
+
+  buildInputs = with pkgs; [ unixtools.xxd ];
 
   passthru = {
     # The kernel used to build the attribute.
