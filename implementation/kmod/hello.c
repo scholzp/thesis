@@ -25,7 +25,7 @@ MODULE_LICENSE("GPL");
 // START_ADDRESS comes from make as -D compiler flag
 const size_t AP_LOWMEM_ADDRESS = START_ADDRESS;
 // currently 1 page. TODO: Make this also use configurable from nix 
-const size_t AP_LOWMEM_SIZE = 4 * 1024;
+const size_t AP_LOWMEM_SIZE = LOW_MEM_SIZE;
 // APIC ID of the AP to use
 const u8 AP_ID = 3;
 
