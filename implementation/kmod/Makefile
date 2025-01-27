@@ -7,7 +7,7 @@ SRC ?= $(CWD)
 # This version information written to the kernel log when the module
 # is loaded.
 KMOD_VERSION ?= "0.1" #$(shell git describe --tags 2> /dev/null || echo "unknown")
-EXTRA_CFLAGS := -Werror -I$(BUILD_DIR) -DSTART_ADDRESS=$(START_ADDRESS)
+EXTRA_CFLAGS := -Werror -I$(BUILD_DIR) -DSTART_ADDRESS=$(START_ADDRESS) -DLOW_MEM_SIZE=$(LOW_MEM_SIZE)
 .PHONY: all
 all: kbuild
 .PHONY: kbuild
