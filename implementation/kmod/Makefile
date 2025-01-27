@@ -23,5 +23,5 @@ clean:
 #generates bytecode from startup.S for insertion
 startup:
 	as -q -o ${SRC}/startup.o -mx86-used-note=no -c ${SRC}/startup.S
-	ld -w -Ttext 200000 --oformat binary -o ${SRC}/startup.bin ${SRC}/startup.o
+	ld -w -Ttext $(START_ADDRESS) --oformat binary -o ${SRC}/startup.bin ${SRC}/startup.o
 	xxd -n STARTUP_CODE -i ${SRC}/startup.bin startup_code.h
