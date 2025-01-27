@@ -22,10 +22,8 @@
 
 MODULE_LICENSE("GPL");
 
-void test(void);
-int get_bash_result(char *filename);
-
-const size_t AP_LOWMEM_ADDRESS = START_ADDRESS * 1024;
+// START_ADDRESS comes from make as -D compiler flag
+const size_t AP_LOWMEM_ADDRESS = START_ADDRESS;
 // currently 1 page. TODO: Make this also use configurable from nix 
 const size_t AP_LOWMEM_SIZE = 4 * 1024;
 // APIC ID of the AP to use
@@ -107,9 +105,9 @@ int init_module(void)
 		iounmap(lapic_page);
 		local_irq_restore(flags);
 	}
-
 	// Release lowmem
 	iounmap(lowmem_region);
+	pr_info("***AP should now boot toyos.\n");
 	pr_info("***KMOD: All done; quit\n");
 	return 0;
 }

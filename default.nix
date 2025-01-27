@@ -15,9 +15,9 @@ in
 let
   kernel = pkgs.linuxPackages.kernel;
   lib = pkgs.lib;
-  # Hardcode start address of reserved low memory. Will be multiplied by 1024.
-  # Look for page granularity, which means the address should be divisible by 4.
-  start_address = "800";
+  # Hardcode start address of reserved low memory.
+  # Take care of page granularity, which means the address should be divisible by 4096.
+  start_address = "0xc8000";
   stdenv = pkgs.stdenv;
   kmod = pkgs.callPackage ./nix/buildKmod.nix {inherit lib; inherit stdenv; inherit kernel; inherit start_address;};
   initrd = pkgs.callPackage ./nix/initrd.nix {inherit lib; inherit pkgs; inherit kmod;};
