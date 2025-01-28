@@ -1,34 +1,34 @@
 \section{Contributions}
 \label{sec:10:contributions}
 As described in the motivation (see chapter~\ref{sec:10:motivation}) for this
-thesis, we see a big problem in the general vulnerability by side channel
-attacks on commodity processors. To fully exclude side channels, we propose
+thesis, I see a big problem in the general vulnerability by side channel
+attacks on commodity processors. To fully exclude side channels, I propose
 <Fancy Name\todo{think about a really fancy name}> to tackle the following
 goals:
 
 \begin{enumerate}
-    \item We create an execution environment fully isolated from the remaining
+    \item I create an execution environment fully isolated from the remaining
           system by utilizing features found in all commodity CPUs. This means
-          that we do not use any vendor-specific ISA extensions.
-    \item We propose a TEE design to detect side-channel attacks and react
+          that I do not use any vendor-specific ISA extensions.
+    \item I propose a TEE design to detect side-channel attacks and react
           appropriately.
     \item Our design ensures the usage of only core local resources. This means
-          we implement a policy that is restricted to core local caches.
-    \item We evaluate ways to enable such an execution environment to offer
+          I implement a policy that is restricted to core local caches.
+    \item I evaluate ways to enable such an execution environment to offer
           remote attestation features.
-    \item We evaluate our implementation regarding system resources. In detail,
-          we will evaluate what workload fits next to the local cache's runtime
+    \item I evaluate our implementation regarding system resources. In detail,
+          I will evaluate what workload fits next to the local cache's runtime
           environment.
-    \item We evaluate the TCB and against what attacker model our sole software
+    \item I evaluate the TCB and against what attacker model our sole software
           solution can defend.
 \end{enumerate}
 
-With complete isolation and the exclusion of possible side channels, we aim for
+With complete isolation and the exclusion of possible side channels, I aim for
 a TEE solution that can withstand a wide array of possible attacks. Because of
-time constraints in this thesis, we cannot implement a fully working TEE ;
-instead, we can show the properties and concepts on a working proof of concept
-implementation. We show that our solution can run next to a commodity operating
+time constraints in this thesis, I cannot implement a fully working TEE ;
+instead, I can show the properties and concepts on a working proof of concept
+implementation. I show that our solution can run next to a commodity operating
 system such as Linux, implement communication channels through a well-defined
-interface, and show that we can protect our implementation from being interfered
-with by the commodity OS. Because we explore the technical feasibility, our
+interface, and show that I can protect our implementation from being interfered
+with by the commodity OS. Because I explore the technical feasibility, our
 solution still depends on the commodity to install the environment.
