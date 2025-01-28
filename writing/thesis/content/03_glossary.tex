@@ -1,20 +1,164 @@
-\newglossaryentry{tee}
-{
-    name=TEE,
-    description={An execution environment that is eligible to run applications isolated and protected from the rest of
-            the system. Offers the ability to prove these features through remote attestation}
-}
+% This file is alphabetically sorted by key (which happens to be the acronym)
 
-\newglossaryentry{sgx}
+%
+% C ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{CPUID}
 {
-    name=SGX,
-    description={Hardware extension in supported Intel processors able to create isolated execution environments and
-            prove integrity and identity of the running program through remote attestation}
+    name=CPUID,
+    description={Instruction in x86 CPUs used to query processor features}
 }
-
+%
+% E ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{eoi}
+{
+    name=end of interrupt,
+    description={Signal send to the interrupt controller by the CPU to signal the of an interrupt serving routine}
+}
+%
+% G ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{gdt}
+{
+    name=global descriptor table,
+    description={Data structure of x86 and x86\_64 \acrshort{a_isa}s pointed to by global descriptor table register.
+            Holds information about memory segments.}
+}
+%
+% I ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{idt}
+{
+    name=interrupt descriptor table,
+    description={Data structure that holds a table of interrupt handlers. The interrupt vector is used by the CPU to
+            call the respective interrupt handler routine.}
+}
+\newglossaryentry{ipi}
+{
+    name=inter-processor interrupt,
+    description={Interrupt send from one processor in a multiprocessor system to another}
+}
+\newglossaryentry{isa}
+{
+    name=instruction set architecture,
+    description={Architecture of a processor as observable from the outside. Serves as the interface between hard- and
+            software and thus describes the instructions supported to program a processor}
+}
+%
+% L ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{lapic}
+{
+    name=local advanced programmable interrupt controller,
+    description={The advanced programmable interrupt controller (APIC) is the successor of the legacy programmable
+            interrupt controller (PIC) in x86 and x86\_64 systems. In systems with multiple CPU cores the LAPIC is the
+            APIC local to the respective core}
+}
+\newglossaryentry{llc}
+{
+    name=last level cache,
+    description={Last level of the cache hierarchy. E.g in a three-level hierarchy, the level 3 (L3) cache is the LLC}
+}
+\newglossaryentry{lmode}
+{
+    name=long mode,
+    description={64 bit operation mode of x86\_64 introduced by AMD with the name AMD64}
+}
+%
+% M ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{mmu}
+{
+    name=memory management unit,
+    description={Coprocessor that translates virtual memory addresses to physical memory addresses}
+}
+\newglossaryentry{msr}
+{
+    name=model specific register,
+    description={Non-architectural register which's implementation is specific to the respective processor}
+}
+%
+% N ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{nmi}
+{
+    name=non-maskable interrupt,
+    description={Interrupt that can not be masked. That means, delivering of non-maskable interrupts can not be
+            deactivated}
+}
+%
+% P ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{pf}
+{
+    name=page fault,
+    description={Fault resulting from erroneous memory access. This can be for example a missing page table entry or
+            rights violation }
+}
+\newglossaryentry{pmc}
+{
+    name=performance monitoring counter,
+    description={\acrshort{a_msr} to count the occurrence of a specific event in a processor}
+}
+\newglossaryentry{pmi}
+{
+    name=performance monitoring interrupt,
+    description={Interrupt issued upon reaching a threshold of specific event occurrences}
+}
+\newglossaryentry{pmode}
+{
+    name=protected mode,
+    description={Operation mode of x86 and x86\_64 processors. Makes features such as memory protection, virtual memory.
+            Introduced with Intel 80286. 32-bit on Intel 80386 and later}
+}
+%
+% R ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{rmode}
+{
+    name=real mode,
+    description={Operation mode of x86 and x86\_64 processors. Compatibility mode to the 16-bit Intel 8086, allowing to
+            address roughly 1 MiB of memory without protection}
+}
+%
+% S ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{sev}
 {
     name=SEV-SNP,
     description={Hardware extension in supported AMD processors able to create isolated execution environments for
             virtual machines and prove integrity and identity of the running VM through remote attestation}
+}
+\newglossaryentry{sgx}
+{
+    name=Intel SGX,
+    description={Hardware extension in supported Intel processors able to create isolated execution environments and
+            prove integrity and identity of the running program through remote attestation}
+}
+\newglossaryentry{simd}
+{
+    name={single instruction multiple data},
+    description={Form of parallel processing in which multiple processor elements perform the same instruction on
+            multiple input data}
+}
+\newglossaryentry{smi}
+{
+    name=system management mode interrupt,
+    description={Interrupt in the x86 and x86\_64 \acrshort{a_isa}. Results in changing to \acrshort{a_smm}}
+}
+\newglossaryentry{smm}
+{
+    name=system management mode,
+    description={High privileged operation mode of x86 and x86\_64 processors. Intended to execute firmware tasks, such
+            as power management, transparently to system software. Can only be entered through \acrshort{smi}}
+}
+\newglossaryentry{smram}
+{
+    name=system management mode RAM,
+    description={Hardware protected area of main memory to store \acrshort{a_smm} data and code, such as the
+            \acrshort{a_smi} handler}
+}
+%
+% T ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{tee}
+{
+    name=trusted execution environment,
+    description={An execution environment that is eligible to run applications isolated and protected from the rest of
+            the system. Offers the ability to prove these features through remote attestation}
+}
+\newglossaryentry{tlb}
+{
+    name=translation lookaside buffer,
+    description={Cache structure that stores translations from virtual to physical addresses}
 }
