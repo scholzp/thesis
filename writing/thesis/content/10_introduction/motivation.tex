@@ -1,0 +1,71 @@
+\section{Motivation}
+\label{sec:10:motivation}
+Remote attestation is the ability of a trusted execution environment to prove
+claims about its state to an appraiser over a computer network.
+\cite{coker_principles_2011} What first sounds like a solution to a rather
+abstract problem can quickly prove helpful when considering the following
+example. We find our example in the implementation of the automatic contact
+discovery of the Signal messenger. Signal itself is a messenger that values the
+privacy of its users and the confidentiality of their communication. In doing
+so, Signal implements a secure end-to-end encryption protocol to protect its
+users' chats.\cite{cohn2020formal} To increase the user experience, Signal saw
+itself confronted by the problem of implementing a privacy-preserving way for
+automatic contact discovery.\cite{SignalCd} The implementers were confronted
+with multiple problems. The first major problem was the social graph. The social
+graph can either be centralized and stored on Signal's servers or decentralized
+and stored on the user's phone. To minimize data stored on Signal's servers
+about their users, the implementers decided to use the users' phonebooks stored
+on their phones. The second problem arises from this decision. The user's phone
+books must be processed so that neither Signal nor their server operators can
+learn anything about the users. To solve these problems, encrypting the phone
+books is not enough. For example, the user does not have any chance to conclude
+from the communication alone with whom they are communicating. Even if the
+communication partner proves with the help of signatures that they are the
+Signal server application, the user cannot verify what version of the server
+application is running or if it processes the data as expected. Until now, we
+have not considered the server operator, which might be malicious, too. They can
+manipulate and read the application's memory because they have privileged access
+to the server's software and hardware. Such a powerful adversary could read
+decrypted secrets directly from the application's memory or modify the server
+application in a way that leaks secret data. In this example, the user wants to
+verify that the Signal server application adheres to the following claims:
+\begin{enumerate}
+    \item The Signal server application executes the code the user expects
+    \item The Signal server application is safe from being manipulated by
+          privileged third parties
+    \item Privileged third parties are unable to read the server applications'
+          memory
+\end{enumerate}
+The server environment, therefore, needs a trusted security authority that can
+prove these claims to the users. Additionally, hardware isolation mechanisms
+must protect this security authority against tampering attempts of privileged
+third parties. Trusted execution environments solve this problem by integrating
+two building blocks. First, they can execute code in an isolated execution
+environment. Hardware enforces isolation, and interaction with the isolated code
+is only possible through defined interfaces of the isolating hardware. This way,
+privileged software is not able to access memory-isolated code. Additionally, to
+protect against memory bus-taping attacks, isolation hardware often encrypts the
+memory. The second building block implements remote attestation. Through remote
+attestation, TEEs can verify that the execution environment runs the task under
+hardware-assisted isolation protection. Furthermore, the TEE can attest to the
+state of the running software, which the appraiser can use to compare the
+attestation result to a state expected by the users. If the TEE fulfills the
+aforementioned claims, the program running under isolation is safe, and the
+appraiser can construct a secure communication channel.
+
+Most commodity CPUs currently implement technologies that enable the creation of
+TEEs. In that case, the CPU and its vendor act as security
+authorities.\cite{tdx_whitepaper,kaplan_amd_2020,pinto_demystifying_2019,costan2016intel}
+The story could be finished at this point if it was not the case that the
+respective CPU implementations contain bugs that make it possible for attackers
+to circumvent their hardware-assisted isolation mechanisms and leak secrets
+through side
+channels.\cite{kocher_spectre_2020,lipp_meltdown_2020,nilsson_survey_2020} While
+software updates could mitigate specific side-channel attacks, the source of the
+information leaks is still persistent in hardware, with researchers still
+finding new side-channel attacks each
+year.\cite{wikner2022retbleed,moghimi_downfall_2023,ragab_ghostrace_2024} On the
+other hand, the example of Signal elucidates that proper working TEEs are
+important because they might process critical data. It is, therefore, crucial to
+find a way to allow the execution of programs in a completely isolated and
+side-channel-free environment. A problem that we try to solve in this thesis.
