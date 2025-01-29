@@ -1,16 +1,40 @@
 \section{Motivation}
 \label{sec:10:motivation}
-Remote attestation is the ability of a trusted execution environment to prove
-claims about its state to an appraiser over a computer network.
-\cite{coker_principles_2011} What first sounds like a solution to a rather
-abstract problem can quickly prove helpful when considering the following
-example. I find our example in the implementation of the automatic contact
-discovery of the Signal messenger. Signal itself is a messenger that values the
-privacy of its users and the confidentiality of their communication. In doing
-so, Signal implements a secure end-to-end encryption protocol to protect its
-users' chats.\cite{cohn2020formal} To increase the user experience, Signal saw
-itself confronted by the problem of implementing a privacy-preserving way for
-automatic contact discovery.\cite{SignalCd} The implementers were confronted
+As of the beginning of 2025, the service haveibeenpawned registered over 14
+billion breached user accounts with personal data such as date of birth, IP
+addresses, and names on over 855 websites.\cite{haveibeenpawned} Criminals can
+use disclosed personal data, for example, for fraud, social engineering, and
+identity theft. Furthermore, even without criminals, protecting privacy can be
+of great value.\cite{solove2007ve} In an ideal world, the user would not only be
+able to transmit encrypted data to a service but also to verify how the provider
+processes their data. In extreme cases, the user even requests proof that the
+server's operator cannot spy on the processing routine. A technology allowing
+these verification forms is called a trusted execution environment (TEE).
+Trusted execution environments have an isolation mechanism to defend against
+spying and modifying attacks. Moreover, they implement protocols to verify those
+isolation properties towards an appraiser over the network, a technology
+referred to as remote attestation. \\
+
+A tangible example of how remote attestation can help solve real-world problems
+is the implementation of Signal's automatic contact discovery service. The
+Signal Messenger aims to provide a privacy messaging service. It implements its
+own end-to-end encryption protocol to protect its users'
+communication.\cite{cohn2020formal} But communication alone is not all of
+Signals features. The history of PGP has shown that virtually no one uses
+privacy-enhancing technologies if their usability is low and their application
+is too complicated.\cite{ruoti2015johnny} It is therefore not surprising that
+Signal also aims to provide a good user experience. To do so, the developers of
+Signal saw themself confronted by the problem of implementing a
+privacy-preserving way for automatic contact discovery.\cite{SignalCd}\\
+
+Traditionally Signal does not use phone numbers. Instead, phone numbers are used
+as input to a hash function to generate user identifiers. The Signal client on
+the users device generates these hashes, truncates them and transmits the
+results to the server. Signal so does not learn the phone numbers of it's users
+this way.\todo{Soll hier 'ne Sidenote rein, dass der Wertebereich des inputs
+    klein ist und damit theortisch einfaches bruteforce möglich ist?}
+\todo{bis hier ist neu}
+When creating the contact discovery service, the implementers were confronted
 with multiple problems. The first major problem was the social graph. The social
 graph can either be centralized and stored on Signal's servers or decentralized
 and stored on the user's phone. To minimize data stored on Signal's servers
@@ -39,19 +63,21 @@ verify that the Signal server application adheres to the following claims:
 The server environment, therefore, needs a trusted security authority that can
 prove these claims to the users. Additionally, hardware isolation mechanisms
 must protect this security authority against tampering attempts of privileged
-third parties. Trusted execution environments solve this problem by integrating
-two building blocks. First, they can execute code in an isolated execution
-environment. Hardware enforces isolation, and interaction with the isolated code
-is only possible through defined interfaces of the isolating hardware. This way,
-privileged software is not able to access memory-isolated code. Additionally, to
-protect against memory bus-taping attacks, isolation hardware often encrypts the
-memory. The second building block implements remote attestation. Through remote
-attestation, TEEs can verify that the execution environment runs the task under
-hardware-assisted isolation protection. Furthermore, the TEE can attest to the
-state of the running software, which the appraiser can use to compare the
-attestation result to a state expected by the users. If the TEE fulfills the
-aforementioned claims, the program running under isolation is safe, and the
-appraiser can construct a secure communication channel.
+third parties. Otherwise an attacker can influence the operation of the trusted
+third party or fake it completely. Trusted execution environments solve this
+problem by integrating two building blocks. First, they can execute code in an
+isolated execution environment. Hardware enforces isolation, and interaction
+with the isolated code is only possible through defined interfaces of the
+isolating hardware. This way, privileged software is not able to access
+memory-isolated code. Additionally, to protect against memory bus-taping
+attacks, isolation hardware often encrypts the memory. The second building block
+implements remote attestation. Through remote attestation, TEEs can verify that
+the execution environment runs the task under hardware-assisted isolation
+protection. Furthermore, the TEE can attest to the state of the running
+software, which the appraiser can use to compare the attestation result to a
+state expected by the users. If the TEE fulfills the aforementioned claims, the
+program running under isolation is safe, and the appraiser can construct a
+secure communication channel.\\
 
 Most commodity CPUs currently implement technologies that enable the creation of
 TEEs. In that case, the CPU and its vendor act as security
