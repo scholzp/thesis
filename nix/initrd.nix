@@ -8,7 +8,7 @@
 }:
 
 let
-  kmodMod = "${kmod}/lib/modules/${kmod.kernel-version}/updates/hello.ko.xz";
+  kmodMod = "${kmod}/lib/modules/${kmod.kernel-version}/updates/kmod.ko.xz";
 in
 pkgs.makeInitrd {
   contents = [{
