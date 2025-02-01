@@ -26,49 +26,55 @@ start:
     mov $ready_txt, %cx
     sub %bx, %cx
     sub $bin_begin, %bx
-    call print
-    
-    // enter protected mode
-    cli 
-    lgdt gdtdesc
-    mov %cr0, %eax
-    or $0x1, %al
-    mov %eax, %cr0
-    
-    /* TODO: Insert long jump here. */
-    // print the ready string, we are still alive
-    mov $ready_txt, %bx
-    mov $ready_txt_end, %cx
-    sub %bx, %cx
-    sub $bin_begin, %bx
-    call print
-    hlt
-    // Stop execution once we skip the hlt
-    ud2
-
-// Print function
-// Calling convention: bx=address of string, cx=length of string
-print:
-    push %ax
-    push %bx
-    push %dx
     mov $0x3f8, %dx #Load port address 0x3f8
-port_prepared:
+print16:
     mov (%bx), %ax
     out %al, %dx
     sub $1, %cx
     add $1, %bx
     cmp $0, %cx
-    jne port_prepared
-    pop %dx
-    pop %bx
-    pop %ax
-    ret
-    // We should have returned, exception ahead
+    jne print16
+enter_protected:
+    cli
+    mov $gdtdesc, %ebx
+    sub $bin_begin, %ebx
+    lgdt (%ebx)
+    //lgdt %cs:gdtdesc
+    mov %cr0, %eax
+    mov $gdt, %ecx
+    or $0x1, %al
+    mov %eax, %cr0
+    mov $protected, %edx
+    //sub %bin_begin, %edx
+    hlt
+    //ljmp $0x8, $protected
+
+.code32
+protected:
+    /* TODO: Insert long jump here. */
+    // print the ready string, we are still alive
+    hlt
+    mov $ready_txt, %bx
+    mov $ready_txt_end, %cx
+    sub %bx, %cx
+    sub $bin_begin, %bx
+    mov $0x3f8, %dx #Load port address 0x3f8
+print32:
+    mov (%bx), %ax
+    out %al, %dx
+    sub $1, %cx
+    add $1, %bx
+    cmp $0, %cx
+    jne print32
+    // Stop execution once we skip the hlt
+    hlt
     ud2
+
+// Print function
+// Calling convention: bx=address of string, cx=length of string
    # sti
 
-.align 4
+.p2align	5	/* force 32-byte alignment */
 gdt:
 	.word	0, 0
 	.byte	0, 0, 0, 0
@@ -94,4 +100,6 @@ hello_txt:
 ready_txt:
     .ascii "Ready for long jump\n"
 ready_txt_end:
+long_jump_off:
+    .long 0x01020304
     nop

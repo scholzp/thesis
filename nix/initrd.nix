@@ -5,10 +5,12 @@
 { pkgs
 , lib
 , kmod
+, tee_kernel
 }:
 
 let
   kmodMod = "${kmod}/lib/modules/${kmod.kernel-version}/updates/kmod.ko.xz";
+  Tkernel = "${tee_kernel}";
 in
 pkgs.makeInitrd {
   contents = [{
@@ -34,6 +36,7 @@ pkgs.makeInitrd {
       mount -t tmpfs none /run
 
       # Insert the debugcon kernel module.
+      cp ${Tkernel} /tmp/tee_kernel
       insmod ${kmodMod}
 
        # Enter bash (the root shell)

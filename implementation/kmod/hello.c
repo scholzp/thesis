@@ -49,6 +49,30 @@ int init_module(void)
 
 	// Lets map the lowmem into kernel address space
 	lowmem_region = ioremap(AP_LOWMEM_ADDRESS, AP_LOWMEM_SIZE);
+	{
+		loff_t offset = 0;
+		ssize_t bytes_read = 0;
+		elf32_file_t *elf_file= NULL;
+		u8* bytewise = NULL;
+		u64 entry_addr = 0;
+		struct file *f = file_open("/tmp/tee_kernel", O_RDWR, 0);
+		u8* buffer = kzalloc(1024 * 1024 * 1, GFP_KERNEL);  
+		bytes_read = kernel_read(f, buffer, 1024 * 1024 * 1, &offset);
+		pr_info("Read 1 MiB or less: %ld, Buffer address %p\n", bytes_read, buffer);
+		for (int x = 0; x < 10; ++x) {
+			pr_info("%x\n", buffer[x]);
+		}
+		elf_file = parse_elf32(buffer);
+		pr_info("Parse result %p; Loadable size sum: %lu\n", elf_file, elf_file->loadable_segments_size); 
+		entry_addr = load_elf32_segments(elf_file);
+		pr_info("Physical entry address: %llx\n", entry_addr);
+		bytewise = (u8*)(&entry_addr);
+		for (u8 x = 0; x < 4; ++x) {
+			pr_info("Byte %d of long jump target %02x\n", x, bytewise[3-x]);
+			// STARTUP_CODE[STARTUP_CODE_len - 6 + x] = bytewise[x];
+		}
+	}
+
 	// Copy startup code bytewise from arry to lowmem
 	while (lowmem_offset < STARTUP_CODE_len) {
 		iowrite8(STARTUP_CODE[lowmem_offset], lowmem_region + lowmem_offset);
@@ -109,27 +133,10 @@ int init_module(void)
 		iounmap(lapic_page);
 		local_irq_restore(flags);
 	}
-	// Release lowmem
-	iounmap(lowmem_region);
 	pr_info("***AP should now boot toyos.\n");
 	pr_info("***KMOD: All done; quit\n");
-	{
-		loff_t offset = 0;
-		ssize_t bytes_read = 0;
-		elf32_file_t *elf_file= NULL;
-		u64 entry_addr = 0;
-		struct file *f = file_open("/tmp/tee_kernel", O_RDWR, 0);
-		u8* buffer = kzalloc(1024 * 1024 * 1, GFP_KERNEL);  
-		bytes_read = kernel_read(f, buffer, 1024 * 1024 * 1, &offset);
-		pr_info("Read 1 MiB or less: %ld, Buffer address %p\n", bytes_read, buffer);
-		for (int x = 0; x < 10; ++x) {
-			pr_info("%x\n", buffer[x]);
-		}
-		elf_file = parse_elf32(buffer);
-		pr_info("Parse result %p; Loadable size sum: %lu\n", elf_file, elf_file->loadable_segments_size); 
-		entry_addr = load_elf32_segments(elf_file);
-		pr_info("Physical entry address: %llx\n", entry_addr);
-	}
+	// Release lowmem
+	iounmap(lowmem_region);
 	reader_hello();
 	return 0;
 }
