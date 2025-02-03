@@ -27,7 +27,8 @@ software is thus neither able to modify the code, tamper with the runtime state,
 nor observe code and data through the runtime. Contrary to TEEs, a SEE cannot
 prove these claims against an appraisal, lest a third party outside the system.
 This is because it does not require a root of trust to present in the system. To
-prove its trustworthiness, TEEs employ remote attestation.\\
+prove its trustworthiness, TEEs employ remote attestation, which is the second
+important aspect of the definition.\\
 
 Trusted execution environment consists of several building blocks. The first
 building block Sabt et al. propose is a secure boot. This building block allows
@@ -126,7 +127,7 @@ which is integrated within the platform security
 processor.\cite{pirker2024brief} \\
 
 TPMs offer different features that can be used to establish a trusted execution
-platform. For example, TPM offers a save random number generator. Moreover, a
+platform. For example, TPM offers a safe random number generator. Moreover, a
 TPM implements Platform Configuration Registers (PCR) to store integrity
 metrics. PCR store the value of a measurement. For example, bootflow integrity
 can be verified by performing multiple measurements, one for each stage in the
@@ -154,19 +155,19 @@ to the so-called enclave page cache (EPC) and assigned to the enclave. Once
 assigned to an enclave, SGX protects the memory page from unprivileged access,
 which includes all access attempts not originating from the memory-owning
 enclave. After the system software adds all pages to the enclave, it is marked
-as initialized. For the initialization process, system software uses highly
-privileged instructions. After the enclave is marked initialized, no more pages
-can be added to the EPC, and interaction with the enclave is only allowed by
-using dedicated instructions available only in user space. The enclave code runs
-at the permission level of the application from which the enclave was called.
-Data and code added to the EPC are encrypted using keys burned into the CPU
-hardware via e-fuses. Applications using SGX services do not necessarily need to
-run as a whole in an SGX enclave. Because of restrictions on the size of the
-enclave's memory, only parts of the data were handed to enclaves. Again,
-communications between the enclave and user applications use special CPU
-instructions. In cases where applications are split into parts residing in and
-outside of the enclave, an application might want to verify the identity before
-sharing secrets. For this, SGX implements so-called local attestation.\\
+as initialized. For the initialization process, system software uses privileged
+instructions. After the enclave is marked initialized, no more pages can be
+added to the EPC, and interaction with the enclave is only allowed by using
+dedicated instructions available only in user space. The enclave code runs at
+the permission level of the application from which the enclave was called. Data
+and code added to the EPC are encrypted using keys burned into the CPU hardware
+via e-fuses. Applications using SGX services do not necessarily need to run as a
+whole in an SGX enclave. Because of restrictions on the size of the enclave's
+memory, only parts of the data were handed to enclaves. Again, communications
+between the enclave and user applications use special CPU instructions. In cases
+where applications are split into parts residing in and outside of the enclave,
+an application might want to verify the identity before sharing secrets. For
+this, SGX implements so-called local attestation.\\
 
 As mentioned, SGX implements processor instructions dedicated to managing and
 interacting with enclaves. Furthermore, SGX implementations create at least a
@@ -189,7 +190,7 @@ enclave's state and identity.\\
 \subsubsection{Confidential VM Extensions}
 \label{section:20:confidential_vms}
 The goal of confidential Virtual machines is to protect the entire VM from the
-influence of a malicious hypervisor or other high-privileged software. Intel and
+influence of a malicious hypervisor or other privileged software. Intel and
 AMD offer individual ISA extensions for their processors to host confidential
 Virtual Machines. Intel calls its solution Intel TDX, while AMDs solution is
 called AMD SEV-SNP.\cite{tdx_whitepaper,kaplan_amd_2020} Both solutions use the
@@ -213,16 +214,16 @@ memory.\\
 
 Both solutions use the trustee's knowledge of the initial state of the VM image.
 The assumption that the approach follows is that if the VM is started in a known
-state and protected from manipulation by the hypervisor or other highly
-privileged software, then the VM can be trusted in the following. To follow this
-approach, a measurement of the initial VM image is created and cryptographically
-bound to the respective VM instance through a MAC. Before the trustee interacts
-with the VM, they request the VM to verify its identity. For this, the VM
-requests the cryptographical hardware to sign a report. The signed report is
-then handed to the trustee. The trustee trusts the implementation in the CPU and
-verifies the signature of the CPU signed report. With this, the trustee knows if
-the VM images were expected. In the following, both the trustee and the VM
-exchange keys for further communication.\\
+state and protected from manipulation by the hypervisor or other privileged
+software, then the VM can be trusted in the following. To follow this approach,
+a measurement of the initial VM image is created and cryptographically bound to
+the respective VM instance through a message authentication code. Before the
+trustee interacts with the VM, they request the VM to verify its identity. For
+this, the VM requests the cryptographical hardware to sign a report. The signed
+report is then handed to the trustee. The trustee trusts the implementation in
+the CPU and verifies the signature of the CPU signed report. With this, the
+trustee knows if the VM images were expected. In the following, both the trustee
+and the VM exchange keys for further communication.\\
 
 \subsubsection{ARM TrustZone}
 \label{sec:20:trustzone}
@@ -232,24 +233,28 @@ technology is called ARM TrustZone. TrustZone is optional for ARM processor
 implementations and slightly differs between the ARM Cortex-A application
 processors and the ARM Cortex-M microcontroller-aimed processors. In the
 following, we will concentrate on the implementation of ARM application
-processors. Pinto and Santos did an extensive review of ARM TrustZone in
-2019.\cite{pinto_demystifying_2019} Conceptually, ARM TrustZone-enabled
-processors offer three processor operation modes. The most privileged mode is
-the Secure Monitor mode or short SM mode. The Secure Monitor mode is the mode in
-which the processor boots and the firmware and Bootloader executes. The second
-most privileged mode is the Secure World. This mode is intended to execute code
-isolated from the third and least privileged mode, the Normal World. The
-Bootloader is responsible for installing software intended to run in the Secure
-World. Isolation is achieved by hardware. For example, some registers exist
-twice to allow fast context switches between the Normal and Secure World. The
-TrustZone Address Space Controller can be used to partition memory into regions
-only accessible from the Secure World and those accessible by both worlds.
-Changing between worlds can be done synchronously using the dedicated SMC
-(System Monitor Call) instruction or asynchronously due to an interrupt. The SMC
-instruction also triggers an interrupt. These interrupts are served by invoking
-the SM, which decides upon its configuration if the interrupt received serves as
-an entry point to the secure world. If so, the Secure Monitor invokes secure
-world code to serve the interrupt.\\
+processors. Pinto and Santos did an extensive survey of ARM TrustZone in 2019.
+In their work, they describe technical properties of AMR TrustZone and how to
+use it for the implementation of \gls{tee}s and hypervisors. Moreover they
+explain technical details of Trustzone and review it's security properties
+against other \gls{tee}s.\cite{pinto_demystifying_2019}\\
+
+Conceptually, ARM TrustZone-enabled processors offer three processor operation
+modes. The most privileged mode is the Secure Monitor mode or short SM mode. The
+Secure Monitor mode is the mode in which the processor boots and the firmware
+and Bootloader executes. The second most privileged mode is the Secure World.
+This mode is intended to execute code isolated from the third and least
+privileged mode, the Normal World. The Bootloader is responsible for installing
+software intended to run in the Secure World. Isolation is achieved by hardware.
+For example, some registers exist twice to allow fast context switches between
+the Normal and Secure World. The TrustZone Address Space Controller can be used
+to partition memory into regions only accessible from the Secure World and those
+accessible by both worlds. Changing between worlds can be done synchronously
+using the dedicated SMC (System Monitor Call) instruction or asynchronously due
+to an interrupt. The SMC instruction also triggers an interrupt. These
+interrupts are served by invoking the SM, which decides upon its configuration
+if the interrupt received serves as an entry point to the secure world. If so,
+the Secure Monitor invokes secure world code to serve the interrupt.\\
 
 ARM TrustZone does not implement remote attestation in hardware. Such
 functionality has to be implemented by the code running in the Secure World. TEE
@@ -266,7 +271,7 @@ world.\\
 
 \subsection{Security of Hardware Solutions}
 All hardware solutions isolate critical functions to protect them from being
-tampered with by highly software. Because the TPM protects only its
+tampered with by privileged software. Because the TPM protects only its
 state, I will not consider it when comparing the other hardware solutions. All x86
 solutions protect against adversaries that can tap the memory bus. These attacks
 become infeasible because all three solutions encrypt the memory content of the
@@ -278,7 +283,7 @@ memory, so tapping the memory bus is possible. All solutions are vulnerable to
 side-channel attacks. Concerning the trusted computing base, ARM TrustZone
 relies conceptually on the functionally largest software stack. All x86
 solutions only rely on their respective implementation in the CPU SoC.
-High-privileged software or firmware running in SMM cannot access the memory of
+Privileged software or firmware running in SMM cannot access the memory of
 enclaves or VMs. On the contrary, ARM TrustZone relies on the Bootloader or
 firmware to install applications into the secure world. The processor's
 implementation does not protect the secure world application from being
@@ -325,7 +330,7 @@ which programs can execute isolated.\\
 
 Enma follows the same approach as SGX for implementing remote attestation. Enma
 hosts a quoting enclave that sings reports to verify the state of an enclave.
-The challenger can then check the signature of the quoting enclave, upon which
+The appraiser can then check the signature of the quoting enclave, upon which
 they decide how to interact with the enclave. Enma encrypts the memory of its
 enclaves. Security-wise, Enma is vulnerable to side-channel attacks as the other
 solution. The TCB is also increased when compared to hardware solutions. An
