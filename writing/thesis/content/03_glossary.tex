@@ -19,8 +19,8 @@
 \newglossaryentry{g_gdt}
 {
     name=global descriptor table,
-    description={Data structure of x86 and x86\_64 \acrshort{a_isa}s pointed to by global descriptor table register.
-            Holds information about memory segments.}
+    description={Data structure of x86 and x86\_64 ISAs pointed to by global descriptor table register.
+            Holds information about memory segments}
 }
 %
 % I ----------------------------------------------------------------------------------------------------------------
@@ -86,12 +86,12 @@
 {
     name=page fault,
     description={Fault resulting from erroneous memory access. This can be for example a missing page table entry or
-            rights violation }
+            rights violation}
 }
 \newglossaryentry{g_pmc}
 {
     name=performance monitoring counter,
-    description={\acrshort{a_msr} to count the occurrence of a specific event in a processor}
+    description={MSR that counts the occurrence of a specific event in a processor}
 }
 \newglossaryentry{g_pmi}
 {
@@ -135,19 +135,19 @@
 \newglossaryentry{g_smi}
 {
     name=system management mode interrupt,
-    description={Interrupt in the x86 and x86\_64 \acrshort{a_isa}. Results in changing to \acrshort{a_smm}}
+    description={Interrupt in the x86 and x86\_64 ISA. Results in changing to SMM}
 }
 \newglossaryentry{g_smm}
 {
     name=system management mode,
     description={High privileged operation mode of x86 and x86\_64 processors. Intended to execute firmware tasks, such
-            as power management, transparently to system software. Can only be entered through \acrshort{smi}}
+            as power management, transparently to system software. Can only be entered through SMI}
 }
 \newglossaryentry{g_smram}
 {
     name=system management mode RAM,
-    description={Hardware protected area of main memory to store \acrshort{a_smm} data and code, such as the
-            \acrshort{a_smi} handler}
+    description={Hardware protected area of main memory to store SMM data and code, such as the
+            SMI handler}
 }
 %
 % T ----------------------------------------------------------------------------------------------------------------
