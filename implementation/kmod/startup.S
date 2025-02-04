@@ -4,22 +4,10 @@ bin_begin:
     // NOP slide. The CPU will later override this, when it enters the boot 
     // code at the beginning of the segment. That's ok, as long as no second 
     // CPU comes along 
-stack:
-    .long 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090
-    .long 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090
-    .long 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090
-    .long 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090
-    .long 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090
-    .long 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090, 0x90909090
 start:
     // Setup data segment (We just use this page as data segment)
     mov $0xc800, %ax
     mov %ax, %ds
-    // Setup stack, last 1Kib of the page
-    mov $start, %bx
-    sub $stack, %bx
-    mov %ax, %ss
-    mov %bx, %sp
 
     // Print hello
     mov $hello_txt, %bx
@@ -39,39 +27,41 @@ enter_protected:
     mov $gdtdesc, %ebx
     sub $bin_begin, %ebx
     lgdt (%ebx)
-    //lgdt %cs:gdtdesc
-    mov %cr0, %eax
+    mov $protected, %edx
+    movl %cr0, %eax
     mov $gdt, %ecx
     or $0x1, %al
-    mov %eax, %cr0
-    mov $protected, %edx
+    movl %eax, %cr0
     //sub %bin_begin, %edx
-    hlt
-    //ljmp $0x8, $protected
+    //hlt
+    ljmpl $0x8, $protected
 
 .code32
 protected:
     /* TODO: Insert long jump here. */
     // print the ready string, we are still alive
-    hlt
-    mov $ready_txt, %bx
-    mov $ready_txt_end, %cx
-    sub %bx, %cx
-    sub $bin_begin, %bx
+    movl $0x10, %eax
+    movl %eax, %ds
+    movl $ready_txt, %ebx
+    movl $ready_txt_end, %edi
+    // DEbug
+    sub %ebx, %edi
     mov $0x3f8, %dx #Load port address 0x3f8
 print32:
-    mov (%bx), %ax
+    // This differs from print16 because we now have flat CS and DS
+    mov (%ebx), %eax
     out %al, %dx
-    sub $1, %cx
-    add $1, %bx
-    cmp $0, %cx
+    sub $1, %di
+    add $1, %ebx
+    cmp $0, %di
     jne print32
+    // Flat segmentation; We can jump where ever we want. This time the actual 
+    // kernel's address is our target. The address is stored in target_kernel_addr
+    movl target_kernel_addr, %ecx 
+    jmp %ecx
     // Stop execution once we skip the hlt
     hlt
     ud2
-
-// Print function
-// Calling convention: bx=address of string, cx=length of string
    # sti
 
 .p2align	5	/* force 32-byte alignment */
@@ -98,8 +88,7 @@ gdtdesc:
 hello_txt:
     .ascii "o7 AP ALIVE\n"
 ready_txt:
-    .ascii "Ready for long jump\n"
+    .ascii "Ready to jump into kernel\n"
 ready_txt_end:
-long_jump_off:
+target_kernel_addr:
     .long 0x01020304
-    nop

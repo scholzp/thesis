@@ -108,11 +108,24 @@ elf32_file_t* parse_elf32(u8 *data) {
 // relocated to the address
 u64 load_elf32_segments(elf32_file_t *elf) {
     // u8 *result = NULL;
-    e32_program_table_entry_t *entry = elf->program_header_table;
+    // e32_program_table_entry_t *entry = elf->program_header_table;
+    // Code that prints "Ready for elf" over serial port 0xf38
+    unsigned char test_msg[] = {
+        0x66, 0xba, 0xf8, 0x03, 0x66, 0xb8, 0x52, 0x00, 0xee, 0x66, 
+        0xb8, 0x65, 0x00, 0xee, 0x66, 0xb8, 0x61, 0x00, 0xee, 0x66, 
+        0xb8, 0x64, 0x00, 0xee, 0x66, 0xb8, 0x79, 0x00, 0xee, 0x66, 
+        0xb8, 0x20, 0x00, 0xee, 0x66, 0xb8, 0x66, 0x00, 0xee, 0x66,
+        0xb8, 0x6f, 0x00, 0xee, 0x66, 0xb8, 0x72, 0x00, 0xee, 0x66,
+        0xb8, 0x20, 0x00, 0xee, 0x66, 0xb8, 0x65, 0x00, 0xee, 0x66,
+        0xb8, 0x6c, 0x00, 0xee, 0x66, 0xb8, 0x66, 0x00, 0xee, 0x66,
+        0xb8, 0x0a, 0x00, 0xee, 0xf4, 0x0f, 0x0b
+    }; 
+    unsigned int test_msg_len = 77;
+
     //TODO: Check if we can replace magic 4096 by PAGE_SIZE
     // Calculate how many pages we require
     unsigned pages_order = 0;
-    size_t new_entry = elf->header->e_entry - elf->relocate_offset;
+    //size_t new_entry = elf->header->e_entry - elf->relocate_offset;
     for (size_t mem_to_allocate = 4096; mem_to_allocate < elf->loadable_segments_size; mem_to_allocate = mem_to_allocate << 1){
         ++pages_order;
     }
@@ -120,15 +133,18 @@ u64 load_elf32_segments(elf32_file_t *elf) {
     struct page *section_mem = alloc_pages(GFP_KERNEL, pages_order);
     // map the section memory so we can write to it
     u8 *target = kmap(section_mem);
-    while (NULL != entry) {
-        elf32_program_header_t *header = entry->header;
-        if (PT_LOAD == header->p_type) {
-            memcpy((target + header->p_paddr - elf->relocate_offset), (elf->data + header->p_offset), header->p_filesz);
-        }
-        entry = entry->next;
+    // while (NULL != entry) {
+    //     elf32_program_header_t *header = entry->header;
+    //     if (PT_LOAD == header->p_type) {
+    //         memcpy((target + header->p_paddr - elf->relocate_offset), (elf->data + header->p_offset), header->p_filesz);
+    //     }
+    //     entry = entry->next;
+    // }
+    for (u16 x = 0; x < test_msg_len; ++x) {
+        target[x] = test_msg[x];
     }
     kunmap(section_mem);
     pr_info("Entry from ELF: %x\n", elf->header->e_entry);
-    pr_info("Reseved PFN %lx, Address start: %lx", page_to_pfn(section_mem), page_to_pfn(section_mem) * 4096 + new_entry);
-    return (page_to_pfn(section_mem) * 4096 + new_entry);
+    // pr_info("Reseved PFN %lx, Address start: %lx", page_to_pfn(section_mem), page_to_pfn(section_mem) * 4096 + new_entry);
+    return (page_to_pfn(section_mem) * 4096 );//new_entry);
 };
