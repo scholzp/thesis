@@ -69,7 +69,7 @@ int init_module(void)
 		bytewise = (u8*)(&entry_addr);
 		for (u8 x = 0; x < 4; ++x) {
 			pr_info("Byte %d of long jump target %02x\n", x, bytewise[3-x]);
-			// STARTUP_CODE[STARTUP_CODE_len - 6 + x] = bytewise[x];
+			 STARTUP_CODE[STARTUP_CODE_len - 4 + x] = bytewise[x];
 		}
 	}
 
@@ -133,6 +133,8 @@ int init_module(void)
 		iounmap(lapic_page);
 		local_irq_restore(flags);
 	}
+	// Wait for AP to output it's text
+	udelay(10000);
 	pr_info("***AP should now boot toyos.\n");
 	pr_info("***KMOD: All done; quit\n");
 	// Release lowmem
