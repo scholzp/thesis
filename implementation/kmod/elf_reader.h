@@ -74,5 +74,3 @@ typedef struct elf32_file {
 elf32_file_t* parse_elf32(u8 *data);
 u64 load_elf32_segments(elf32_file_t *elf);
 size_t align_up (size_t value, size_t align_base);
-//TODO: Remove test function
-void reader_hello(void);

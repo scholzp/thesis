@@ -12,5 +12,4 @@ sources
 *.snm
 *.nav
 result*
-
-
+debugcon.txt
