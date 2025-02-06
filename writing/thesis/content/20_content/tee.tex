@@ -25,7 +25,7 @@ secure execution environment can protect the integrity, authenticity, and
 confidentiality of the application hosted by the SEE. Malicious privileged
 software is thus neither able to modify the code, tamper with the runtime state,
 nor observe code and data through the runtime. Contrary to TEEs, a SEE cannot
-prove these claims against an appraisal, lest a third party outside the system.
+prove these claims against an appraiser, lest a third party outside the system.
 This is because it does not require a root of trust to present in the system. To
 prove its trustworthiness, TEEs employ remote attestation, which is the second
 important aspect of the definition.\\
@@ -95,7 +95,7 @@ the respective manufacturer's service. \\
 
 Hardware roots of trust are necessary because system software could tamper with
 software or memory to manipulate a possible software solution. The following
-sections will review the most widely spread solutions to the hardware root of
+sections we review the most widely spread solutions to the hardware root of
 trust. These implementations rely on dedicated hardware modules such as add-in
 cards or unique, secure operation modes in CPU hardware. \\
 
@@ -120,7 +120,7 @@ concerns. Replacing the now-considered insecure hash function, TPM 2.0 offers
 many additional security features, such as SHA-256 for hashing, compared to
 version 1.0 while not being backward compatible. In x86 systems, TPM 2.0 is
 today widely spread and one of Windows 11s system requirements. Often, TPM is
-not implemented as a dedicated hardware module but rather as a so-called
+not implemented as a dedicated hardware module but rather as
 firmware TPM. The firmware TPM is part of the Intel Platform Trust Technology
 (Intel PTT) on Intel platforms. AMD platforms use an implementation called fTPM,
 which is integrated within the platform security
@@ -141,42 +141,46 @@ internal TPM data. \\
 \subsubsection{Intel SGX}
 \label{sec:20:sgx}
 \todo{A lot of passive to fix here}
-Intel SGX is an extension in some x86\_64 processors manufactured by Intel.
-Intel first shipped SGX in 2015, with processors implementing the Skylake
-microarchitecture. While server-grade CPUs are still implementing SGX, Intel
-marked SGX was deprecated in 2021 in consumer-grade CPUs, beginning from CPUs
-implementing the Rocket Lake microarchitecture. Costan et al. did an extensive
-review of SGX in 2016.\cite{costan2016intel} \\
+Intel SGX is an extension in x86\_64 processors manufactured by Intel, that
+allows the creation of trusted execution environments. Intel first shipped SGX
+in 2015, with processors implementing the Skylake microarchitecture. While
+server-grade CPUs are still implementing SGX, Intel marked SGX was deprecated in
+2021 in consumer-grade CPUs, beginning from CPUs implementing the Rocket Lake
+microarchitecture. Costan et al. did an extensive study of SGX in 2016 and
+documented in detail how SGX works and what it's security properties
+are.\cite{costan2016intel} \\
 
-Features of SGX include the creation of so-called enclaves. Enclaves are
-especially access-protected and encrypted system memory regions, with SGX
-preventing direct memory access. In the creation process, memory pages are added
-to the so-called enclave page cache (EPC) and assigned to the enclave. Once
-assigned to an enclave, SGX protects the memory page from unprivileged access,
-which includes all access attempts not originating from the memory-owning
-enclave. After the system software adds all pages to the enclave, it is marked
-as initialized. For the initialization process, system software uses privileged
-instructions. After the enclave is marked initialized, no more pages can be
-added to the EPC, and interaction with the enclave is only allowed by using
-dedicated instructions available only in user space. The enclave code runs at
-the permission level of the application from which the enclave was called. Data
-and code added to the EPC are encrypted using keys burned into the CPU hardware
-via e-fuses. Applications using SGX services do not necessarily need to run as a
-whole in an SGX enclave. Because of restrictions on the size of the enclave's
+Features of SGX include the creation of enclaves. Enclaves are especially
+access-protected and encrypted system memory regions, with SGX preventing direct
+memory access. In the creation process, memory pages are added to the enclave
+page cache (EPC) and assigned to the enclave. Once assigned to an enclave, SGX
+protects the memory page from unprivileged access, which includes all access
+attempts not originating from the memory-owning enclave. After the system
+software adds all pages to the enclave, it is marked as initialized. For the
+initialization process, system software uses privileged instructions. After the
+enclave is marked initialized, no more pages can be added to the EPC, and
+interaction with the enclave is only allowed by using dedicated instructions
+available only in user space. The enclave code runs at the permission level of
+the application from which the enclave was called. Intel equips each CPU with
+unique cryptographic keys that the CPU uses to encrypt code and data placed in
+the EPC. These keys reside in memory made of electronic fuses that can not be
+reprogrammed. Intel programs this memory in the factory process by burning some
+of the fuses. Applications using SGX services do not necessarily need to run as
+a whole in an SGX enclave. Because of restrictions on the size of the enclave's
 memory, only parts of the data were handed to enclaves. Again, communications
 between the enclave and user applications use special CPU instructions. In cases
 where applications are split into parts residing in and outside of the enclave,
 an application might want to verify the identity before sharing secrets. For
-this, SGX implements so-called local attestation.\\
+this, SGX implements local attestation.\\
 
 As mentioned, SGX implements processor instructions dedicated to managing and
 interacting with enclaves. Furthermore, SGX implementations create at least a
-so-called Launch Enclave signed by Intel. The Launch Enclave is a requirement
-for the successful initialization of enclaves, which Intel does not provide. It
-is necessary in all cases when SGX is used.\\
+Launch Enclave signed by Intel. Third party enclaves that are not signed by
+Intel require the Launch Enclave for successful initialization. It is necessary
+in all cases when SGX is used.\\
 
 To implement software attestation, SGX uses a second enclave provided by Intel,
-the so-called Quoting Enclave. The quoting enclave is used to verify the state
+the Quoting Enclave. The quoting enclave is used to verify the state
 of an enclave to verify. This is done by generating a report structure. This
 structure contains data such as the version and launch state of the enclave and
 its identity. It is generated by calling the dedicated \textbf{EREPORT}
@@ -201,7 +205,10 @@ implementation. Additionally, to interact with a confidential VM, the CPU must
 be in the dedicated CPU operation mode called SEAM mode. Memory access is only
 allowed in SEAM mode to protect confidential VMs. Once in SEAM mode, the CPU
 uses its VMX capabilities to host and interact with the VM. For cryptographical
-features, Intel processors utilize the Intel Trusted Execution Engine.\\
+features, such as signing and key generation, Intel processors utilize the
+Intel Management Engine. The Intel management Engine is a coprocessor located
+in the CPU package with special firmware and a separate OS that is isolated from
+the remaining parts of the system\\
 
 For SEV-SNP, AMD uses the already implemented SEV capabilities. Unlike Intel's
 implementation, AMD processors do not utilize a dedicated CPU mode but extend
@@ -232,7 +239,7 @@ architecture offers technology to allow isolated program execution. On ARM, this
 technology is called ARM TrustZone. TrustZone is optional for ARM processor
 implementations and slightly differs between the ARM Cortex-A application
 processors and the ARM Cortex-M microcontroller-aimed processors. In the
-following, we will concentrate on the implementation of ARM application
+following, we concentrate on the implementation of ARM application
 processors. Pinto and Santos did an extensive survey of ARM TrustZone in 2019.
 In their work, they describe technical properties of AMR TrustZone and how to
 use it for the implementation of \gls{tee}s and hypervisors. Moreover they
@@ -272,7 +279,7 @@ world.\\
 \subsection{Security of Hardware Solutions}
 All hardware solutions isolate critical functions to protect them from being
 tampered with by privileged software. Because the TPM protects only its
-state, I will not consider it when comparing the other hardware solutions. All x86
+state, I do not consider it when comparing the other hardware solutions. All x86
 solutions protect against adversaries that can tap the memory bus. These attacks
 become infeasible because all three solutions encrypt the memory content of the
 respective enclaves or VMs. An adversary must break the respective cryptographic
@@ -298,7 +305,7 @@ manufacturer and the vendors of the Bootloader, firmware, and secure world
 application.\\
 
 \subsection{Software Enhancements}
-In this section I will review solutions that do implement TEE functionality or
+In this section I review solutions that do implement TEE functionality or
 enhanced isolation through software. Work in this field can be considered as
 inspiration to my work.
 
@@ -337,7 +344,7 @@ solution. The TCB is also increased when compared to hardware solutions. An
 application that trusts Enma must also trust the L4Re runtime environment as
 much as the firmware and hardware. Enma utilizes a TPM as the hardware root of
 trust for verifying the system state and that the expected versions of L4Re and
-Enma were booted. The so-called soft backend of Enma, which I described in this
+Enma were booted. The soft backend of Enma, which I described in this
 section, can also be replaced by another backend. The authors propose an SGX
 back end that utilizes hardware features.
 
@@ -458,7 +465,7 @@ affected all commodity architectures. For example, CPUs of the vendors AMD,
 Intel, Qualcomm, and other ARM designs were affected. This class of new
 transient execution side-channel attacks abuses the speculative execution
 feature of modern CPU and defines an entirely new class of attacks. Furthermore,
-they are the first class of attacks that abuse microarchitectural bugs. We will
+they are the first class of attacks that abuse microarchitectural bugs. We
 review this class of attacks in more detail as I aim to implement a TEE that
 can defend against such an attack.\\
 
