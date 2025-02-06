@@ -148,7 +148,7 @@ called local APICs or \gls{lapic}. \gls{lapic}s
 forward interrupts from different sources to the respective CPU core. For
 example, the \gls{lapic} receives interrupts such as \gls{ipi}
 (\gls{ipi}) from other \gls{lapic}s and legacy interrupts from the
-PIC. CPU external devices are deliver their interrupt to the IOAPIC, which
+PIC. CPU external devices deliver their interrupts to the IOAPIC, which
 forwards them to the respective LAPIC. Figure~\ref{fig:state:technical:lapic}
 shows a schematic view on how the LAPIC of each CPU core integrates into the
 system. System software must change the CPU to \gls{g_pmode} to activate the
@@ -224,7 +224,7 @@ the data in any line. \\
 Caches use the principle of locality, which consists of two kinds of locality.
 The first is called spatial locality. Spatial locality describes the observation
 that if a program accesses data from the main memory, data located at nearby
-addresses will be the target of future accesses with a high probability. In this
+addresses are the target of future accesses with a high probability. In this
 case, the CPU tries to guess the size of the loaded structure to load parts
 missing in the cache in advance. If the CPU then accesses the neighbor of the
 first data, it already resides in the cache, lowering the latency. The second
