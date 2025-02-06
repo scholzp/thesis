@@ -39,12 +39,17 @@ enter_protected:
 .code32
 protected:
     /* TODO: Insert long jump here. */
-    // print the ready string, we are still alive
+    // Load the DS descriptor to all segment registers
     movl $0x10, %eax
     movl %eax, %ds
+    movl %eax, %ss
+    movl %eax, %es
+    movl %eax, %fs
+    movl %eax, %gs
+
+    // print the ready string, we are still alive
     movl $ready_txt, %ebx
     movl $ready_txt_end, %edi
-    // DEbug
     sub %ebx, %edi
     mov $0x3f8, %dx #Load port address 0x3f8
 print32:
@@ -57,7 +62,9 @@ print32:
     jne print32
     // Flat segmentation; We can jump where ever we want. This time the actual 
     // kernel's address is our target. The address is stored in target_kernel_addr
-    movl target_kernel_addr, %ecx 
+    movl target_kernel_addr, %ecx
+    movl mb2_magic, %eax
+    movl mb2_info_addr, %ebx
     jmp %ecx
     // Stop execution once we skip the hlt
     hlt
@@ -90,5 +97,9 @@ hello_txt:
 ready_txt:
     .ascii "Ready to jump into kernel\n"
 ready_txt_end:
+mb2_magic:
+    .word 0x36d76289
+mb2_info_addr:
+    .word 0x0
 target_kernel_addr:
     .long 0x01020304

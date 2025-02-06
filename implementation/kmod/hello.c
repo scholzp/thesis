@@ -135,11 +135,11 @@ int init_module(void)
 	}
 	// Wait for AP to output it's text
 	udelay(10000);
-	pr_info("***AP should now boot toyos.\n");
+	pr_info("***AP should now boot payload kernel.\n");
 	pr_info("***KMOD: All done; quit\n");
 	// Release lowmem
 	iounmap(lowmem_region);
-	reader_hello();
+	
 	return 0;
 }
 

@@ -25,7 +25,8 @@ writeShellScript "run_qemu_demo" ''
     -serial stdio \
     -m 512M \
     -no-reboot \
-    -cpu host \
     -no-shutdown \
-    -d pcall \
+    -debugcon file:./debugcon.txt \
+    -d cpu_reset,int,cpu,guest_errors \
+    -cpu host \
 ''

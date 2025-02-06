@@ -4,13 +4,20 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
+    argc
+    binutils
+    cargo-nextest
+    clang-tools
+    gcc
     gnumake
+    grub2
     niv
-    rustup
     pkgs.niv
     pkgs.cmake-format
-    clang-tools
+    qemu
+    rustup
     unixtools.xxd
+    xorriso
   ];
 
   # Environment variables

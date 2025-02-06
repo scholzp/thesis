@@ -22,10 +22,12 @@ let
   low_mem_size = "4096";
 
   stdenv = pkgs.stdenv;
+  # tee_kernel = pkgs.callPackage ./nix/tee_kernel.nix{};
   kmod = pkgs.callPackage ./nix/buildKmod.nix {inherit lib; inherit stdenv; inherit kernel; inherit start_address; inherit low_mem_size;};
   initrd = pkgs.callPackage ./nix/initrd.nix {inherit lib; inherit pkgs; inherit kmod; inherit tee_kernel;};
   runQemu = pkgs.callPackage ./nix/run_qemu.nix {inherit kernel; inherit initrd; inherit start_address; inherit low_mem_size;};
 in {
+  inherit tee_kernel;
   inherit initrd;
   inherit kmod;
   inherit runQemu;
