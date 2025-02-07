@@ -1,0 +1,98 @@
+\section{Attacks on Trusted Execution Environments}
+
+\subsubsection{Iago Attack Protection}
+\label{sec:20:iago}
+Checkoway et al. first published the class of Iago attacks in
+2013.\cite{checkoway2013iago}. The attacker model in this attack class can
+neither manipulate the application's code nor read the data from its memory. The
+application is assumed to be unmodified and linked against unmodified libraries
+but running on a malicious kernel. These application properties equal those of
+SGX. The attack aims to manipulate the application through malicious system call
+returns answered by the kernel. Such unexpected return values can cause the
+application to work against its security interest or even manipulate the control
+flow. SGX applications are potential targets for Iago attacks because they
+depend on the runtime outside the enclave. Intel TDX and AMD SEV-SNP rely on an
+untrusted hypervisor.\cite{tdx_whitepaper,kaplan_amd_2020} This untrusted
+hypervisor could mount Iago attacks similar to malicious kernels. The WeSee
+attack on AMD SEV-SNP, published by Schlüter et al. in 2024, shows that such an
+attack is possible on AMD SEV-SNP by injecting specific interrupts into the
+confidential VM.\cite{schluter2024wesee}\\
+
+\subsection{Interrupt Based Side Channel Attacks}
+\label{sec:20:interrupt_sca}
+An attacker can learn about memory access patterns and behavior by using
+interrupt-based side-channel attacks. The adversary in this class of attacks can
+disrupt the execution of an enclave or confidential VM by sending interrupts.
+These interrupts cause a context switch from the enclave or VM to the interrupt
+handler of the OS or hypervisor. The malicious system software can then inspect
+the state of the hardware, such as the L1 cache, the TLB, or the accessed or
+dirty bits of pages. System software thus can single-step the enclave or VM with
+a high enough frequency of malicious interrupts at instruction level
+granularity. Attacks that utilize interrupts to learn about the state of trusted
+execution environments exist for Intel SGX, ARM TrustZone, and AMD
+SEV.\cite{van2017sgx, kou2021load, wilke2023sev}\\
+
+
+
+\subsection{Transient Execution Attacks}
+\label{sec:20:transientattacks}
+In 2018, researchers published the Spectre and Meltdown
+attacks.\cite{kocher_spectre_2020, lipp_meltdown_2020} These attacks were the
+first to exploit the side effects of transient execution in modern CPUs and
+affected all commodity architectures. For example, CPUs of the vendors AMD,
+Intel, Qualcomm, and other ARM designs were affected. This class of new
+transient execution side-channel attacks abuses the speculative execution
+feature of modern CPU and defines an entirely new class of attacks. Furthermore,
+they are the first class of attacks that abuse microarchitectural bugs. We
+review this class of attacks in more detail as I aim to implement a TEE that
+can defend against such an attack.\\
+
+Modern CPUs use speculative execution to hide memory latencies. If, for example,
+the control flow forks, the decision of which path to take often depends on a
+value stored in memory. If this value is not persistent in the CPU cache, the
+CPU needs to fetch the value from the main memory. While waiting for the result,
+the CPU precalculates the most likely path. The CPU uses a dedicated buffer
+called Branch Target Buffer (BTB) to decide what path to precalculate. The
+Buffer records the n-th last paths taken, from which the CPU decides the most
+likely path. If the value arrives from the main memory, the CPU checks its
+decision and corrects its mistake, if any, to take the correct path. Overall,
+speculative execution can lead to a huge performance increase. Older
+publications see a performance increase from 27\% up to
+87\%.\cite{espasa1997out, mock2005empirical}\\
+
+In some cases, the decision about what path to precalculate is wrong. For
+performance reasons, the CPU does not revert its microarchitectural state, like
+cache content, on mistakes. Furthermore, if the wrongly speculatively executed
+code produces an exception, the CPU does not serve it because the CPU should
+never have executed the code path. Spectre and Meltdown-like attacks exploit
+this design decision to read arbitrary memory. The attacker trains the BTB to
+predict a path dependent on a memory address to prepare an attack. In the
+training phase, the attacker uses valid addresses when the control flow
+branches, which leads the CPU in the actual attack phase to predict that the
+path in the training will be valid. In the attack phase, the attacker chooses an
+arbitrary address. In preparation, the attacker evicts the value on which the
+chosen path depends from the cache. Now, the attacker chooses a value that would
+result in the decision to take a different code path. Because the attacker
+trained the CPU before to take the now invalid path, it executes this one
+speculatively until the requested value arrives. In the meantime, the CPU
+executes a malicious read to the main memory using the address chosen by the
+attacker. Later, the result of the malicious read returns and is stored in the
+CPU cache. In the meantime, the CPU notices its mistake and takes the other
+path. The value load resulting from the manipulated address still leaves traces
+on the microarchitectural state of the CPU (in this example, the cache), and the
+CPU does not throw an exception because the CPU should have never executed the
+in this path. The attacker can now extract the secret through a side channel of
+their choice. Because these attacks target microarchitectural behavior, a
+complete redesign is necessary to fix the issue. Software mitigations are
+available for specific attacks. For example, the Linux Kernel uses techniques
+called retpopline and Kernel Page Table Isolation (KPTI) to mitigate Spectre
+version 2 and Meltdown, respectively. On the other hand, software mitigations
+can greatly impact performance, reaching from a 10\% to 800\% overhead,
+depending on the workload.\cite{low2018overview} The class of transient
+execution attacks is still highly relevant today, with at least five attacks
+published in the last since 2023.
+\cite{ormandy2023zenbleed,trujillo2023inception, moghimi2023downfall,ragab_ghostrace_2024, wilke2024tdxdown}
+TEE solutions are affected, too, because these attacks enable attackers to read
+arbitrary memory. The problem persists, and no solution exists to mitigate
+transient execution attacks in general.\\
+
