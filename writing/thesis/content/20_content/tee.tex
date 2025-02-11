@@ -1,50 +1,92 @@
-\section{Trusted Execution Environments}
-\label{sec:state:tee}
+\section{Chain of Trust}
+\label{sec:20:chain_of_trust}
+Signatures of real humans differ because humans do not work entirely
+deterministic. The process of forging signatures of other humans requires
+dictations and practice by the forger because the human factor introduces
+entropy to the process of signing. On the contrary, computers are built to work
+deterministically. If the same input data is processed the same way, computers
+working as intended by humans produce the same output. It is, therefore, that
+authentication in the digital realm is implemented through cryptography and the
+knowledge of secrets. Communication involves at least two parties, which we want
+to call Alice and Bob in the following example.\\
 
-GlobalPlatform first used the term trusted execution environment to define a
-solution for mobile trusted computing solutions.\cite{globaltee} Since then,
-many definitions inconsistent and unspecific definitions have been published for
-TEEs until the first precise definition was proposed by Sabt
-et.al.\cite{sabt2015trusted}. They define the TEE in the following way:
-\begin{quote}
-    \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
-        environment that runs on a separation kernel. It guarantees the authenticity of
-        the executed code, the integrity of the runtime states (e.g., CPU registers,
-        memory, and sensitive I/O), and the confidentiality of its code, data, and
-        runtime states are stored on persistent memory. In addition, it shall be able
-        to provide a remote attestation that proves its trustworthiness for third
-        parties. The content of TEE is not static; it can be securely updated. The TEE
-        resists all software attacks as well as physical attacks performed on the
-        system's main memory. Attacks performed by exploiting backdoor security flaws
-        are not possible. \\
-    } \mbox{ -- Sabt et al.\cite{sabt2015trusted}}
-\end{quote}
+When referring to cryptographic algorithms, a secret is called a key, and based
+on the kind of keys used, we can differentiate between two kinds of
+cryptographic algorithms. In symmetric algorithms, the same key is used for
+encryption and decryption. Alice and Bob share thus the same secret. In
+asymmetric algorithms, each of Alice and Bob maintain their secrets. These keys
+have a public and a private part, respectively. Alice uses the public part of
+Bob's key when they want to encrypt a message for Bob, and only Bob's private
+key can decrypt a message in this way.\\
 
-The first half of the definition describes a secure execution environment. A
-secure execution environment can protect the integrity, authenticity, and
-confidentiality of the application hosted by the SEE. Malicious privileged
-software is thus neither able to modify the code, tamper with the runtime state,
-nor observe code and data through the runtime. Contrary to TEEs, a SEE cannot
-prove these claims against an appraiser, lest a third party outside the system.
-This is because it does not require a root of trust to present in the system. To
-prove its trustworthiness, TEEs employ remote attestation, which is the second
-important aspect of the definition.\\
+Digital signatures use asymmetric cryptography. Given that Alice wants to sign a
+message so that Bob can verify that Alice is the sender, both proceed as follows
+to fulfill their goal. First, Alice creates a pair of keys, a public and a
+private one. Alice uses their private key to sign a message and distributes
+their public key so others can use it to verify Alice's signature. To create
+their signature, Alice first generates a pair of keys. Alice then published
+their public key to make it available to Bob. When sending a message to Bob,
+Alice uses a signing function that takes the message and the private key as
+input and produces a signature, which Alice sends along the message to Bob.
+Knowing Alice's public key, Bob can now check the validity of the signature with
+the help of a signature validation function. This function takes the message,
+the signature, and Alice's public key as input and generates the answer to
+whether the message was signed with the signature.\\
 
-Trusted execution environment consists of several building blocks. The first
-building block Sabt et al. propose is a secure boot. This building block allows
-TEEs are used to verify that only a specific code of a particular state is
-loaded. For a secure boot, a chain of trust is formed by verifying each
-component's state. To generalize the secure boot requirement, a TEE must be
-capable of verifying what code it loads to the environment. The second building
-block is secure scheduling. Task executing in the TEE should not be able to
-disrupt the main OS. Moreover, a TEE should implement means to allow
-communication between the insecure world outside the TEE and the application
-executing inside of it. Secure storage is one more building block. It allows the
-application in the TEE to store data in a confidentiality, integrity, and
-freshness-conserving way. Trusted I/O paths secure the communication between a
-TEE and its users.
+Another problem arises when the network increases and Bob does not have the
+chance to receive Alice's key in person. To prevent man-in-the-middle attacks,
+Bob must ensure that the key they received over a network originates from Alice
+and not from a malicious entity. The attack surface increases with the number of
+different entities Bob wants to communicate with, as Bob needs to verify the
+keys of each of their communication partner. A third party, the \gls{ca}, that
+Bob trusts, can help with this. The \gls{ca}'s task is to pledge to Bob that a
+certified key belongs to Alice or any other chosen entity and not a potentially
+malicious third party. Bob trusts the \gls{ca} to do the keys' background check
+and only deliver certificates of trusted identities. Alice first registers their
+key with the \gls{ca}. The \gls{ca} own a pair of private and public keys too.
+It uses these keys to cryptographically bind Alice's public key to their
+identity. With this certificate, Bob can validate that a public key belongs to
+Alice by validating the certificate with the \gls{ca}s public key. Alice now
+delivers their public key and the certificate issued by the \gls{ca} to prove
+that the key belongs to them. As long as the \gls{ca} is not malicious, Bob can
+detect man-in-the-middle attacks if any malicious entity ships a key not
+belonging to Alice. While all participants can create certificates for their key
+with a dedicated key pair, such self-signed certificates could allow
+man-in-the-middle attacks again. Hence, a trusted third party creates the
+certificates.\\
 
-\subsection{Remote attestation}Remote attestation proves claims about a target
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=.6\textwidth]{images/chain_of_trust_placeholder.png}
+        \caption{Certifications in a chain of trust}
+        \label{fig:state:technical:chain_of_trust}
+    \end{center}
+\end{figure}
+\todo{This is a placeholder}
+
+Because the single \gls{ca} is trusted by all participants in the network,
+compromising it would mean control over all the communication in the network.
+The solution to this is distributed trust. Multiple \gls{ca}'s can exist in a
+network and compete with each other on the reputation gained from
+users.\cite{perlman1999overview} Such a \gls{pki} is used in many network
+technologies, such as HTTPS, that use the X.509 standard. Next to leaf
+certificates issued to Alice and Bob, a \gls{ca} can also issue certificates on
+keys that allow other entities to issue certificates and act as an \gls{ica},
+creating a chain of certificates.
+Figure~\ref{fig:state:technical:chain_of_trust} shows such a chain of
+certificates. If Bob now wants to establish trust in the certificate provided by
+Alice, they must first decide if they trust the \gls{ica}. The first step is to
+verify that Alice's certificate was issued by the \gls{ica}. In the next step,
+Bob needs to check all succeeding certificates until they reach the root
+\gls{ca} by validating the \gls{ica}s respective certificates with the public
+key of their issuer. In this way, Bob builds a chain of trust by verifying the
+validity of the chain of certificates and deciding to trust the root \gls{ca}.
+In the following section, we will see that such trust chains allow the
+implementation of software attestation schemes.
+
+\subsection{Remote attestation}
+\label{sec:20:remote_attestation}
+Remote attestation proves claims about a target
 by delivering evidence to an appraiser over a network that supports these
 claims. Before I further proceed to explain remote attestation, I want to
 define the following terms similar to Coker et. al.\cite{coker_principles_2011}
@@ -98,6 +140,51 @@ software or memory to manipulate a possible software solution. The following
 sections we review the most widely spread solutions to the hardware root of
 trust. These implementations rely on dedicated hardware modules such as add-in
 cards or unique, secure operation modes in CPU hardware. \\
+
+\section{Trusted Execution Environments}
+\label{sec:state:tee}
+GlobalPlatform first used the term trusted execution environment to define a
+solution for mobile trusted computing solutions.\cite{globaltee} Since then,
+many definitions inconsistent and unspecific definitions have been published for
+TEEs until the first precise definition was proposed by Sabt
+et.al.\cite{sabt2015trusted}. They define the TEE in the following way:
+\begin{quote}
+    \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
+        environment that runs on a separation kernel. It guarantees the authenticity of
+        the executed code, the integrity of the runtime states (e.g., CPU registers,
+        memory, and sensitive I/O), and the confidentiality of its code, data, and
+        runtime states are stored on persistent memory. In addition, it shall be able
+        to provide a remote attestation that proves its trustworthiness for third
+        parties. The content of TEE is not static; it can be securely updated. The TEE
+        resists all software attacks as well as physical attacks performed on the
+        system's main memory. Attacks performed by exploiting backdoor security flaws
+        are not possible. \\
+    } \mbox{ -- Sabt et al.\cite{sabt2015trusted}}
+\end{quote}
+
+The first half of the definition describes a secure execution environment. A
+secure execution environment can protect the integrity, authenticity, and
+confidentiality of the application hosted by the SEE. Malicious privileged
+software is thus neither able to modify the code, tamper with the runtime state,
+nor observe code and data through the runtime. Contrary to TEEs, a SEE cannot
+prove these claims against an appraiser, lest a third party outside the system.
+This is because it does not require a root of trust to present in the system. To
+prove its trustworthiness, TEEs employ remote attestation, which is the second
+important aspect of the definition.\\
+
+Trusted execution environment consists of several building blocks. The first
+building block Sabt et al. propose is a secure boot. This building block allows
+TEEs are used to verify that only a specific code of a particular state is
+loaded. For a secure boot, a chain of trust is formed by verifying each
+component's state. To generalize the secure boot requirement, a TEE must be
+capable of verifying what code it loads to the environment. The second building
+block is secure scheduling. Task executing in the TEE should not be able to
+disrupt the main OS. Moreover, a TEE should implement means to allow
+communication between the insecure world outside the TEE and the application
+executing inside of it. Secure storage is one more building block. It allows the
+application in the TEE to store data in a confidentiality, integrity, and
+freshness-conserving way. Trusted I/O paths secure the communication between a
+TEE and its users.
 
 \subsubsection{TPM}
 \label{sec:20:tpm}
