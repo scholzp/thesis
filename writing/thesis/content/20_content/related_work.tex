@@ -56,7 +56,7 @@ they decide how to interact with the enclave. Enma encrypts the memory of its
 enclaves. Security-wise, Enma is vulnerable to side-channel attacks as the other
 solution. The TCB is also increased when compared to hardware solutions. An
 application that trusts Enma must also trust the L4Re runtime environment as
-much as the firmware and hardware. Enma utilizes a TPM as the hardware root of
+much as the firmware and hardware. Enma utilizes a \gls{tpm} as the hardware root of
 trust for verifying the system state and that the expected versions of L4Re and
 Enma were booted. The soft backend of Enma, which I described in this
 section, can also be replaced by another backend. The authors propose an SGX
