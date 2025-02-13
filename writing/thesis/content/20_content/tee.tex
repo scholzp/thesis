@@ -46,7 +46,7 @@ and only deliver certificates of trusted identities. Alice first registers their
 key with the \gls{ca}. The \gls{ca} own a pair of private and public keys too.
 It uses these keys to cryptographically bind Alice's public key to their
 identity. With this certificate, Bob can validate that a public key belongs to
-Alice by validating the certificate with the \gls{ca}s public key. Alice now
+Alice by validating the certificate with the \glspl{ca} public key. Alice now
 delivers their public key and the certificate issued by the \gls{ca} to prove
 that the key belongs to them. As long as the \gls{ca} is not malicious, Bob can
 detect man-in-the-middle attacks if any malicious entity ships a key not
@@ -78,7 +78,7 @@ certificates. If Bob now wants to establish trust in the certificate provided by
 Alice, they must first decide if they trust the \gls{ica}. The first step is to
 verify that Alice's certificate was issued by the \gls{ica}. In the next step,
 Bob needs to check all succeeding certificates until they reach the root
-\gls{ca} by validating the \gls{ica}s respective certificates with the public
+\gls{ca} by validating the \glspl{ica} respective certificates with the public
 key of their issuer. In this way, Bob builds a chain of trust by verifying the
 validity of the chain of certificates and deciding to trust the root \gls{ca}.
 In the following section, we will see that such trust chains allow the
@@ -206,7 +206,7 @@ means can be used to implement \gls{tpm} services, such as unique processor
 modes with dedicated memory access rights.\\
 
 The most recent version of the \gls{tpm} specification is 2.0. The first
-widespread family of \gls{tpm}s followed specification version 1.2, which was
+widespread family of \glspl{tpm} followed specification version 1.2, which was
 implemented on modules shipped with personal computers beginning from the year
 2005.\cite{arthur2015practical} One major drawback of version 1.2 was the
 hard-coded usage of SHA-1 as a hashing algorithm. SHA-1 was first broken in 2005
@@ -214,7 +214,7 @@ by Wang et al.\cite{wang2005collision}. In 2011, NIST deprecated SHA-1 because
 of security concerns.\cite{nist-sha1} \gls{tpm} 1.2 is constrained with respect
 to its data structures to use either RSA or SHA-1\cite{tpm_architecture}
 Therefore, when designing \gls{tpm} 2.0, the \gls{tcg} decided to leave the
-exact algorithms specific \gls{tpm}s support open for their implementation.
+exact algorithms specific \glspl{tpm} support open for their implementation.
 Instead, the specification mandates a \gls{tpm} of version 2.0 to implement at
 least one symmetric hashing, one symmetric encryption, and one asymmetric
 encryption and signing algorithm. \\
@@ -257,27 +257,28 @@ words, the core root of trust is trusted software that is believed to perform
 the first measurement of the system correctly.\\
 
 Software that performs the measurements instructs the \gls{tpm} to store its
-result in \gls{pcr}. \gls{pcr}s are special registers of the \gls{tpm} that only
+result in \gls{pcr}. \glspl{pcr} are special registers of the \gls{tpm} that only
 allow the \texttt{extend} operation and only reset when resetting the system.
 The \texttt{extend} operation takes the current value of the \gls{pcr} and a new
 value as input, concatenates both values, and processes the result with the help
 of a hash function to create a digest that reflects the current system state.
-The \gls{tpm} can assist in creating a chain of trust with the help of
-\gls{pcr}s. An example of how to use the \gls{tpm} to build up a chain of trust
-is given by Arthur et al.\cite{arthur2015practical} The system software can
-extend a certain \gls{pcr} for each state before transferring control to the
-next application. The application can then check the respective \gls{pcr} to
-contain a known good value, indicating the platform was in a known good state
-before the application was launched. If so, it can continue operation. If not,
-the application might terminate. The measurement can also contain data about the
-application to be launched to make sure that the application's integrity is not
-hurt. Remote parties can use the \gls{tpm} attestation function to determine
-whether a system was in a known good state at some time. For this, the \gls{tpm}
-offers the possibility to sign the content of one or more \gls{pcr}s, producing
-a quote. The remote party receives the quote, the public key, and the message
-contents. The remote party can validate the certificate by executing the
-signature validation function. With the public key of the \gls{tpm}, a remote
-party can verify that the \gls{tpm} is genuine, and the vendor pledged to do so.
+The \gls{tpm} can assist in creating a chain of trust
+(see~\ref{sec:20:chain_of_trust}) with the help of \glspl{pcr}. An example of how
+to use the \gls{tpm} to build up a chain of trust is given by Arthur et
+al.\cite{arthur2015practical} The system software can extend a certain \gls{pcr}
+for each state before transferring control to the next application. The
+application can then check the respective \gls{pcr} to contain a known good
+value, indicating the platform was in a known good state before the application
+was launched. If so, it can continue operation. If not, the application might
+terminate. The measurement can also contain data about the application to be
+launched to make sure that the application's integrity is not hurt. Remote
+parties can use the \gls{tpm} attestation function to determine whether a system
+was in a known good state at some time. For this, the \gls{tpm} offers the
+possibility to sign the content of one or more \glspl{pcr}, producing a quote.
+The remote party receives the quote, the public key, and the message contents.
+The remote party can validate the certificate by executing the signature
+validation function. With the public key of the \gls{tpm}, a remote party can
+verify that the \gls{tpm} is genuine, and the vendor pledged to do so.
 \todo{Do we need information on how system software interacts with the TPM?}
 
 \subsection{Intel SGX}
@@ -384,9 +385,9 @@ processors and the ARM Cortex-M microcontroller-aimed processors. In the
 following, we concentrate on the implementation of ARM application
 processors. Pinto and Santos did an extensive survey of ARM TrustZone in 2019.
 In their work, they describe technical properties of AMR TrustZone and how to
-use it for the implementation of \gls{tee}s and hypervisors. Moreover they
+use it for the implementation of \glspl{tee} and hypervisors. Moreover they
 explain technical details of Trustzone and review it's security properties
-against other \gls{tee}s.\cite{pinto_demystifying_2019}\\
+against other \glspl{tee}.\cite{pinto_demystifying_2019}\\
 
 Conceptually, ARM TrustZone-enabled processors offer three processor operation
 modes. The most privileged mode is the Secure Monitor mode or short SM mode. The
