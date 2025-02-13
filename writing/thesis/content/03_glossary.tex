@@ -2,6 +2,11 @@
 
 %
 % C ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{g_ca}
+{
+    name=certification authority,
+    description={Trusted third party that issues certificates in a cryptographic system}
+}
 \newglossaryentry{g_cpuid}
 {
     name=CPUID,
@@ -9,6 +14,11 @@
 }
 %
 % E ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{g_ek}
+{
+    name=endorsement key,
+    description={Key burned to a security device by the manufacturer by which the security device can be identified}
+}
 \newglossaryentry{g_eoi}
 {
     name=end of interrupt,
@@ -29,6 +39,11 @@
     name=interrupt descriptor table,
     description={Data structure that holds a table of interrupt handlers. The interrupt vector is used by the CPU to
             call the respective interrupt handler routine.}
+}
+\newglossaryentry{g_ica}
+{
+    name=intermediate certification authority,
+    description={Certification authority that is not the root certification authority}
 }
 \newglossaryentry{g_ipi}
 {
@@ -82,11 +97,22 @@
 }
 %
 % P ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{g_pcr}
+{
+    name=platform configuration register,
+    description={Register of a TPM available to (system) software to store the results of a measurement in shielded
+            memory}
+}
 \newglossaryentry{g_pf}
 {
     name=page fault,
     description={Fault resulting from erroneous memory access. This can be for example a missing page table entry or
             rights violation}
+}
+\newglossaryentry{g_pki}
+{
+    name=public key infrastructure,
+    description={Infrastructure to manage public encryption keys and bind them to identities}
 }
 \newglossaryentry{g_pmc}
 {
@@ -151,6 +177,11 @@
 }
 %
 % T ----------------------------------------------------------------------------------------------------------------
+\newglossaryentry{g_tcg}
+{
+    name=Trusted Computing Group,
+    description={Consortium that manages and developes open standards for trusted computing platforms}
+}
 \newglossaryentry{g_tee}
 {
     name=trusted execution environment,
@@ -161,4 +192,9 @@
 {
     name=translation lookaside buffer,
     description={Cache structure that stores translations from virtual to physical addresses}
+}
+\newglossaryentry{g_tpm}
+{
+    name=trusted platform module,
+    description={Isolated cryptographic coprocessor that is able to measure the state of a platform and attest to it's measurements}
 }
