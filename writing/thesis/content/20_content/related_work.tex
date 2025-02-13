@@ -62,27 +62,27 @@ Enma were booted. The soft backend of Enma, which I described in this
 section, can also be replaced by another backend. The authors propose an SGX
 back end that utilizes hardware features.
 
-\subsection{Iago mitigations}
-Arnautov et al. and Baumann et al. published two potential countermeasures
-against Iago attacks in 2016 and 2015, SCONE and Haven, respectively. SCONE aims
-to protect applications in Linux environments, while Haven protects applications
-in Windows environments.\cite{arnautov_scone_2016, baumann_shielding_2015} Both
-SCONE and Haven try to solve two problems with using SGX. The first problem is
-the threat described through Iago attacks, and the second is to make legacy
-applications executable with SGX enclaves without modifying them. SCONE achieves
-this by integrating a modified Linux library OS consisting of the Linux Kernel
-Library and the musl libc implementation, aiming for a similar solution as
-Haven. Haven uses a reduced Windows runtime environment to create a library OS
-as part of the enclave. In both cases, the library OS implements or emulates
-system calls that the legacy application would otherwise perform to the
-potentially malicious OS. Additionally, in both solutions, the library OS
-emulates instructions that the execution of SGX enclaves otherwise forbids.
-Haven and SCONE implement a shielding component for system calls that the
-library OS cannot emulate. This shielding component reduces the interface
-through which system calls to the host kernel are made. Moreover, the shielding
-component in both solutions implements sanity checks of the values returned by
-the host OS system calls. Both solutions reduce the TCB by integrating a reduced
-subset of the respective systems' runtime environment.
+% \subsection{Iago mitigations}
+% Arnautov et al. and Baumann et al. published two potential countermeasures
+% against Iago attacks in 2016 and 2015, SCONE and Haven, respectively. SCONE aims
+% to protect applications in Linux environments, while Haven protects applications
+% in Windows environments.\cite{arnautov_scone_2016, baumann_shielding_2015} Both
+% SCONE and Haven try to solve two problems with using SGX. The first problem is
+% the threat described through Iago attacks, and the second is to make legacy
+% applications executable with SGX enclaves without modifying them. SCONE achieves
+% this by integrating a modified Linux library OS consisting of the Linux Kernel
+% Library and the musl libc implementation, aiming for a similar solution as
+% Haven. Haven uses a reduced Windows runtime environment to create a library OS
+% as part of the enclave. In both cases, the library OS implements or emulates
+% system calls that the legacy application would otherwise perform to the
+% potentially malicious OS. Additionally, in both solutions, the library OS
+% emulates instructions that the execution of SGX enclaves otherwise forbids.
+% Haven and SCONE implement a shielding component for system calls that the
+% library OS cannot emulate. This shielding component reduces the interface
+% through which system calls to the host kernel are made. Moreover, the shielding
+% component in both solutions implements sanity checks of the values returned by
+% the host OS system calls. Both solutions reduce the TCB by integrating a reduced
+% subset of the respective systems' runtime environment.
 
 \subsection{Interrupt based side channel defenses}
 To defend against interrupt-based side-channel attacks, Cui et al. proposed a
