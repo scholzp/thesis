@@ -1,22 +1,22 @@
 \section{Attacks on Trusted Execution Environments}
 
-\subsubsection{Iago Attack Protection}
-\label{sec:20:iago}
-Checkoway et al. first published the class of Iago attacks in
-2013.\cite{checkoway2013iago}. The attacker model in this attack class can
-neither manipulate the application's code nor read the data from its memory. The
-application is assumed to be unmodified and linked against unmodified libraries
-but running on a malicious kernel. These application properties equal those of
-SGX. The attack aims to manipulate the application through malicious system call
-returns answered by the kernel. Such unexpected return values can cause the
-application to work against its security interest or even manipulate the control
-flow. SGX applications are potential targets for Iago attacks because they
-depend on the runtime outside the enclave. Intel TDX and AMD SEV-SNP rely on an
-untrusted hypervisor.\cite{tdx_whitepaper,kaplan_amd_2020} This untrusted
-hypervisor could mount Iago attacks similar to malicious kernels. The WeSee
-attack on AMD SEV-SNP, published by Schlüter et al. in 2024, shows that such an
-attack is possible on AMD SEV-SNP by injecting specific interrupts into the
-confidential VM.\cite{schluter2024wesee}\\
+% \subsubsection{Iago Attacks}
+% \label{sec:20:iago}
+% Checkoway et al. first published the class of Iago attacks in
+% 2013.\cite{checkoway2013iago}. The attacker model in this attack class can
+% neither manipulate the application's code nor read the data from its memory. The
+% application is assumed to be unmodified and linked against unmodified libraries
+% but running on a malicious kernel. These application properties equal those of
+% SGX. The attack aims to manipulate the application through malicious system call
+% returns answered by the kernel. Such unexpected return values can cause the
+% application to work against its security interest or even manipulate the control
+% flow. SGX applications are potential targets for Iago attacks because they
+% depend on the runtime outside the enclave. Intel TDX and AMD SEV-SNP rely on an
+% untrusted hypervisor.\cite{tdx_whitepaper,kaplan_amd_2020} This untrusted
+% hypervisor could mount Iago attacks similar to malicious kernels. The WeSee
+% attack on AMD SEV-SNP, published by Schlüter et al. in 2024, shows that such an
+% attack is possible on AMD SEV-SNP by injecting specific interrupts into the
+% confidential VM.\cite{schluter2024wesee}\\
 
 \subsection{Interrupt Based Side Channel Attacks}
 \label{sec:20:interrupt_sca}
@@ -31,8 +31,6 @@ a high enough frequency of malicious interrupts at instruction level
 granularity. Attacks that utilize interrupts to learn about the state of trusted
 execution environments exist for Intel SGX, ARM TrustZone, and AMD
 SEV.\cite{van2017sgx, kou2021load, wilke2023sev}\\
-
-
 
 \subsection{Transient Execution Attacks}
 \label{sec:20:transientattacks}

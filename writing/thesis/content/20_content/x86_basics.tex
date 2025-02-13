@@ -22,13 +22,13 @@ important to allow advanced operating systems. These features extended the
 instruction set and microarchitecture implemented by the Intel 80286. The Intel
 80286 could address, for example, 16 MiB of physical memory through 24 address
 bus bits and could address 1 GiB of virtual memory. Moreover, segment registers
-now contain an index in a data structure called \gls{gdt}. The \gls{gdt} contains descriptors that store
-information on segments, such as base address and access rights. The Intel 80286
-implements access rights as rings, and the lower the numerical access level, the
-higher the privileges of the executing software are. The introduction of the
-\gls{gdt} allowed virtual memory implementation with memory protection. A
-new \gls{mmu}, added for the first time on chip in the
-80286 allowed fast virtual to physical address translation. \\
+now contain an index in a data structure called \gls{gdt}. The \gls{gdt}
+contains descriptors that store information on segments, such as base address
+and access rights. The Intel 80286 implements access rights as rings, and the
+lower the numerical access level, the higher the privileges of the executing
+software are. The introduction of the \gls{gdt} allowed virtual memory
+implementation with memory protection. A new \gls{mmu}, added for the first time
+on chip in the 80286 allowed fast virtual to physical address translation. \\
 
 When using the features newly added to the 80286 the processor was incompatible
 with the original Intel 8086. Because the result would have been that all
@@ -104,8 +104,8 @@ Interrupts, on the other hand, can be divided into two classes:
           software can temporarily disable them. The interrupt controller holds
           them back until interrupts are enabled again.
     \item \Gls{nmi}~(\gls{nmi}): Software cannot turn off
-          \gls{nmi}s. The interrupt controller delivers~
-          \gls{nmi}s to the CPU unless it currently serves another~
+          \glspl{nmi}. The interrupt controller delivers~
+          \glspl{nmi} to the CPU unless it currently serves another~
           \gls{nmi}. When the CPU executes the IRET instruction in the
           interrupt handler, the interrupt controller can deliver the next~
           \gls{nmi}.
@@ -133,7 +133,7 @@ the serving routine is done, before it can receive the next interrupt. \\
 \begin{figure}
     \begin{center}
         \includegraphics[width=.6\textwidth]{images/lapic_placeholder.png}
-        \caption{Illustration of how \gls{lapic}s integrate in a
+        \caption{Illustration of how \glspl{lapic} integrate in a
             multiprocessor system}
         \label{fig:state:technical:lapic}
     \end{center}
@@ -144,10 +144,10 @@ Intel later introduced the advanced programmable interrupt controller, short
 APIC with its 486 processor line to allow the system to operate with multiple
 CPUs. In modern CPUs, multiprocessor configurations are prevalent, and each
 processor core has its own APIC. Because the APIC is CPU local, these APICs are
-called local APICs or \gls{lapic}. \gls{lapic}s
+called local APICs or \gls{lapic}. \glspl{lapic}
 forward interrupts from different sources to the respective CPU core. For
 example, the \gls{lapic} receives interrupts such as \gls{ipi}
-(\gls{ipi}) from other \gls{lapic}s and legacy interrupts from the
+(\gls{ipi}) from other \glspl{lapic} and legacy interrupts from the
 PIC. CPU external devices deliver their interrupts to the IOAPIC, which
 forwards them to the respective LAPIC. Figure~\ref{fig:state:technical:lapic}
 shows a schematic view on how the LAPIC of each CPU core integrates into the
@@ -305,13 +305,13 @@ Exclusive caches do not necessarily contain items of lower cache levels, and the
 synchronization of modified items needs to be propagated in other ways. The
 additional "owned" state of the MOESI protocol solves this issue.
 
-\subsection{Hardware Performance counters}
+\subsection{Hardware Performance Monitoring Counters}
 \label{sec:state:technical:hpc}
-The first x86 CPU implementing hardware \gls{pmc} \gls{pmc} and
+The first x86 CPU implementing hardware \glspl{pmc} and
 documenting them was the Intel Pentium Pro in 1995, implementing the P6
 microarchitecture.\cite{intel_sdm} The x86\_64 \gls{isa} specificities
 four freely programmable architectural hardware
-\gls{pmc}s.\cite{amd_manual} Concrete processor implementation can offer
+\glspl{pmc}.\cite{amd_manual} Concrete processor implementation can offer
 additional counters. Similarly, the \gls{isa} specifies architectural
 events that must be present in every processor implementing x86\_64. Additional
 events are vendor and implementation-specific. The four counters can be
@@ -320,16 +320,15 @@ implementation. Vendors of x86 CPUs publish what processor supports what
 additional events in their manuals. Moreover, a CPU notes what events it
 supports in the result of the \gls{g_cpuid} instruction. \\
 
-In x86 hardware, Performance counters are implemented by a set of two \gls{msr}s
-(\gls{msr}) per counter. One \gls{msr} can be programmed by system
-software with the event to measure, while a second \gls{msr} counts the
-occurrence of the respective event. As noted, programming has to be done by
-system software with elevated privileges. Reading \gls{pmc}s can be done
-with privileged instruction or from user space with the RDPMC instruction. In
-this way, a program can poll the values of counters. The system software can
-also program a threshold for a \gls{pmi}. Once the
-\gls{pmc} values exceed the threshold, the \gls{pmi} is triggered,
-offering an alternative to expensive polling techniques.\\
+In x86 hardware, Performance counters are implemented by a set of two
+\glspl{msr} per counter. One \gls{msr} can be programmed by system software with
+the event to measure, while a second \gls{msr} counts the occurrence of the
+respective event. As noted, programming has to be done by system software with
+elevated privileges. Reading \glspl{pmc} can be done with privileged instruction
+or from user space with the RDPMC instruction. In this way, a program can poll
+the values of counters. The system software can also program a threshold for a
+\gls{pmi}. Once the \gls{pmc} values exceed the threshold, the \gls{pmi} is
+triggered, offering an alternative to expensive polling techniques.\\
 
 When I use hardware \gls{pmc}, I must use the proper technique adopted to
 the environment in which I read the counter values. Das et al. found in a
