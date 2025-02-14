@@ -9,7 +9,7 @@
 }:
 
 let
-  kmodMod = "${kmod}/lib/modules/${kmod.kernel-version}/updates/kmod.ko.xz";
+  kmodMod = "${kmod}/lib/modules/${kmod.kernel-version}/updates/kmod.ko";
   Tkernel = "${tee_kernel}";
 in
 pkgs.makeInitrd {
@@ -35,7 +35,7 @@ pkgs.makeInitrd {
       mount -t tmpfs none /tmp
       mount -t tmpfs none /run
 
-      # Insert the debugcon kernel module.
+      # Insert the tee kernel module.
       cp ${Tkernel} /tmp/tee_kernel
       insmod ${kmodMod}
 
