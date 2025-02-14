@@ -13,7 +13,9 @@ let
   pkgs = import <nixpkgs> { };
 in
 let
-  kernel = pkgs.linuxPackages.kernel;
+  # select a LTS kernel
+  selectedLinuxKernelPkg = pkgs.linux_6_6; 
+  kernel = pkgs.callPackage ./nix/linux_kernel.nix { inherit selectedLinuxKernelPkg; };
   lib = pkgs.lib;
   tee_kernel = implementation/kernel.elf32;
   # Hardcode start address of reserved low memory.
@@ -26,9 +28,12 @@ let
   kmod = pkgs.callPackage ./nix/buildKmod.nix {inherit lib; inherit stdenv; inherit kernel; inherit start_address; inherit low_mem_size;};
   initrd = pkgs.callPackage ./nix/initrd.nix {inherit lib; inherit pkgs; inherit kmod; inherit tee_kernel;};
   runQemu = pkgs.callPackage ./nix/run_qemu.nix {inherit kernel; inherit initrd; inherit start_address; inherit low_mem_size;};
+  createIsoImage = lib.makeOverridable(pkgs.callPackage ./nix/create-iso-image.nix {inherit start_address; inherit low_mem_size;});
+  isoImage = createIsoImage {inherit kernel; inherit initrd; };
 in {
   inherit tee_kernel;
   inherit initrd;
   inherit kmod;
   inherit runQemu;
+  inherit isoImage;
 }
