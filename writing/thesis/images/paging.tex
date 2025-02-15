@@ -1,0 +1,95 @@
+\documentclass[crop,tikz]{standalone}
+\begin{document}
+\begin{tikzpicture}[scale=1]
+    % % Virtual address ----------------------------------------------------------
+    % %% fields with braces
+    \coordinate (x) at (0, 7);
+    \draw (x) rectangle ($ (x) + (2, 1)$) node[pos=0.5, scale=.75] {Sign Extension};
+
+    %% bit numbers
+    \node[scale=.75, align=center] at ($ (x) + (0, 1.15)$) {63};
+    \node[scale=.75, align=center] at ($ (x) + (2, 1.15)$) {47 48};
+    \node[scale=.75, align=center] at ($ (x) + (4, 1.15)$) {39 38};
+    \node[scale=.75, align=center] at ($ (x) + (6, 1.15)$) {30 29};
+    \node[scale=.75, align=center] at ($ (x) + (8, 1.15)$) {21 20};
+    \node[scale=.75, align=center] at ($ (x) + (10, 1.15)$) {12 11};
+    \node[scale=.75, align=center] at ($ (x) + (12, 1.15)$) {0};
+    \node[scale=.8, align=center] at ($ (x) + (6, 1.6)$) {Virtual Address};
+
+    % Virtual address offset fields w/ arrows pointing into the respective table
+    \draw ($ (x) + (2, 0)$) rectangle ($ (x) + (4, 1)$) node[pos=0.5, scale=.75, align=center] {Page Map\\ Level 4\\Offset (PML4)};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=1pt, mirror, aspect=0.3}] ($ (x) + (2, 0)$) -- ($ (x) + (4, 0)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2.6, -0.2)$) -- ($ (x) + (2.6, -2.75)$) -- ($ (x) + (2.95, -2.75)$);
+
+    \coordinate (x) at (2, 7);
+    \draw ($ (x) + (2, 0)$) rectangle ($ (x) + (4, 1)$) node[pos=0.5, scale=.75, align=center] {Page Directory\\Pointer Offset};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=1pt, mirror, aspect=0.3}] ($ (x) + (2, 0)$) -- ($ (x) + (4, 0)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2.6, -0.2)$) -- ($ (x) + (2.6, -4)$) -- ($ (x) + (2.95, -4)$);
+
+    \coordinate (x) at (4, 7);
+    \draw ($ (x) + (2, 0)$) rectangle ($ (x) + (4, 1)$) node[pos=0.5, scale=.75, align=center] {Page Directory\\Offset};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=1pt, mirror, aspect=0.3}] ($ (x) + (2, 0)$) -- ($ (x) + (4, 0)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2.6, -0.2)$) -- ($ (x) + (2.6, -3.25)$) -- ($ (x) + (2.95, -3.25)$);
+
+    \coordinate (x) at (6, 7);
+    \draw ($ (x) + (2, 0)$) rectangle ($ (x) + (4, 1)$) node[pos=0.5, scale=.75, align=center] {Page Table\\Offset};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=1pt, mirror, aspect=0.3}] ($ (x) + (2, 0)$) -- ($ (x) + (4, 0)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2.6, -0.2)$) -- ($ (x) + (2.6, -4)$) -- ($ (x) + (2.95, -4)$);
+
+    \coordinate (x) at (8, 7);
+    \draw ($ (x) + (2, 0)$) rectangle ($ (x) + (4, 1)$) node[pos=0.5, scale=.75, align=center] {Physical Page\\Offset};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=1pt, mirror, aspect=0.3}] ($ (x) + (2, 0)$) -- ($ (x) + (4, 0)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2.6, -0.2)$) -- ($ (x) + (2.6, -3.25)$) -- ($ (x) + (2.95, -3.25)$);
+
+    % % PML4T --------------------------------------------------------------------
+    \coordinate (x) at (2.5, 5.25);
+    \node[scale=.75, align=center] at ($ (x) + (.95, 0.75)$) {Page-Map\\Level-4\\Table};
+    \draw[] ($ (x) + (0.45, -0)$) rectangle ($ (x) + (1.5, -3)$);
+    \draw[] ($ (x) + (0.45, -.25)$) rectangle ($ (x) + (1.5, -1)$) node[pos=0.5, scale=.75, align=center] {PML4E};
+    \draw [decorate,decoration={brace,amplitude=3pt,raise=1pt}] ($ (x) + (1.5, -.25)$) -- ($ (x) + (1.5, -1)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (1.65, -.625)$) -- ($ (x) + (1.8, -.625)$) -- ($ (x) + (1.8, -3)$) -- ($ (x) + (2.45, -3)$);
+
+    % % PDPT ---------------------------------------------------------------------
+    \coordinate (x) at (4.5, 5.25);
+    \node[scale=.75, align=center] at ($ (x) + (.95, .75)$) {Page\\Directory\\Pointer\\Table};
+    \draw[] ($ (x) + (0.45, -0)$) rectangle ($ (x) + (1.5, -3)$);
+    \draw[] ($ (x) + (0.45, -1.5)$) rectangle ($ (x) + (1.5, -2.25)$) node[pos=0.5, scale=.75, align=center] {PDPE};
+    \draw [decorate,decoration={brace,amplitude=3pt,raise=1pt}] ($ (x) + (1.5, -1.5)$) -- ($ (x) + (1.5, -2.25)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (1.65, -1.875)$) -- ($ (x) + (1.8, -1.875)$) -- ($ (x) + (1.8, -3)$) -- ($ (x) + (2.45, -3)$);
+
+    % % PDT ----------------------------------------------------------------------
+    \coordinate (x) at (6.5, 5.25);
+    \node[scale=.75, align=center] at ($ (x) + (.95, .75)$) {Page\\Directory\\Table};
+    \draw[] ($ (x) + (0.45, -0)$) rectangle ($ (x) + (1.5, -3)$);
+    \draw[] ($ (x) + (0.45, -.75)$) rectangle ($ (x) + (1.5, -1.5)$) node[pos=0.5, scale=.75, align=center] {PDE};
+    \draw [decorate,decoration={brace,amplitude=3pt,raise=1pt}] ($ (x) + (1.5, -.75)$) -- ($ (x) + (1.5, -1.5)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (1.65, -1.125)$) -- ($ (x) + (1.8, -1.125)$) -- ($ (x) + (1.8, -3)$) -- ($ (x) + (2.45, -3)$);
+
+    % % PT -----------------------------------------------------------------------y
+    \coordinate (x) at (8.5, 5.25);
+    \node[scale=.75, align=center] at ($ (x) + (.95, .75)$) {Page\\Table};
+    \draw[] ($ (x) + (0.45, -0)$) rectangle ($ (x) + (1.5, -3)$);
+    \draw[] ($ (x) + (0.45, -1.5)$) rectangle ($ (x) + (1.5, -2.25)$) node[pos=0.5, scale=.75, align=center] {PTE};
+    \draw [decorate,decoration={brace,amplitude=3pt,raise=1pt}] ($ (x) + (1.5, -1.5)$) -- ($ (x) + (1.5, -2.25)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (1.65, -1.875)$) -- ($ (x) + (1.8, -1.875)$) -- ($ (x) + (1.8, -3)$) -- ($ (x) + (2.45, -3)$);
+
+    % % Phys ---------------------------------------------------------------------
+    \coordinate (x) at (10.5, 5.25);
+    \node[scale=.8, align=center] at ($ (x) + (.95, .75)$) {Page\\Frame};
+    \draw[] ($ (x) + (0.45, -0)$) rectangle ($ (x) + (1.5, -3)$);
+    \draw[] ($ (x) + (0.45, -.75)$) rectangle ($ (x) + (1.5, -1.5)$) node[pos=0.5, scale=.75, align=center] {Physical\\Address};
+
+    % % CR3 ----------------------------------------------------------------------
+    \coordinate (x) at (0, 1);
+    \draw[] (x) rectangle ($ (x) + (12, -1)$);
+    \draw[] ($ (x) + (2.4, 0)$) rectangle ($ (x) + (9.6, -1)$) node[pos=0.5, scale=.75, align=center] {Page-Map Level-4 Base Address};
+    \node[scale=.8, align=center] at ($ (x) + (0, 0.15)$) {63};
+    \node[scale=.8, align=center] at ($ (x) + (2.4, .15)$) {51};
+    \node[scale=.8, align=center] at ($ (x) + (9.6, .15)$) {12};
+    \node[scale=.8, align=center] at ($ (x) + (12, .15)$) {0};
+    \node[scale=.8, align=center] at ($ (x) + (6, -1.25)$) {CR3};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=9pt}] ($ (x) + (2.4, 0)$) -- ($ (x) + (9.6, 0)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (6, 0.5)$) -- ($ (x) + (6, .75)$)
+    -- ($ (x) + (2.6, 0.75)$) -- ($ (x) + (2.6, 1.25)$) -- ($ (x) + (2.95, 1.25)$);
+\end{tikzpicture}
+\end{document}
