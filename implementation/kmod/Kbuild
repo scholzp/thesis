@@ -1,2 +1,2 @@
 obj-m := kmod.o
-kmod-y := elf_reader.o hello.o
+kmod-y := elf_reader.o main.o chardev.o
