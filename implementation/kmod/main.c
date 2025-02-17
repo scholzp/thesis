@@ -23,9 +23,11 @@
  */
 #include "startup_code.h"
 #include "elf_reader.h"
+#include "chardev.h"
 
 MODULE_LICENSE("GPL");
-struct file *file_open(const char *path, int flags, int rights) ;
+struct file *file_open(const char *path, int flags, int rights);
+void start_ap(void);
 // START_ADDRESS comes from make as -D compiler flag
 const size_t AP_LOWMEM_ADDRESS = START_ADDRESS;
 // currently 1 page. TODO: Make this also use configurable from nix 
@@ -79,86 +81,92 @@ int init_module(void)
 		++lowmem_offset;
 	}
 
+	// setup character device for communication
+	init_tee_chardev();
 	// Activate the AP
-	{
-		// send INIT IPI via LAPIC. Does not work for x2APIC mode
-		u64 lapic_addr;
-		void __iomem *lapic_page;
-		unsigned long flags;
-		size_t num_startups = 0;
-		// int cpu;
-
-		//Disable Interrupts because the following better does not get
-		//interrupted...
-		local_irq_save(flags);
-
-		pr_info("***KMOD: I'm CPU %d of a total of %d CPUs.", smp_processor_id(), num_online_cpus());
-		// Read the address from the APIC Base Address Register of the CPU
-		rdmsrl(0x0000001b, lapic_addr);
-		// Bits 12-51 contain the pages address. The lowest 12 bits contain
-		// additional information about the APIC but are *NOT* part of the
-		// address ~~> Mask them to get the address of the physical frame
-		lapic_page = ioremap(lapic_addr & (~0xFFFu), 4096);
-		
-		// We now got the physical address mapped. Let's do the IPI
-		pr_info("***KMOD: LAPIC ADDRESS: 0x%016llx MAPPED TO: 0x%016lx\n", lapic_addr & (~0xFFFu), ((size_t)lapic_page));
-		pr_info("***KMOD: lapic ID 0x%08x\n", ioread32(lapic_page + 0x20) );
-		pr_info("***KMOD: lapic version 0x%08x\n", ioread32(lapic_page + 0x30));
-
-		// Clear APIC errors
-		iowrite32(0 , lapic_page + 0x280);
-		// Select AP
-		iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
-		// Trigger INIT IPI and wait for delivery
-		iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x00C500, lapic_page + 0x300);
-		do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
-		// Select AP again and deassert, then wait for delivery
-		iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
-		iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x008500, lapic_page + 0x300);
-		do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
-		//Wait 10 ms
-		udelay(10000);
-
-		// send STARTUP IPI (twice)
-		for(num_startups = 0; num_startups < 2; ++num_startups) {
-			// Clear errors; Seclect AP; Trigger STARTUP IP; wait
-			iowrite32(0, lapic_page + 0x280); 
-			iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
-			// set delivery mode to 0x6 (startup) and vector to 0xc8 (segment of reserved low mem)
-			iowrite32((ioread32(lapic_page + 0x300) & 0xfff0f800) | 0x0006c8, lapic_page + 0x300);
-			udelay(200);
-			do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
-		}
-		// Release ressources; Enable interrupts
-		iounmap(lapic_page);
-		local_irq_restore(flags);
-	}
+	start_ap();
+	
 	// Wait for AP to output it's text
 	udelay(10000);
 	pr_info("***AP should now boot payload kernel.\n");
-	pr_info("***KMOD: All done; quit\n");
+	pr_info("***KMOD: Initialization successful\n");
 	// Release lowmem
 	iounmap(lowmem_region);
 	
 	return 0;
 }
 
+void start_ap(void) {
+	// send INIT IPI via LAPIC. Does not work for x2APIC mode
+	u64 lapic_addr;
+	void __iomem *lapic_page;
+	unsigned long flags;
+	size_t num_startups = 0;
+	// int cpu;
+
+	//Disable Interrupts because the following better does not get
+	//interrupted...
+	local_irq_save(flags);
+
+	pr_info("***KMOD: I'm CPU %d of a total of %d CPUs.", smp_processor_id(), num_online_cpus());
+	// Read the address from the APIC Base Address Register of the CPU
+	rdmsrl(0x0000001b, lapic_addr);
+	// Bits 12-51 contain the pages address. The lowest 12 bits contain
+	// additional information about the APIC but are *NOT* part of the
+	// address ~~> Mask them to get the address of the physical frame
+	lapic_page = ioremap(lapic_addr & (~0xFFFu), 4096);
+	
+	// We now got the physical address mapped. Let's do the IPI
+	pr_info("***KMOD: LAPIC ADDRESS: 0x%016llx MAPPED TO: 0x%016lx\n", lapic_addr & (~0xFFFu), ((size_t)lapic_page));
+	pr_info("***KMOD: lapic ID 0x%08x\n", ioread32(lapic_page + 0x20) );
+	pr_info("***KMOD: lapic version 0x%08x\n", ioread32(lapic_page + 0x30));
+
+	// Clear APIC errors
+	iowrite32(0 , lapic_page + 0x280);
+	// Select AP
+	iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+	// Trigger INIT IPI and wait for delivery
+	iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x00C500, lapic_page + 0x300);
+	do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+	// Select AP again and deassert, then wait for delivery
+	iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+	iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x008500, lapic_page + 0x300);
+	do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+	//Wait 10 ms
+	udelay(10000);
+
+	// send STARTUP IPI (twice)
+	for(num_startups = 0; num_startups < 2; ++num_startups) {
+		// Clear errors; Seclect AP; Trigger STARTUP IP; wait
+		iowrite32(0, lapic_page + 0x280); 
+		iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+		// set delivery mode to 0x6 (startup) and vector to 0xc8 (segment of reserved low mem)
+		iowrite32((ioread32(lapic_page + 0x300) & 0xfff0f800) | 0x0006c8, lapic_page + 0x300);
+		udelay(200);
+		do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+	}
+	// Release ressources; Enable interrupts
+	iounmap(lapic_page);
+	local_irq_restore(flags);
+}
+
 struct file *file_open(const char *path, int flags, int rights) 
 {
-    struct file *filp = NULL;
+	struct file *filp = NULL;
 
-    int err = 0;
+	int err = 0;
 
-    filp = filp_open(path, flags, rights);
-    if (IS_ERR(filp)) {
+	filp = filp_open(path, flags, rights);
+	if (IS_ERR(filp)) {
 		pr_info("Error reading file!");
-        err = PTR_ERR(filp);
-        return NULL;
-    }
-    return filp;
+		err = PTR_ERR(filp);
+		return NULL;
+	}
+	return filp;
 }
 
 void cleanup_module(void)
 {
+	purge_tee_chardev();
 	printk(KERN_INFO "Goodbye world 1.\n");
 }
