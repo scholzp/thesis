@@ -39,8 +39,11 @@ pkgs.makeInitrd {
       cp ${Tkernel} /tmp/tee_kernel
       insmod ${kmodMod}
 
-       # Enter bash (the root shell)
-       setsid bash
+      #create device nodes
+      mdev -s
+
+      # Enter bash (the root shell)
+      setsid bash
 
     poweroff -f
     '';
