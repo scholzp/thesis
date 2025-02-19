@@ -21,9 +21,10 @@
  * 	unsigned char STARTUP_CODE[];
  * 	unsigned int STARTUP_CODE_len;
  */
-#include "startup_code.h"
-#include "elf_reader.h"
 #include "chardev.h"
+#include "elf_reader.h"
+#include "tee_mgmt.h"
+#include "startup_code.h"
 
 MODULE_LICENSE("GPL");
 struct file *file_open(const char *path, int flags, int rights);
@@ -85,9 +86,9 @@ int init_module(void)
 	init_tee_chardev();
 	// Activate the AP
 	start_ap();
-	
 	// Wait for AP to output it's text
 	udelay(10000);
+	setup_tee_irq_handler();
 	pr_info("***AP should now boot payload kernel.\n");
 	pr_info("***KMOD: Initialization successful\n");
 	// Release lowmem
@@ -124,14 +125,32 @@ void start_ap(void) {
 	// Clear APIC errors
 	iowrite32(0 , lapic_page + 0x280);
 	// Select AP
-	iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+	iowrite32(
+		(ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24),
+		lapic_page + 0x310
+	);
+
 	// Trigger INIT IPI and wait for delivery
-	iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x00C500, lapic_page + 0x300);
-	do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+	iowrite32(
+		(ioread32(lapic_page + 0x300) & 0xfff00000) | 0x00C500,
+		lapic_page + 0x300
+	);
+	do {
+		__asm__ __volatile__ ("pause" : : : "memory"); 
+	} while (ioread32(lapic_page + 0x300) & (1 << 12));
+
 	// Select AP again and deassert, then wait for delivery
-	iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
-	iowrite32((ioread32(lapic_page + 0x300) & 0xfff00000) | 0x008500, lapic_page + 0x300);
-	do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+	iowrite32(
+		(ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24),
+		lapic_page + 0x310
+	);
+	iowrite32(
+		(ioread32(lapic_page + 0x300) & 0xfff00000) | 0x008500,
+		lapic_page + 0x300
+	);
+	do {
+		__asm__ __volatile__ ("pause" : : : "memory"); 
+	} while (ioread32(lapic_page + 0x300) & (1 << 12));
 	//Wait 10 ms
 	udelay(10000);
 
@@ -139,11 +158,19 @@ void start_ap(void) {
 	for(num_startups = 0; num_startups < 2; ++num_startups) {
 		// Clear errors; Seclect AP; Trigger STARTUP IP; wait
 		iowrite32(0, lapic_page + 0x280); 
-		iowrite32((ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24), lapic_page + 0x310);
+		iowrite32(
+			(ioread32(lapic_page + 0x310) & 0x00ffffff) | (AP_ID << 24),
+			lapic_page + 0x310
+		);
 		// set delivery mode to 0x6 (startup) and vector to 0xc8 (segment of reserved low mem)
-		iowrite32((ioread32(lapic_page + 0x300) & 0xfff0f800) | 0x0006c8, lapic_page + 0x300);
+		iowrite32(
+			(ioread32(lapic_page + 0x300) & 0xfff0f800) | 0x0006c8,
+			lapic_page + 0x300
+		);
 		udelay(200);
-		do { __asm__ __volatile__ ("pause" : : : "memory"); } while (ioread32(lapic_page + 0x300) & (1 << 12));
+		do {
+			__asm__ __volatile__ ("pause" : : : "memory");
+		} while (ioread32(lapic_page + 0x300) & (1 << 12));
 	}
 	// Release ressources; Enable interrupts
 	iounmap(lapic_page);
