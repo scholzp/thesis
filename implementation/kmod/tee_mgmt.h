@@ -11,4 +11,3 @@ MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 extern char IRQ_VECTOR;
 
 int setup_tee_irq_handler(void);
-extern irqreturn_t tee_irq_handler(int irq, void *dev_id);
