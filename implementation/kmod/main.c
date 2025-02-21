@@ -39,11 +39,18 @@ const size_t AP_LOWMEM_ADDRESS = START_ADDRESS;
 const size_t AP_LOWMEM_SIZE = LOW_MEM_SIZE;
 // APIC ID of the AP to use
 const u8 AP_ID = 3;
+// pages to use for shared memory communication
+struct page *shared_pages;  
 
 int init_module(void)
 {
 	void __iomem *lowmem_region;
 	unsigned int lowmem_offset = 0;
+	struct mb2_mmap *mb2_bi_mmap = create_mb2_mmap();
+	// TODO: Fix the hardcoding of the shared mem buf size.
+	struct page *shared_mem = alloc_pages(GFP_KERNEL, 1);
+	u64 multiboot_info_phys_addr = 0;
+
 	pr_info("***KMOD: Hello world 1.\n");
 
 	pr_info("***KMOD: Using address 0x%016lx\n", AP_LOWMEM_ADDRESS);
@@ -75,12 +82,39 @@ int init_module(void)
 		pr_info("Physical entry address: %llx\n", entry_addr);
 		bytewise = (u8*)(&entry_addr);
 		for (u8 x = 0; x < 4; ++x) {
-			pr_info("Byte %d of long jump target %02x\n", x, bytewise[3-x]);
-			 STARTUP_CODE[STARTUP_CODE_len - 4 + x] = bytewise[x];
+			STARTUP_CODE[STARTUP_CODE_len - 4 + x] = bytewise[x];
 		}
 	}
 
-	// Copy startup code bytewise from arry to lowmem
+	//prepare shared memory
+	{
+		u8* bytewise = NULL;
+		u32 address_as_u32;
+		mb2_mmap_add_entry(
+			mb2_bi_mmap,
+			create_mb2_mmap_entry(
+				page_to_pfn(shared_mem) * 4096, // Physical address of the page
+				4096, 							// TODO: Fix hardcoded value
+				1 								// MB2 type for usable memory
+			)
+		);
+		multiboot_info_phys_addr = create_mb2_boot_info(mb2_bi_mmap);
+		if ((-0x1u) < multiboot_info_phys_addr)
+		{
+			pr_err("MB2 Bootinfo location above 4GiB! Aborting");
+			return -ENOMEM;
+		}
+		pr_info("Created MMAP entry for shared memory at 0x%01llx!\n", multiboot_info_phys_addr);
+		address_as_u32 = multiboot_info_phys_addr & 0xFFFFFFF; // Mask for saver cast???
+		// Copy shared memory address to the respective location in the bootcode
+		bytewise = (u8*)(&address_as_u32);
+		for (u8 x = 0; x < 4; ++x)
+		{
+				STARTUP_CODE[STARTUP_CODE_len - 8 + x] = bytewise[x];
+		}
+	}
+
+	// Copy startup code bytewise from array to lowmem
 	while (lowmem_offset < STARTUP_CODE_len) {
 		iowrite8(STARTUP_CODE[lowmem_offset], lowmem_region + lowmem_offset);
 		++lowmem_offset;
