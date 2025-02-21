@@ -88,18 +88,18 @@ gdt:
 	.word	0xFFFF, 0
 	.byte	0, 0x92, 0xCF, 0
 //this is the GDT descriptor
+    .p2align 5
 gdtdesc:
 	.word	0x17	/* limit */
 	.long	gdt		/* addr */
-	.p2align	2
 hello_txt:
     .ascii "o7 AP ALIVE\n"
 ready_txt:
     .ascii "Ready to jump into kernel\n"
 ready_txt_end:
 mb2_magic:
-    .word 0x36d76289
+    .long 0x36d76289
 mb2_info_addr:
-    .word 0x0
+    .long 0x0
 target_kernel_addr:
     .long 0x01020304
