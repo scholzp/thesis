@@ -4,6 +4,7 @@
 #include "elf_reader.h"
 
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 
 // Takes ownership of data
 elf32_file_t* parse_elf32(u8 *data) {
@@ -103,6 +104,8 @@ elf32_file_t* parse_elf32(u8 *data) {
 // Loads all loadable segement to memory and returns address of entry point
 // relocated to the address
 u64 load_elf32_segments(elf32_file_t *elf) {
+	// TODO: FIXME: This function lead to memory leaking. We don't store the 
+	// result of alloc_pages in a way that we can free them later.
 	e32_program_table_entry_t *entry = elf->program_header_table;
 
 	unsigned pages_order = 0;

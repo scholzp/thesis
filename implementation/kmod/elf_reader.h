@@ -1,7 +1,9 @@
 #pragma once
 #include <linux/module.h>	/* Needed by all modules */
 #include <linux/kernel.h>	/* Needed for KERN_INFO */
+
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 
 #define elf_magic 0x464c457fu
 

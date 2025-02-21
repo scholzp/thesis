@@ -2,6 +2,7 @@
 #include "chardev.h"
 
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 
 // Kernel space buffer of the character device
 static char TEE_CHARDEV_BUFFER[TEE_DEVICE_BUFFER_SIZE];
