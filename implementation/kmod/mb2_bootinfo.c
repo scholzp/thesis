@@ -69,7 +69,7 @@ int mb2_mmap_add_entry (struct mb2_mmap *mmap, struct mb2_mmap_entry *entry)
 		mmap->last_entry->next = entry;
 	}
 	mmap->last_entry = entry;
-	mmap->tag.size += sizeof(*entry);
+	mmap->tag.size += sizeof(entry->entry);
 	return 0;
 }
 
