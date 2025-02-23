@@ -54,6 +54,7 @@ int init_module(void)
 	u8* shared_virt = NULL;
 
 	pr_info("***KMOD: Hello world 1.\n");
+	lapic_init();
 
 	pr_info("***KMOD: Using address 0x%016lx\n", AP_LOWMEM_ADDRESS);
 	// We should do a check, if we really *most likely* own enough memory
@@ -131,6 +132,7 @@ int init_module(void)
 	start_ap();
 	// Wait for AP to output it's text
 	udelay(10000);
+	lapic_send_nmi_waiting(3);
 	pr_info("***AP should now boot payload kernel.\n");
 	pr_info("***KMOD: Initialization successful\n");
 	// Release lowmem
@@ -143,8 +145,6 @@ void start_ap(void) {
 	unsigned long flags;
 
 	local_irq_save(flags);
-
-	lapic_init();
 
 	lapic_send_init_ipi_waiting(3);
 	lapic_send_init_ipi_waiting(3);

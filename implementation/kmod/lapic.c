@@ -60,6 +60,25 @@ void lapic_send_startup_ipi_waiting(u32 target_lapic_id, char segment) {
 	} while (ioread32(LAPIC_PAGE + 0x300) & (1 << 12));
 }
 
+void lapic_send_nmi_waiting(u32 target_lapic_id) {
+	if (1 != INITIALIZED) 
+	{
+		pr_err("%s: LAPIC not initialized", __FUNCTION__);
+		return;
+	}
+	iowrite32(
+		(ioread32(LAPIC_PAGE + 0x310) & 0x00ffffff) | (target_lapic_id << 24),
+		LAPIC_PAGE + 0x310
+	);
+	iowrite32(
+		(ioread32(LAPIC_PAGE + 0x300) & 0xfff00000) | 0x00C400,
+		LAPIC_PAGE + 0x300
+	);
+	do {
+		__asm__ __volatile__ ("pause" : : : "memory"); 
+	} while (ioread32(LAPIC_PAGE + 0x300) & (1 << 12));
+}
+
 void release_lapic(void) {
 	iounmap(LAPIC_PAGE);
 }
