@@ -51,6 +51,7 @@ int init_module(void)
 	// TODO: Fix the hardcoding of the shared mem buf size.
 	struct page *shared_mem = alloc_pages(GFP_KERNEL, 1);
 	u64 multiboot_info_phys_addr = 0;
+	u8* shared_virt = NULL;
 
 	pr_info("***KMOD: Hello world 1.\n");
 
@@ -90,13 +91,14 @@ int init_module(void)
 	//prepare shared memory
 	{
 		u8* bytewise = NULL;
+		shared_virt = kmap(shared_mem);
 		u32 address_as_u32;
 		mb2_mmap_add_entry(
 			mb2_bi_mmap,
 			create_mb2_mmap_entry(
 				page_to_pfn(shared_mem) * 4096, // Physical address of the page
 				4096, 							// TODO: Fix hardcoded value
-				1 								// MB2 type for usable memory
+				7 								// MB2 type for usable memory
 			)
 		);
 		multiboot_info_phys_addr = create_mb2_boot_info(mb2_bi_mmap);
@@ -105,7 +107,8 @@ int init_module(void)
 			pr_err("MB2 Bootinfo location above 4GiB! Aborting");
 			return -ENOMEM;
 		}
-		pr_info("Created MMAP entry for shared memory at 0x%01llx!\n", multiboot_info_phys_addr);
+		pr_info("Multiboot info at physical address: 0x%01llx\n", multiboot_info_phys_addr);
+		pr_info("Shared mem at physical address:     0x%01llx\n", page_to_pfn(shared_mem) * 4096ull);
 		address_as_u32 = multiboot_info_phys_addr & 0xFFFFFFF; // Mask for saver cast???
 		// Copy shared memory address to the respective location in the bootcode
 		bytewise = (u8*)(&address_as_u32);
@@ -121,13 +124,13 @@ int init_module(void)
 		++lowmem_offset;
 	}
 
+	setup_tee_irq_handler(shared_virt);
 	// setup character device for communication
 	init_tee_chardev();
 	// Activate the AP
 	start_ap();
 	// Wait for AP to output it's text
 	udelay(10000);
-	setup_tee_irq_handler();
 	pr_info("***AP should now boot payload kernel.\n");
 	pr_info("***KMOD: Initialization successful\n");
 	// Release lowmem
