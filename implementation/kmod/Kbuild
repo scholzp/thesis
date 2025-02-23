@@ -1,2 +1,2 @@
 obj-m := kmod.o
-kmod-y := elf_reader.o main.o chardev.o tee_mgmt.o mb2_bootinfo.o
+kmod-y := elf_reader.o main.o chardev.o tee_mgmt.o mb2_bootinfo.o lapic.o
