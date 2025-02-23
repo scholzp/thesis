@@ -152,8 +152,8 @@ void start_ap(void) {
 	//Wait 10 ms
 	udelay(10000);
 
-	lapic_send_startup_ipi_waiting(3);
-	lapic_send_startup_ipi_waiting(3);
+	lapic_send_startup_ipi_waiting(3, 0xc8);
+	lapic_send_startup_ipi_waiting(3, 0xc8);
 	local_irq_restore(flags);
 }
 
