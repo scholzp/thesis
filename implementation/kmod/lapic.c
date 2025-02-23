@@ -38,7 +38,7 @@ void lapic_send_init_ipi_waiting(u32 target_lapic_id) {
 	} while (ioread32(LAPIC_PAGE + 0x300) & (1 << 12));
 }
 
-void lapic_send_startup_ipi_waiting(u32 target_lapic_id) {
+void lapic_send_startup_ipi_waiting(u32 target_lapic_id, char segment) {
 	if (1 != INITIALIZED) 
 	{
 		pr_err("%s: LAPIC not initialized", __FUNCTION__);
@@ -51,7 +51,7 @@ void lapic_send_startup_ipi_waiting(u32 target_lapic_id) {
 	);
 	// set delivery mode to 0x6 (startup) and vector to 0xc8 (segment of reserved low mem)
 	iowrite32(
-		(ioread32(LAPIC_PAGE + 0x300) & 0xfff0f800) | 0x0006c8,
+		(ioread32(LAPIC_PAGE + 0x300) & 0xfff0f800) | 0x000600 | segment,
 		LAPIC_PAGE + 0x300
 	);
 	udelay(200);
