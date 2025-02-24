@@ -132,7 +132,13 @@ int init_module(void)
 	start_ap();
 	// Wait for AP to output it's text
 	udelay(10000);
-	lapic_send_nmi_waiting(3);
+	udelay(10000);
+	udelay(10000);
+	udelay(10000);
+	udelay(10000);
+	udelay(10000);
+	udelay(10000);
+	udelay(10000);
 	pr_info("***AP should now boot payload kernel.\n");
 	pr_info("***KMOD: Initialization successful\n");
 	// Release lowmem
