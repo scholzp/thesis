@@ -28,6 +28,14 @@ qemu-run-debug: uefi-app
 	cp target/x86_64-unknown-uefi/debug/uefi_app_poc.efi .qemu/efi/boot/bootx64.efi
 	./.run_qemu.sh
 
+.PHONY: install
+install: uefi-app
+	@if [[ -e $(of) ]]; then \
+		cp target/x86_64-unknown-uefi/release/uefi_app_poc.efi $(of)/EFI/Boot/Bootx64.efi; \
+	else \
+		echo "Output path $(of) does not exist"; \
+	fi
+
 .PHONY: clean
 clean:
 	cargo clean
