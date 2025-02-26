@@ -6,8 +6,5 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 
-#define IRQ_NAME "tee_irq_handler"
-
-extern char IRQ_VECTOR;
-
-int setup_tee_irq_handler(u8 *shared_mem_ptr);
+int setup_tee_poll_timer(u8 *shared_mem_ptr);
+void cleanup_tee_poll_timer(void);

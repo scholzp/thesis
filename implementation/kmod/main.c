@@ -10,6 +10,8 @@
 #include <asm/uaccess.h>
 #include <linux/buffer_head.h>
 #include <linux/fs.h>
+#include <linux/smp.h>
+#include <linux/cpumask.h>
 
 #include "chardev.h"
 #include "elf_reader.h"
@@ -33,7 +35,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 
 struct file *file_open(const char *path, int flags, int rights);
-void start_ap(void);
+void start_ap(int apic_id);
 // START_ADDRESS comes from make as -D compiler flag
 const size_t AP_LOWMEM_ADDRESS = START_ADDRESS;
 // currently 1 page. TODO: Make this also use configurable from nix 
@@ -52,6 +54,7 @@ int init_module(void)
 	struct page *shared_mem = alloc_pages(GFP_KERNEL, 1);
 	u64 multiboot_info_phys_addr = 0;
 	u8* shared_virt = NULL;
+	int cpu, last_cpu, id_diff;
 
 	pr_info("***KMOD: Hello world 1.\n");
 	lapic_init();
@@ -124,12 +127,20 @@ int init_module(void)
 		iowrite8(STARTUP_CODE[lowmem_offset], lowmem_region + lowmem_offset);
 		++lowmem_offset;
 	}
+	
+	for_each_possible_cpu(cpu) {
+		pr_info("CPU %d - LAPIC ID: %d", cpu, cpu_physical_id(cpu));
+		id_diff = cpu - last_cpu;
+		last_cpu = cpu;
+	}
+	pr_info("Total number of CPUS: %d", nr_cpu_ids);
+	pr_info("CPU physical ID diff: %d", id_diff);
 
-	setup_tee_irq_handler(shared_virt);
+	setup_tee_poll_timer(shared_virt);
 	// setup character device for communication
 	init_tee_chardev();
 	// Activate the AP
-	start_ap();
+	start_ap(id_diff * (nr_cpu_ids + 1));
 	// Wait for AP to output it's text
 	udelay(10000);
 	udelay(10000);
@@ -147,19 +158,19 @@ int init_module(void)
 	return 0;
 }
 
-void start_ap(void) {
+void start_ap(int apic_id) {
 	unsigned long flags;
 
 	local_irq_save(flags);
 
-	lapic_send_init_ipi_waiting(3);
-	lapic_send_init_ipi_waiting(3);
+	lapic_send_init_ipi_waiting(apic_id);
+	lapic_send_init_ipi_waiting(apic_id);
 
 	//Wait 10 ms
 	udelay(10000);
 
-	lapic_send_startup_ipi_waiting(3, 0xc8);
-	lapic_send_startup_ipi_waiting(3, 0xc8);
+	lapic_send_startup_ipi_waiting(apic_id, 0xc8);
+	lapic_send_startup_ipi_waiting(apic_id, 0xc8);
 	local_irq_restore(flags);
 }
 
@@ -182,5 +193,6 @@ void cleanup_module(void)
 {
 	purge_tee_chardev();
 	release_lapic();
+	cleanup_tee_poll_timer();
 	printk(KERN_INFO "Goodbye world 1.\n");
 }
