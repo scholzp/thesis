@@ -34,6 +34,7 @@ in {
   inherit tee_kernel;
   inherit initrd;
   inherit kmod;
+  inherit kernel;
   inherit runQemu;
   inherit isoImage;
 }
