@@ -1,9 +1,9 @@
 #![no_main]
 #![no_std]
 
-mod intel;
-
 extern crate alloc;
+
+pub mod pmc_utils;
 
 use log::info;
 use uefi::prelude::*;
@@ -18,7 +18,8 @@ use uefi::system::with_stdin;
 use alloc::collections::BTreeMap;
 use uefi::{CString16, print, println};
 
-use crate::intel::{query_features_intel, test_offcore_pmc};
+use pmc_utils::intel::{query_features_intel, test_offcore_pmc};
+use pmc_utils::vendor::*;
 
 use x86::msr;
 
@@ -136,10 +137,10 @@ fn query_features_amd() {
 fn print_help() {
     info!("Supported command:");
     info!("help     -- Prints this help.");
+    info!("pmcTest  -- Test if PMC can be programmed with offcore events.");
     info!("query    -- Queries CPUID for information about MPC.");
     info!("quit     -- Terminate this UEFI app.");
     info!("vendor   -- Queries CPUID for vendor information.");
-    info!("pmcTest  -- Test if PMC can be programmed with offcore events.");
 }
 
 #[entry]
@@ -150,10 +151,10 @@ fn main() -> Status {
 
     let mut commands: BTreeMap<CString16, Box<dyn Fn()>> = BTreeMap::new();
     commands.insert(CString16::try_from("less").unwrap(), Box::new(||{info!("less: Not implemented")}));
-    commands.insert(CString16::try_from("query").unwrap(), Box::new(query_features_intel));
     commands.insert(CString16::try_from("help").unwrap(), Box::new(print_help));
-    commands.insert(CString16::try_from("vendor").unwrap(), Box::new(get_vendor));
     commands.insert(CString16::try_from("pmcTest").unwrap(), Box::new(test_offcore_pmc));
+    commands.insert(CString16::try_from("query").unwrap(), Box::new(query_features_intel));
+    commands.insert(CString16::try_from("vendor").unwrap(), Box::new(get_vendor));
     
 
     // CPU ID Name
