@@ -128,10 +128,13 @@ int init_module(void)
 		++lowmem_offset;
 	}
 	
+	/* We can' get the MADT or any other structure that tells us what the LAPIC
+	 * IDs of the cores are. So We guess them and hope for good luck.
+	 */
 	for_each_possible_cpu(cpu) {
 		pr_info("CPU %d - LAPIC ID: %d", cpu, cpu_physical_id(cpu));
-		id_diff = cpu - last_cpu;
-		last_cpu = cpu;
+		id_diff = cpu_physical_id(cpu) - last_cpu;
+		last_cpu = cpu_physical_id(cpu);
 	}
 	pr_info("Total number of CPUS: %d", nr_cpu_ids);
 	pr_info("CPU physical ID diff: %d", id_diff);
