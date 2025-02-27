@@ -10,6 +10,8 @@ use x86::msr::{
 	IA32_PERFEVTSEL3, IA32_A_PMC3,
 };
 use x86_64::instructions::nop;
+use alloc::vec::Vec;
+use crate::pmc_utils::vendor;
 
 /// https://perfmon-events.intel.com/
 /// Supported architectures: Skylake
@@ -163,6 +165,7 @@ impl MsrOffcoreRspEventCounter {
 			0 => unsafe {
 				wrmsr(MSR_OFFCORE_RSP_0, self.content);
 				event_code = OFFCORE_RSP0_EVENT_CODE;
+				info!("Wrote to MSR_OFFCORE_RSP_0: {:#016x?}", self.content);
 			},
 			1 => unsafe {
 				wrmsr(MSR_OFFCORE_RSP_1, self.content);
@@ -176,37 +179,63 @@ impl MsrOffcoreRspEventCounter {
 		| IA32_PERFEVTSEL_USR | IA32_PERFEVTSEL_OS // count in all priv levels
 		| event_code			// Event depending on chosen MSR_OFFCORE_RSPx
 		| OFFCORE_RSP_UNIT_MASK // offcore event UMASK
-		| IA32_PERFEVTSEL_E; 	// Start the counter
+		| IA32_PERFEVTSEL_EN; 	// Start the counter
 		// 2 & 3 & 4 & 5) Depending on the index of the PMC we do the same thing
 		match self.pmc_index {
 			0 => {
 				// We operate on PMC0 and IA32_PERFEVTSEL0
-				unsafe { 
-					// Cancel any running performance measurements
-					wrmsr(IA32_PERFEVTSEL0, 0x0_u64);
-					// Reset the counter to zero
-					wrmsr(IA32_A_PMC0, init_v);
-					// MSR_OFFCOREx was configured before
-					// Activate the counter
-					wrmsr(IA32_PERFEVTSEL0, perfsel_content);
-				}
+				Self::init_and_conf_pmc(
+					IA32_PERFEVTSEL0, 
+					IA32_A_PMC0, 
+					init_v,
+					perfsel_content
+				);
 			},
 			1 => {
 				// We operate on PMC1 and IA32_PERFEVTSEL1
-				
+				Self::init_and_conf_pmc(
+					IA32_PERFEVTSEL1,
+					IA32_A_PMC1,
+					init_v,
+					perfsel_content
+				);
 			},
 			2 => {
 				// We operate on PMC2 and IA32_PERFEVTSEL2
+				Self::init_and_conf_pmc(
+					IA32_PERFEVTSEL2, 
+					IA32_A_PMC2, 
+					init_v,
+					perfsel_content
+				);
 				
 			},
 			3 => {
 				// We operate on PMC3 and IA32_PERFEVTSEL3
+				Self::init_and_conf_pmc(
+					IA32_PERFEVTSEL3, 
+					IA32_A_PMC3, 
+					init_v,
+					perfsel_content
+				);
 				
 			},
 			_ => {
 				info!("No CPU known to implement 4 or more GP PMCs!");
 				return;  //TODO: We want, at some point, return an error
 			},
+		}
+	}
+
+	fn init_and_conf_pmc(perfevtsel_register: u32, pmc_register: u32, init_v: u64, perfsel_content: u64) {
+		unsafe { 
+			// Cancel any running performance measurements
+			wrmsr(perfevtsel_register, 0x0_u64);
+			// Reset the counter to zero
+			wrmsr(pmc_register, init_v);
+			// MSR_OFFCOREx was configured before
+			// Activate the counter
+			wrmsr(perfevtsel_register, perfsel_content);
 		}
 	}
 
@@ -222,26 +251,48 @@ impl MsrOffcoreRspEventCounter {
 	}
 }
 
-
+/// Returns performance monitoring related features of th CPU
 pub fn query_features_intel() {
+	if false == vendor::check_vendor(vendor::CpuVendor::Intel) {
+		return
+	}
 	let cpuid = CpuId::new();
 	info!("{:?}", cpuid.get_performance_monitoring_info().unwrap());
 }
 
 pub fn test_offcore_pmc() {
 	let mut counter = MsrOffcoreRspEventCounter::new(0, 0);
+
+	if false == vendor::check_vendor(vendor::CpuVendor::Intel) {
+		return
+	}
+
 	counter.set_offcore_configuration(
-		0x0_u64 | SUPPLIER_ANY | REQUEST_DMND_DATA_RD | REQUEST_DMND_IFETCH
+		0x0_u64 | SUPPLIER_ANY | SUPPLIER_DRAM | SUPPLIER_NO_SUPP
+		| SUPPLIER_L3_HIT_E_SATE | SUPPLIER_L3_HIT_S_SATE
+		| SUPPLIER_L3_HITM_SATE
+		| REQUEST_DMND_DATA_RD | REQUEST_DMND_IFETCH
 		| REQUEST_DMND_RFO | REQUEST_OTHER | SNOOP_NOT_NEEDED | SNOOP_HITM |
-		SNOOP_HIT_NO_FWD | SNOOP_HIT_WITH_FWD
+		SNOOP_HIT_NO_FWD | SNOOP_HIT_WITH_FWD | SNOOP_MISS | SNOOP_NONE
 	);
 	counter.activate_counter(0x0_u64);
 
-	while true {
-		info!("Current value: {:?}", counter.read_pcm_val());
-		for x in 0..(1024u64 * 1024 * 1024 * 10) {
-			nop();
-		}
-	}
+	let mut vec = Vec::new();
+	
 
+	let num_vec_elements : u64 = 0x1_u64 << 21;
+	for x in 0..num_vec_elements {
+		vec.push(x);
+	}
+	info!("Initialized vector");
+
+	for x in 0..num_vec_elements {
+		vec.push(x);
+	}
+	vec = vec.iter().map(|x | x * x).collect();
+
+	info!("Modified vector, current size = {:?}, at least {:?} bytes", 
+		vec.len(), vec.len() 
+	);
+	info!("Current value: {:?}", counter.read_pcm_val());
 } 
