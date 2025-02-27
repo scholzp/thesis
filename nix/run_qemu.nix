@@ -19,7 +19,7 @@ writeShellScript "run_qemu_demo" ''
   ${qemuBin} \
     -kernel ${kernelPath} \
     -accel kvm \
-    -smp 4 \
+    -smp 6 \
     -append "nr_cpus=3 console=ttyS0 memmap=${low_mem_size}!${start_address} nox2apic loglevel=7 nokaslr" \
     -initrd ${initrdPath} \
     -serial stdio \
