@@ -242,6 +242,9 @@ impl MsrOffcoreRspEventCounter {
 	pub fn read_pcm_val(&self) -> u64 {
 		match self.pmc_index {
 			0 => unsafe { rdmsr(IA32_A_PMC0) },
+			1 => unsafe { rdmsr(IA32_A_PMC1) },
+			2 => unsafe { rdmsr(IA32_A_PMC2) },
+			3 => unsafe { rdmsr(IA32_A_PMC3) },
 			_ => {
 				info!("No CPU known to implement 4 or more GP PMCs!");
 				//return;  //TODO: We want, at some point, return an error
@@ -280,7 +283,7 @@ pub fn test_offcore_pmc() {
 	let mut vec = Vec::new();
 	
 
-	let num_vec_elements : u64 = 0x1_u64 << 21;
+	let num_vec_elements : u64 = 0x1_u64 << 14;
 	for x in 0..num_vec_elements {
 		vec.push(x);
 	}
@@ -294,5 +297,4 @@ pub fn test_offcore_pmc() {
 	info!("Modified vector, current size = {:?}, at least {:?} bytes", 
 		vec.len(), vec.len() 
 	);
-	info!("Current value: {:?}", counter.read_pcm_val());
 } 

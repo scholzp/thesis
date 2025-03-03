@@ -19,7 +19,8 @@ use alloc::collections::BTreeMap;
 use uefi::{CString16, print, println};
 
 use pmc_utils::intel::{query_features_intel, test_offcore_pmc};
-use pmc_utils::vendor::*;
+use pmc_utils::architectural::{architectural_test_setup, read_and_print_pmcs};
+use pmc_utils::vendor::{check_vendor, CpuVendor};
 
 use x86::msr;
 
@@ -127,12 +128,21 @@ fn get_vendor() {
         },
     }
 }
+
+fn pmc_test() {
+    if false == check_vendor(CpuVendor::Intel) {
+        return
+    }
+    test_offcore_pmc();
+    architectural_test_setup(); 
+    read_and_print_pmcs();
+}
+
 fn query_features_amd() {
     let cpuid_result = unsafe{ __cpuid_count(0x8000_0001, 0x0)};
     info!("CPUID Result: {:#x?}, PerfCtrExtLLC: {:#x?}", cpuid_result, Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32);
     info!("CPUID LLC extensions: {:#x?}", cpuid_result.ecx & (Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32));
 }
-
 
 fn print_help() {
     info!("Supported command:");
@@ -152,7 +162,7 @@ fn main() -> Status {
     let mut commands: BTreeMap<CString16, Box<dyn Fn()>> = BTreeMap::new();
     commands.insert(CString16::try_from("less").unwrap(), Box::new(||{info!("less: Not implemented")}));
     commands.insert(CString16::try_from("help").unwrap(), Box::new(print_help));
-    commands.insert(CString16::try_from("pmcTest").unwrap(), Box::new(test_offcore_pmc));
+    commands.insert(CString16::try_from("pmcTest").unwrap(), Box::new(pmc_test));
     commands.insert(CString16::try_from("query").unwrap(), Box::new(query_features_intel));
     commands.insert(CString16::try_from("vendor").unwrap(), Box::new(get_vendor));
     
