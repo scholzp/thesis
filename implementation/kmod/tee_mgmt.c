@@ -8,6 +8,7 @@ MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 
 static struct shared_mem *SHARED_MEM_PTR = NULL;
 static struct timer_list POLL_TIMER;
+static u8 waiting = 0;
 
 void ping_app(void);
 
@@ -23,6 +24,7 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 			// For now we init the ping app
 			SHARED_MEM_PTR->task_id = TEE_T_PING;
 			SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
+			waiting = 0;
 			break;
 		case TEE_C_TEE_SEND:
 			// delegate to respective app
@@ -36,11 +38,15 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 					pr_info("Unknow task ID: %u", SHARED_MEM_PTR->task_id);
 					break;
 			}
+			waiting = 0;
 			break;
 		// We don't need to do anything if our message was not processed yet
 		case TEE_C_HOSTSEND:
 		case TEE_C_NONE:
-			pr_info("%s: No message pending!\n", __FUNCTION__);
+			if (0 == waiting) {
+				pr_info("%s: No message pending!\n", __FUNCTION__);
+				waiting = 1;
+			}
 			break;
 		default:
 			pr_info("%s:Received message with unknown code!\n", __FUNCTION__);
