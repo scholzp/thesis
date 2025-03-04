@@ -124,6 +124,7 @@ int init_module(void)
 
 	// Copy startup code bytewise from array to lowmem
 	while (lowmem_offset < STARTUP_CODE_len) {
+		pr_info("as 0x%016llx\n", (u64)(lowmem_region + lowmem_offset));
 		iowrite8(STARTUP_CODE[lowmem_offset], lowmem_region + lowmem_offset);
 		++lowmem_offset;
 	}

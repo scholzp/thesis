@@ -16,6 +16,7 @@ pkgs.mkShell {
     pkgs.cmake-format
     qemu
     rustup
+    swtpm
     unixtools.xxd
     xorriso
   ];
