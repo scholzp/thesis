@@ -25,6 +25,7 @@ pkgs.makeInitrd {
            # They might require more kernel features.
            # pkgs.fd
            pkgs.usbutils
+           pkgs.tpm2-tools
 
         ])
       }
