@@ -6,7 +6,7 @@ bin_begin:
     // CPU comes along 
 start:
     // Setup data segment (We just use this page as data segment)
-    mov $0xc800, %ax
+    mov $0x0900, %ax
     mov %ax, %ds
 
     // Print hello
