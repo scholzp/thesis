@@ -21,6 +21,45 @@
 \ldots design \ldots
 
 \todo{write design}
+\begin{itemize}
+    \item Current problem: as described in chapter 2.summary: no real protection against SCA
+    \item Section first describes the environment
+    \item Then describe the system as a whole
+    \item then describe the tee kernel and requirements on it
+\end{itemize}
+
+\section{Environment}
+\begin{itemize}
+    \item PMC implementation Specific
+    \item Intel and AMD use different address schemas
+    \item AMD/Intel implements different events
+    \item I focus on events compatible to processors derived from Skylake
+    \item this means I'll support CPUs for this PoC of Skylake to Alderlake
+    \item Want to use core local resources -> no HT at all
+    \item I focus on the implementation of the TEE Software
+    \item This means, I don't care much about the setup and that's left for
+          future work
+    \item in particular in this PoC I assume that software is not hostile until
+          the TEE is running
+    \item Want to research if I can employ a SC free software on a dedicated core
+    \item I require the presence of a TPM
+    \item TEE software runs isolated on core
+    \item Performance counters monitor events regarding L3 cache usage
+    \item If a request can't be served by L2 the TEE software terminates
+\end{itemize}
+
+\section{System describtion}
+\begin{itemize}
+    \item System consists of TEE Software, Host kernel on which user programs run,
+          driver to communicate with TEE and TPM
+    \item host and TEE communicate via
+\end{itemize}
+
+\section{Environment}
+\begin{itemize}
+    \item
+\end{itemize}
+
 
 \cleardoublepage
 
