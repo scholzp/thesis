@@ -124,7 +124,6 @@ int init_module(void)
 
 	// Copy startup code bytewise from array to lowmem
 	while (lowmem_offset < STARTUP_CODE_len) {
-		pr_info("as 0x%016llx\n", (u64)(lowmem_region + lowmem_offset));
 		iowrite8(STARTUP_CODE[lowmem_offset], lowmem_region + lowmem_offset);
 		++lowmem_offset;
 	}
@@ -173,8 +172,8 @@ void start_ap(int apic_id) {
 	//Wait 10 ms
 	udelay(10000);
 
-	lapic_send_startup_ipi_waiting(apic_id, 0xc8);
-	lapic_send_startup_ipi_waiting(apic_id, 0xc8);
+	lapic_send_startup_ipi_waiting(apic_id, 0x09);
+	lapic_send_startup_ipi_waiting(apic_id, 0x09);
 	local_irq_restore(flags);
 }
 

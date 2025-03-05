@@ -20,7 +20,7 @@ let
   tee_kernel = implementation/kernel.elf32;
   # Hardcode start address of reserved low memory.
   # Take care of page granularity, which means the address should be divisible by 4096.
-  start_address = "0xc8000";
+  start_address = "0x09000";
   low_mem_size = "4096";
 
   stdenv = pkgs.stdenv;
