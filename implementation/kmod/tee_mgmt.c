@@ -69,7 +69,7 @@ void cleanup_tee_poll_timer(void) {
 }
 
 void ping_app(void) {
-	const u8 number_of_pings = 10;
+	const u8 number_of_pings = 1;
 	// We simply use the first byte of the payload to count the pings
 	if (number_of_pings > SHARED_MEM_PTR->memory[0]) {
 		pr_info("Ping count = %u\n", SHARED_MEM_PTR->memory[0]++);
