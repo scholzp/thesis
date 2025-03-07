@@ -28,7 +28,8 @@ let
   kmod = pkgs.callPackage ./nix/buildKmod.nix {inherit lib; inherit stdenv; inherit kernel; inherit start_address; inherit low_mem_size;};
   dbus_session_conf = pkgs.callPackage ./nix/dbus_conf.nix {};
   root_user = pkgs.callPackage ./nix/root_user.nix {};
-  initrd = pkgs.callPackage ./nix/initrd.nix {inherit lib; inherit pkgs; inherit kmod; inherit tee_kernel; inherit dbus_session_conf; inherit root_user;};
+  user_app = pkgs.callPackage ./nix/user_space_app.nix {};
+  initrd = pkgs.callPackage ./nix/initrd.nix {inherit lib; inherit pkgs; inherit kmod; inherit tee_kernel; inherit dbus_session_conf; inherit root_user; inherit user_app;};
   runQemu = pkgs.callPackage ./nix/run_qemu.nix {inherit kernel; inherit initrd; inherit start_address; inherit low_mem_size;};
   runQemuTpm = pkgs.callPackage ./nix/run_qemu_tpm.nix {inherit kernel; inherit initrd; inherit start_address; inherit low_mem_size;};
   createIsoImage = lib.makeOverridable(pkgs.callPackage ./nix/create-iso-image.nix {inherit start_address; inherit low_mem_size;});
@@ -43,4 +44,5 @@ in {
   inherit swtpm;
   inherit runQemuTpm;
   inherit isoImage;
+  inherit user_app;
 }

@@ -8,6 +8,7 @@
 , tee_kernel
 , dbus_session_conf
 , root_user
+, user_app
 }:
 
 let
@@ -15,6 +16,7 @@ let
   Tkernel = "${tee_kernel}";
   session_conf = "${dbus_session_conf}";
   passwd = "${root_user}";
+  app = "${user_app}";
 in
 pkgs.makeInitrd {
   contents = [{
@@ -31,6 +33,7 @@ pkgs.makeInitrd {
            pkgs.usbutils
            pkgs.tpm2-tools
            pkgs.dbus
+           app
         ])
       }
 
@@ -42,6 +45,8 @@ pkgs.makeInitrd {
 
       # add root as user
       cp ${passwd} /etc/passwd
+
+      # copy applications
       cp ${pkgs.bashInteractive}/bin/bash /run/bash
 
       # create machine-id
