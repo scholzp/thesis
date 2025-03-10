@@ -138,12 +138,13 @@ int init_module(void)
 	}
 	pr_info("Total number of CPUS: %d", nr_cpu_ids);
 	pr_info("CPU physical ID diff: %d", id_diff);
+	pr_info("Boot CPU with APIC ID: %d", id_diff * (nr_cpu_ids));
 
 	setup_tee_poll_timer(shared_virt);
 	// setup character device for communication
 	init_tee_chardev();
 	// Activate the AP
-	start_ap(id_diff * (nr_cpu_ids + 1));
+	start_ap(id_diff * (nr_cpu_ids));
 	// Wait for AP to output it's text
 	udelay(10000);
 	udelay(10000);
