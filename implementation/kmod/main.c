@@ -79,9 +79,6 @@ int init_module(void)
 		u8* buffer = kzalloc(1024 * 1024 * 1, GFP_KERNEL);  
 		bytes_read = kernel_read(f, buffer, 1024 * 1024 * 1, &offset);
 		pr_info("Read 1 MiB or less: %ld, Buffer address %p\n", bytes_read, buffer);
-		for (int x = 0; x < 10; ++x) {
-			pr_info("%x\n", buffer[x]);
-		}
 		elf_file = parse_elf32(buffer);
 		pr_info("Parse result %p; Loadable size sum: %lu\n", elf_file, elf_file->loadable_segments_size); 
 		entry_addr = load_elf32_segments(elf_file);
@@ -111,8 +108,8 @@ int init_module(void)
 			pr_err("MB2 Bootinfo location above 4GiB! Aborting");
 			return -ENOMEM;
 		}
-		pr_info("Multiboot info at physical address: 0x%01llx\n", multiboot_info_phys_addr);
-		pr_info("Shared mem at physical address:     0x%01llx\n", page_to_pfn(shared_mem) * 4096ull);
+		pr_info("Multiboot info at PFN: 0x%012llx\n", multiboot_info_phys_addr);
+		pr_info("Shared mem at PFN:     0x%012llx\n", page_to_pfn(shared_mem) * 4096ull);
 		address_as_u32 = multiboot_info_phys_addr & 0xFFFFFFF; // Mask for saver cast???
 		// Copy shared memory address to the respective location in the bootcode
 		bytewise = (u8*)(&address_as_u32);
