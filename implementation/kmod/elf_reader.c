@@ -117,6 +117,7 @@ u64 load_elf32_segments(elf32_file_t *elf) {
 	// TODO: We should read the respective multiboot 2 header entry
 	pages_order = pages_order < 9 ? 9 : pages_order;
 	pr_info("Allocate 2^%u pages = %ld KiB\n", pages_order, 1ul << (pages_order + 2));
+	// We never free this on purpose: The program is assumed to live as long as the whole system
 	struct page *section_mem = alloc_pages(GFP_KERNEL, pages_order);
 	pr_info("Phyiscal memory of loaded Elf: 0x%08lx - 0x%08lx\n", 
 		page_to_pfn(section_mem) * 4096,
