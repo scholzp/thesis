@@ -20,9 +20,122 @@
 % nichts zu suchen, auch nicht im Anhang, sondern gehören auf Rechner,
 % auf denen man sie sich ansehen kann.
 
-\ldots implementation \ldots
+\begin{itemize}
+    \item Chose Linux as Host Kernel, Phipsboot as TEE kernel.
+    \item Implement for Intel Rapter Lake, test system has Intel Core i7 13700k
+    \item I will explain in this chapter:
+          \begin{itemize}
+              \item How I use the host system, what the kernel module does
+              \item How does the communication work in detail between TEE kernel and host OS
+              \item Why Phipsboot, what modifications?
+              \item What do the attacks do?
+          \end{itemize}
+\end{itemize}
 
-\todo{write implementation}
+\section{TEE Kernel: phipsboot}
+\begin{itemize}
+    \item MB2 compliant kernel
+    \item expects to be loaded to a memory aligned to 2 MiB
+    \item Relocate able: Can be freely moved in memory -> important as I don't
+          now where kernel will be loaded
+    \item Uses only memory contained in the elf image; doesn't need additional
+          information on physical memory; heap memory consists of memory in
+          .text section of Elf image
+    \item Brings core in long mode, doesn't do much else
+    \item Maps all memory to a single page table before entering Rust highlevel code
+    \item Valid CR3 setting and all memory mapped at this point is accessible
+    \item But lacks functionality to map arbritrary memory
+    \item Implemented this feature along with management routines for shred mem
+          communication channel
+    \item For this: Observer only the lower 256 tage table entries are used;
+          reserve the upper 128 entries for on damnd mapping of arbritrary physical addresses
+    \item implements PMC routines, which consist of code setting the configuration MSRs up
+    \item Code to read PMC counter MSRs
+    \item Implements commands to be triggered through communication
+    \item Code to react on PMC misbehavior
+    \item I use the follwing counters\todo{Add what counters I use}
+\end{itemize}
+
+\section{Host Kernel: Linux}
+\begin{itemize}
+    \item Linux can be started with command line arguments
+    \item We need to limit the number of cores Linux uses in a way that it cannot
+          reclaim them later
+    \item -> use \textit{nr\_cpus} to limit cores used by Linux
+    \item -> cores can't be pluged in later if not initilized by linux as result of \textit{nr\_cpus}
+    \item Need for memory with physical address below 1 MiB border to boot isolated core
+    \item Can be reserved by \textit{memmmap} argument
+    \item all relevant modules and application and binary data are packed in the initrd
+    \item this includes:
+          \begin{itemize}
+              \item kernel module
+              \item the TEE kernel elf
+          \end{itemize}
+\end{itemize}
+
+\section{Linux kernel module}
+\begin{itemize}
+    \item Linux kernel module are drivers
+    \item Allows interaction and communication with TEE Kernel
+    \item In this version: sets up TEE module on isolated core
+    \item First: Boot the isolated core
+          \begin{enumerate}
+              \item prepare the TEE kernel by reading the Elf file and load it to
+                    memory; need to respect 2 Mib alignment
+              \item Address of the TEE kernel changes dynamically as Linux pleases
+                    -> we only know it after placing the Elf image in memory
+              \item Prepare core to be in a state as spefifyed by MB2, which means
+                    \begin{enumerate}
+                        \item Machine must be in 32 Bit mode;
+                        \item pointers to MB2 structures need to be placed in respective registers
+                    \end{enumerate}
+              \item therefore prepare MB2 boot info structure
+              \item This structure contains a single memory map entry: The shared memory portion used for communication
+              \item Memory simply allocted in Linux
+              \item Startup code included in binary format in the kernel module
+              \item Patch startup code with entry point of elf image in memory \& address of MB2 structure
+              \item Copy startup code that will bring core into 32 bit mode to reserved memory
+              \item For this we use memory reserved with \textit{memmap}
+              \item identify core to use ~> APIC ID do not start at 0 and
+                    increment by one; need to find the right APIC ID of an unused core
+              \item send STRATUP IPI from Linux to isolated core give reference of startup code
+              \item Isolated core will boot TEE kernel and initialied
+          \end{enumerate}
+    \item Second: Communication with TEE/Tasks
+          \begin{enumerate}
+              \item Communication as mentioned via shared memory.
+              \item kernel module instructs tee what to do
+              \item implementation uses a 4Kib sized memory area
+              \item first byte denotes sender (TEE/Kmod); second byte the
+                    command/function; all remaining bytes are used for payload
+              \item Attacks are implemented as functions executed by the kenrel module on the respective command
+          \end{enumerate}
+    \item Third: Characterdevie for use space application???
+\end{itemize}
+
+\section{Attacks}
+\begin{itemize}
+    \item Theory: An attacker will try to find physical addresses that we use
+          as backing memory and read from it, triggering memory leakage
+    \item attacker discussed in design
+    \item Simulate both attackers with the same basic routines:
+          \begin{itemize}
+              \item Implement a task on Host kernel module and TEE side
+              \item the TEE side allocated memory (from within the .text of the Elf image)
+              \item Memory consists of a 4Kib page, enoguth to fit in L1
+              \item TEE side find the respective physical address; communicates that to kmod
+              \item Kmod side maps that mmeory as IO-memory to it's virtual address space to access it
+              \item Kmod reads for passive attacker from the memory
+              \item Kmod reads from and writes to memory for active attacker\todo{Maybe add some code examples?}
+              \item Kmod signals TEE that it's done
+              \item TEE reads from memory
+          \end{itemize}
+    \item Counters produced unexpected output on Intel i7 13700k
+    \item Counters for L1 Misses were not incremented other then expected\todo{still under investigation}
+    \item Attacks should leave their marks in performance counter
+    \item A third simple attack should send an IPI to the isolated core
+    \item In this the attack is viewed as mitigated if the TEE crashes (the system)
+\end{itemize}
 
 \cleardoublepage
 
