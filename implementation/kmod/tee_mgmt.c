@@ -2,6 +2,8 @@
 #include <linux/sched.h>
 
 #include "tee_mgmt.h"
+#include <linux/gfp.h>
+#include <linux/highmem.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
@@ -123,21 +125,33 @@ void attack_write_mem(void) {
 	const u8 number_of_read_attempts = 5;
 	u64 address = 0;
 	u64 secret_mem_size = 4096;
+	u64 hash = 0;
+	u32 *secret_mem = NULL;
+	u32 num_iterations = secret_mem_size / sizeof(*secret_mem);
+
 	// We simply use the first byte of the payload to count the pings
 	// Vector not yet initalized
 	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
 	// The memory was initialized, we read
 	if (number_of_read_attempts > SHARED_MEM_PTR->memory[1]) {
-		void __iomem * secret_mem = NULL;
 		// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
 		// 64 bit physical memory addresss 
-		address = *((u64*) &(SHARED_MEM_PTR->memory[2]));
-		pr_info("Test 0x%016llx", address);
-		secret_mem = ioremap(address, secret_mem_size);
-		for (u64 offset = 0; offset < secret_mem_size; offset+=4) {
-			iowrite32(SHARED_MEM_PTR->memory[1] + offset, secret_mem + offset);
-			ioread32(secret_mem + offset);
+		address = *((u32*) &(SHARED_MEM_PTR->memory[2]));
+		/*
+		* We got the physical address and can calculate the page frame number 
+		* from it. The pages were already allocated (and never freed) when we 
+		* copied the Elf to memory.
+		*/ 
+		secret_mem = kmap(pfn_to_page(address >> 12));
+		pr_info("Received phy. addr: 0x%016llx mapped tp 0x%016llx\n", 
+			address, (u64) secret_mem);
+		for (u64 offset = 0; offset < num_iterations; ++offset) {
+			const u32 value = *(secret_mem + offset);
+			hash += value;
+			*(secret_mem + offset) = 1 + value;
 		}
+		pr_info("%s: Hash: 0x%016llx", __FUNCTION__, hash);
+		kunmap(pfn_to_page(address >> 12));
 		++SHARED_MEM_PTR->memory[1];
 		SHARED_MEM_PTR->task_id = TEE_T_ATTACK_WRITE_MEM;
 		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
