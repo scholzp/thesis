@@ -93,6 +93,7 @@ int init_module(void)
 	{
 		u8* bytewise = NULL;
 		shared_virt = kmap(shared_mem);
+		memset(shared_virt, 0, 4096);
 		u32 address_as_u32;
 		mb2_mmap_add_entry(
 			mb2_bi_mmap,
