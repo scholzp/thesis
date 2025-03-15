@@ -47,11 +47,17 @@ protected:
     movl %eax, %fs
     movl %eax, %gs
 
+    // Disable hardware prefetching
+    mov $15, %eax
+    mov $0, %edx
+    mov $0x1a4, %ecx
+    wrmsr
     // print the ready string, we are still alive
     movl $ready_txt, %ebx
     movl $ready_txt_end, %edi
     sub %ebx, %edi
     mov $0x3f8, %dx #Load port address 0x3f8
+ 
 print32:
     // This differs from print16 because we now have flat CS and DS
     mov (%ebx), %eax
