@@ -38,6 +38,7 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 					break;
 				case TEE_T_ATTACK_READ_MEM:
 				case TEE_T_ATTACK_WRITE_MEM:
+				case TEE_T_ATTACK_NOP_MEM:
 					attack_mem(SHARED_MEM_PTR->task_id);
 					break;
 				case TEE_T_UNKNOWN:
@@ -91,7 +92,7 @@ void ping_app(void) {
 }
 
 void attack_mem(enum tee_task task) {
-	const u8 number_of_read_attempts = 5;
+	const u8 number_of_read_attempts = 10;
 	u64 address = 0;
 	u64 secret_mem_size = 4096;
 	u64 hash = 0;
@@ -103,26 +104,28 @@ void attack_mem(enum tee_task task) {
 	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
 	// The memory was initialized, we read
 	if (number_of_read_attempts > SHARED_MEM_PTR->memory[1]) {
-		// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
-		// 64 bit physical memory addresss 
-		address = *((u32*) &(SHARED_MEM_PTR->memory[2]));
-		/*
-		* We got the physical address and can calculate the page frame number 
-		* from it. The pages were already allocated (and never freed) when we 
-		* copied the Elf to memory.
-		*/ 
-		secret_mem = kmap(pfn_to_page(address >> 12));
-		pr_info("Received phy. addr: 0x%016llx mapped tp 0x%016llx\n", 
-			address, (u64) secret_mem);
-		for (u64 offset = 0; offset < num_iterations; ++offset) {
-			const u32 value = *(secret_mem + offset);
-			if (TEE_T_ATTACK_WRITE_MEM == task) {
-				*(secret_mem + offset) = value + 1;
-			}
-			hash += value + 1;
-		}
-		pr_info("%s: Hash: 0x%016llx", __FUNCTION__, hash);
-		kunmap(pfn_to_page(address >> 12));
+		if (TEE_T_ATTACK_NOP_MEM != task) {
+			// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
+			// 64 bit physical memory addresss 
+			address = *((u32*) &(SHARED_MEM_PTR->memory[2]));
+			/*
+			* We got the physical address and can calculate the page frame number 
+			* from it. The pages were already allocated (and never freed) when we 
+			* copied the Elf to memory.
+			*/ 
+			secret_mem = kmap(pfn_to_page(address >> 12));
+			pr_info("Received phy. addr: 0x%016llx mapped tp 0x%016llx\n", 
+				address, (u64) secret_mem);
+				for (u64 offset = 0; offset < num_iterations; ++offset) {
+					const u32 value = *(secret_mem + offset);
+					if (TEE_T_ATTACK_WRITE_MEM == task) {
+						*(secret_mem + offset) = value + 1;
+					}
+					hash += value + 1;
+				}
+			pr_info("%s: Hash: 0x%016llx", __FUNCTION__, hash);
+			kunmap(pfn_to_page(address >> 12));
+		} 
 		++SHARED_MEM_PTR->memory[1];
 		SHARED_MEM_PTR->task_id = task;
 		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
