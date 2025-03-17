@@ -105,12 +105,12 @@ accessing the uncacheable main memory. \\
 
 \begin{center}
     \begin{figure}
-        \includegraphics[width=0.8\textwidth]{images/shared_mem_placeholder.png}
-        \caption{Shared memory protocol}
-        \label{fig:shared-mem}
+        \centering
+        \includestandalone{images/shared_mem_layout.tex}
+        \caption{Illustration of the Layout of the Shared Memory used For Communication}
+        \label{fig:state:technical:paging}
     \end{figure}
 \end{center}
-\todo{replace graphic}
 
 I implemented a structure to manage the memory in question to enable
 communication through the shared memory channel. Access to the shared memory
