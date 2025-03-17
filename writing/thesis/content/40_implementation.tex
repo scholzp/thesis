@@ -29,20 +29,6 @@ my use case. Another component I programmed is the Linux kernel module, which I
 explain in section~\ref{sec:implementation:kmod}. In the last part of the
 implementation chapter, I will explain how I implemented the attack simulations.
 
-% \begin{itemize}
-%       \item Chose Linux as Host Kernel, Phipsboot as TEE kernel.
-%       \item Implement for Intel Rapter Lake, test system has Intel Core i7 13700k
-%       \item I will explain in this chapter:
-%             \begin{itemize}
-%                   \item How I use the host system, what the kernel module does
-%                   \item How does the communication work in detail between TEE kernel
-%                         and host OS
-%                   \item Why Phipsboot, what modifications?
-%                   \item What do the attacks do?
-%             \end{itemize}
-% \end{itemize}
-
-
 \section{TEE Kernel: phipsboot}
 \label{sec:implementation:teeKernel}
 
@@ -83,14 +69,24 @@ an offocre\todo{Irgendwo mal erklären was ein OFfcore event ist} event when it
 tries to access memory owned by the TEE kernel. For this, I implemented a
 function that iterates over the page table entries and copies all bytes in
 place. This triggers the modified state of the cache line, which leads to
-invalidating the cache line in remote cores referencing the same memory item.
-The TEE can now detect subsequent access from the remote core through monitoring
-performance counters. For this, the TEE writes the respective events to the
-configuration MSRs. Once prepared, the TEE sets the IDTR to null, which leads to
-triple faulting once an interrupt is delivered to the TEE. The only expected
-interrupts in the TEE are NMIs, PMIs, and IPIs from other cores. All other
-interrupts are masked by clearing the interrupt flag in the EFLAGS register of
-the isolated core. \\
+invalidating the cache line in remote cores referencing the same memory item. I
+discovered this necessity when implementing my attack simulations
+(c.f.~\ref{sec:implementation:attacks:memory}). While the TEE could detect the
+active attacker, the passive one was undetectable because the reading of cache
+lines, which are in the shared state in both caches, does not trigger any
+microarchitectural responses. It is, therefore, necessary to hold all memory
+that the TEE should keep secret in the exclusive or modified state to detect
+cache synchronization over the cache coherency protocol.\\
+
+After ensuring that all attempts to manipulate or access secret memory do not
+result in additional microarchitectural state changes, it is time to make the
+TEE detect the respective events resulting from access to the remote core
+through monitoring performance counters. For this, the TEE writes the respective
+events to the configuration MSRs. Once prepared, the TEE sets the IDTR to null,
+which leads to triple faulting once an interrupt is delivered to the TEE. The
+only expected interrupts in the TEE are NMIs, PMIs, and IPIs from other cores.
+All other interrupts are masked by clearing the interrupt flag in the EFLAGS
+register of the isolated core. \\
 
 NMIs can be sent by faulty hardware and the interrupt controller if configured
 accordingly. Currently, the TEE has no other means of defense against malicious
@@ -142,33 +138,6 @@ After the task returns, the TEE creates a report from the performance counters
 and sends the result to the third party over the shared memory
 channel.\todo{Does it really?} \\
 
-% \begin{itemize}
-%     \item MB2 compliant kernel
-%     \item expects to be loaded to a memory aligned to 2 MiB
-%     \item Relocate able: Can be freely moved in memory -> important as I don't
-%           now where kernel will be loaded
-%     \item Uses only memory contained in the elf image; doesn't need additional
-%           information on physical memory; heap memory consists of memory in
-%           .text section of Elf image
-%     \item Brings core in long mode, doesn't do much else
-%     \item Maps all memory to a single page table before entering Rust highlevel
-%           code
-%     \item Valid CR3 setting and all memory mapped at this point is accessible
-%     \item But lacks functionality to map arbritrary memory
-%     \item Implemented this feature along with management routines for shred mem
-%           communication channel
-%     \item For this: Observer only the lower 256 tage table entries are used
-%           reserve the upper 128 entries for on damnd mapping of arbritrary
-%           physical addresses
-%     \item implements PMC routines, which consist of code setting the
-%           configuration MSRs up
-%     \item Code to read PMC counter MSRs
-%     \item Implements commands to be triggered through communication
-%     \item Code to react on PMC misbehavior
-%     \item I use the follwing counters\todo{Add what counters I use}
-% \end{itemize}
-
-
 \section{Host Kernel: Linux}
 \label{sec:implementation:hostKernel}
 
@@ -203,108 +172,112 @@ as an Elf-file image and the Linux kernel module, are embedded in its initial
 RAM disk image, which allows, in theory, to sign a single image for secure boot
 and thus ensure the integrity of all components on startup.\\
 
-% \begin{itemize}
-%     \item Linux can be started with command line arguments
-%     \item We need to limit the number of cores Linux uses in a way that it
-%           cannot reclaim them later
-%     \item -> use \textit{nr\_cpus} to limit cores used by Linux
-%     \item -> cores can't be pluged in later if not initilized by linux as result
-%           of \textit{nr\_cpus}
-%     \item Need for memory with physical address below 1 MiB border to boot
-%           isolated core
-%     \item Can be reserved by \textit{memmmap} argument
-%     \item all relevant modules and application and binary data are packed in the
-%           initrd
-%     \item this includes:
-%           \begin{itemize}
-%               \item kernel module
-%               \item the TEE kernel elf
-%           \end{itemize}
-% \end{itemize}
-
-
 \section{Linux kernel module}
 \label{sec:implementation:kmod}
+As I described in section~\ref{sec:implementation:hostKernel}, the Linux kernel
+module is the driver not only enabling Linux to communicate with the TEE kernel
+on the isolated core but also the component that initializes the isolated core
+and loads the TEE kernel into memory.\\
 
-\begin{itemize}
-    \item Linux kernel module are drivers
-    \item Allows interaction and communication with TEE Kernel
-    \item In this version: sets up TEE module on isolated core
-    \item First: Boot the isolated core
-          \begin{enumerate}
-              \item prepare the TEE kernel by reading the Elf file and load it
-                    to
-                    memory; need to respect 2 Mib alignment
-              \item Address of the TEE kernel changes dynamically as Linux
-                    pleases
-                    -> we only know it after placing the Elf image in memory
-              \item Prepare core to be in a state as spefifyed by MB2, which
-                    means
-                    \begin{enumerate}
-                        \item Machine must be in 32 Bit mode;
-                        \item pointers to MB2 structures need to be placed in
-                              respective registers
-                    \end{enumerate}
-              \item therefore prepare MB2 boot info structure
-              \item This structure contains a single memory map entry: The
-                    shared memory portion used for communication
-              \item Memory simply allocted in Linux
-              \item Startup code included in binary format in the kernel module
-              \item Patch startup code with entry point of elf image in memory
-                    \& address of MB2 structure
-              \item Copy startup code that will bring core into 32 bit mode to
-                    reserved memory
-              \item For this we use memory reserved with \textit{memmap}
-              \item identify core to use ~> APIC ID do not start at 0 and
-                    increment by one; need to find the right APIC ID of an
-                    unused core
-              \item send STRATUP IPI from Linux to isolated core give reference
-                    of startup code
-              \item Isolated core will boot TEE kernel and initialied
-          \end{enumerate}
-    \item Second: Communication with TEE/Tasks
-          \begin{enumerate}
-              \item Communication as mentioned via shared memory.
-              \item kernel module instructs tee what to do
-              \item implementation uses a 4Kib sized memory area
-              \item first byte denotes sender (TEE/Kmod); second byte the
-                    command/function; all remaining bytes are used for payload
-              \item Attacks are implemented as functions executed by the kenrel
-                    module on the respective command
-          \end{enumerate}
-    \item Third: Characterdevie for use space application???
-\end{itemize}
+For this, the kernel module claims the memory reserved through the Linux command
+line argument and copies the startup code. This code sequence brings the
+processor from real mode into 32-bit mode with segmentation and places the
+addresses of Multiboot 2 structures into the registers. The resulting state is
+the one expected by the TEE kernel. Because these addresses are not known
+beforehand, the kernel module modifies the startup code on runtime to contain
+the respective addresses.\\
 
-\section{Attacks}
+In the next step, the kernel module locates the Elf binary of the TEE kernel and
+places it in memory. For this, the module allocates memory through the Linux
+kernel's \textit{allocpages} interface at a physical address aligned to 2 MiB.
+Once allocated, the kernel module does not deallocate the pages to prevent Linux
+from reusing the memory and possibly overwriting the TEE kernel. Once the
+required memory is allocated and mapped in the kernel address space, the kernel
+module begins to parse the TEE kernel's Elf image and copies all necessary parts
+to memory. It then sets up the shared memory region and updates. It generates a
+multiboot 2 Information structure containing the region with a custom-defined
+memory type used by the TEE kernel to find the shared memory.\\
+
+Once all parts necessary to run the TEE kernel are placed in memory, the kernel
+module prepares to start the isolated core. At this point, Linux does not allow
+interaction with any core not initialized by it, e.g., the kernel module cannot
+address the isolated core with any kernel-provided functions. To circumvent this
+shortcoming, I gained access to the LAPIC of the core running the kernel module
+to send the required INIT and startup IPI sequence to the isolated core. Another
+problem arises when implementing this routine: APIC IDs are not bound to start
+at 0, nor do they have to increment by one for each CPU core. To come by this, I
+queried the APIC IDs of the core mapped by Linux and calculated the offset for
+each core. I used this offset to calculate the APIC ID of the target core by
+adding the offset to the ID of the last core mapped by Linux. After sending the
+IPI sequence to the remote core, the startup code will be executed, and a far
+jump to the TEE kernel's code will be performed by the remote CPU.\\
+
+After initializing the remote core, the kernel module manages communication with
+the TEE kernel. It therefore implements the protocol described in
+\ref{sec:implementation:teeKernel}. To receive messages, the kernel module
+installs a timer, which it uses to poll the shared memory periodically for new
+messages. The kernel module also implements the remote part of tasks in the
+prototype. To start a specific task, the kernel module sends a message
+containing the task's ID and evaluates messages from the TEE to delegate them to
+the respective tasks routine. \\
+\todo{If anything ever uses the chardev then I should write about it}
+
+\section{Attacks and Applications}
 \label{sec:implementation:attacks}
+
+To proof the effectiveness of the prototype I implemented three possible attacks
+as tasks. Furthermore, I impemented a simple \textit{ping} task that allows me to
+investigate ressource usage of the TEE allone. In the follwing subsection I want
+to show some implementationt details of the attacks and the \textit{ping} taks.
+
+\subsection{Ping Task}
+\label{sec:implementation:attacks:ping}
+This simple task does nothing more than to increment a value shared between the
+TEE and the host OS. It can be viewed as the minimal working set of the TEE to
+run tasks. Therefore, the result for memory usage is the minimum to expect for
+any other task. Measuring the resource usage with appropriate PMC allows me to
+make assumptions about the resources a future payload can use. I collected data
+with the following events:
 \begin{itemize}
-    \item Theory: An attacker will try to find physical addresses that we use
-          as backing memory and read from it, triggering memory leakage
-    \item attacker discussed in design
-    \item Simulate both attackers with the same basic routines:
-          \begin{itemize}
-              \item Implement a task on Host kernel module and TEE side
-              \item the TEE side allocated memory (from within the .text of the
-                    Elf image)
-              \item Memory consists of a 4Kib page, enoguth to fit in L1
-              \item TEE side find the respective physical address; communicates
-                    that to kmod
-              \item Kmod side maps that mmeory as IO-memory to it's virtual
-                    address space to access it
-              \item Kmod reads for passive attacker from the memory
-              \item Kmod reads from and writes to memory for active
-                    attacker\todo{Maybe add some code examples?}
-              \item Kmod signals TEE that it's done
-              \item TEE reads from memory
-          \end{itemize}
-    \item Counters produced unexpected output on Intel i7 13700k
-    \item Counters for L1 Misses were not incremented other then
-          expected\todo{still under investigation}
-    \item Attacks should leave their marks in performance counter
-    \item A third simple attack should send an IPI to the isolated core
-    \item In this the attack is viewed as mitigated if the TEE crashes (the
-          system)
+    \item L1 replacements
+    \item L1 Miss (any)
+    \item Offcore events \todo{umask and so angeben um reproduzierbarkeit zu
+              wahren}
 \end{itemize}
+Between each ping cycle I used used the \textit{wbinvd} instruction of x86, that
+results in the core writing back all it's cache entries to memory and
+invalidating each cache line. Executing the following ping cycle until reading
+the PMC again yields the number of cache lines filled with data necessary to
+execute a complete cycle. From the cache line size I can then conclude the total
+memory requirements of the runtime part of the TEE.
+
+\subsection{Stalling Attack}
+The denial of service attack floods the TEE with NMIs. It is intended to prove
+that the TEE can defend against interrupts that the TEE cannot mask.
+\todo{maybe move this into the chapter intro}
+
+
+\subsection{Memory Attacks}
+\label{sec:implementation:attacks:memory}
+In theory, an attacker is able to leak data through the microarchitectural
+behavior of the CPU cache's implementation. The first attacker is passive and
+only interested in spying unobserved on the secrets of the TEE. The attacker
+would use their access to read the TEE memory. If the TEE cannot observe this,
+then secrets could be leaked through this channel upon writing. The second
+attacker is an active one who tries to write the TEE memory to influence its
+control flow. Both attacks follow the same workflow.\\
+
+To simulate these attacks, the TEE first initializes a memory area of the size
+of 4KiB and finds its physical location. Because I want to observe the side
+effects of the attack, this memory is not mapped as uncacheable on the TEE side
+but instead like any other memory in the TEE. The TEE then communicates the
+address through the shared memory channel to the Linux kernel module in which
+the respective attack implementations reside. The remote side now maps the
+physical address space into its address space and either reads or writes to the
+memory. When finished, the remote kernel module creates the respective answer
+and transfers control over the memory area on this way back to the TEE. The TEE
+now reports on the state of the performance counters.\todo{maybe add some code
+    examples?}\\
 
 \cleardoublepage
 
