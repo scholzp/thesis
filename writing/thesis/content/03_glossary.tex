@@ -34,16 +34,21 @@
 }
 %
 % I ----------------------------------------------------------------------------------------------------------------
-\newglossaryentry{g_idt}
-{
-    name=interrupt descriptor table,
-    description={Data structure that holds a table of interrupt handlers. The interrupt vector is used by the CPU to
-            call the respective interrupt handler routine.}
-}
 \newglossaryentry{g_ica}
 {
     name=intermediate certification authority,
     description={Certification authority that is not the root certification authority}
+}
+\newglossaryentry{g_idt}
+{
+    name=interrupt descriptor table,
+    description={x86 data structure that holds a table of interrupt handlers. The interrupt vector is used by the CPU to
+            call the respective interrupt handler routine.}
+}
+\newglossaryentry{g_idtr}
+{
+    name=interrupt descriptor table,
+    description={Register in x86 processors that hold the address of the IDT}
 }
 \newglossaryentry{g_ipi}
 {
@@ -175,6 +180,11 @@
     description={Hardware protected area of main memory to store SMM data and code, such as the
             SMI handler}
 }
+\newglossaryentry{g_soc}
+{
+    name=system on chip,
+    description={Integrated circuit that houses components that all realize different functions}
+}
 %
 % T ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_tcg}
@@ -197,4 +207,11 @@
 {
     name=trusted platform module,
     description={Isolated cryptographic coprocessor that is able to measure the state of a platform and attest to it's measurements}
+}
+%
+% V ----------------------------------------------------------------------------------------------------------------\newglossaryentry{g_tpm}
+\newglossaryentry{g_vm}
+{
+    name=virtual machine,
+    description={Software encapsulated computing system}
 }
