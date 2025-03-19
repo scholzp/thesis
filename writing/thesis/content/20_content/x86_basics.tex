@@ -110,18 +110,18 @@ Interrupts, on the other hand, can be divided into two classes:
           interrupt handler, the interrupt controller can deliver the next~
           \gls{nmi}.
 \end{enumerate}
-The CPU serves exceptions and interrupts by calling the respective interrupt or
-exception handler routine. System software can install an interrupt handler by
-writing its address into the \gls{idt}. The
-\gls{idt} is a data structure containing pointers to interrupt handling
-routines. The specification assigns a vector number to each interrupt or
-exception. With the help of this vector, the CPU determines what handler to call
-by using the interrupt vector as an index in the \gls{idt}. It finds the
-\gls{idt} by reading the value of the interrupt descriptor table register
-(IDTR). System software is expected to create the \gls{idt} and install
-handlers for at least the predefined vectors. Then, the address of the
-\gls{idt} is provided by writing to the IDTR before interrupts can be
-activated. \\
+
+The x86 \gls{isa} assigns a vector number to each interrupt or exception. Vector
+numbers range from 0 to 255 in newer implementations. The CPU uses the vector
+number of an interrupt as an index to locate the respective handler function in
+a data structure called the \gls{idt}. The \gls{idt} resides in the main memory
+and contains the address of an interrupt handler routine for each vector. System
+software defines the handler routines and writes their addresses to the
+\gls{idt}. Once system software defines the handler routines, it makes the
+\gls{idt} accessible by writing its address to the \gls{idtr}. At this point,
+the CPU is ready to respond to interrupts in a way defined by system software.
+System software can enable maskable interrupts by executing the \textit{STI}
+instruction.\\
 
 Over time, interrupt controllers were improved and adapted to new use cases
 similar to CPUs. In \gls{g_rmode}, the CPU falls back to using the Intel 8259 or a
@@ -132,7 +132,7 @@ the serving routine is done, before it can receive the next interrupt. \\
 
 \begin{figure}
     \begin{center}
-        \includegraphics[width=.6\textwidth]{images/lapic_placeholder.png}
+        \includestandalone{images/lapic.tex}
         \caption{Illustration of how \glspl{lapic} integrate in a
             multiprocessor system}
         \label{fig:state:technical:lapic}
@@ -343,7 +343,6 @@ correctly.
 \label{sec:state:technical:paging}
 \begin{center}
     \begin{figure}
-        \centering
         \includestandalone{images/paging.tex}
         \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables}
         \label{fig:state:technical:paging}
@@ -419,8 +418,8 @@ these invalidations to other CPUs. \\
 
 \begin{figure}
     \begin{center}
-        \includegraphics[width=.6\textwidth]{images/paging_rights_placeholder.png}
-        \caption{Layout of the lowest 12 bits in a page table entry}
+        \includestandalone{images/pte_rights.tex}
+        \caption{Layout of the 12 least significant bits in a page table entry}
         \label{fig:state:technical:paging_rights}
     \end{center}
 \end{figure}
@@ -438,7 +437,3 @@ rights. A second bit important for this thesis is the Page-Level Cache Disable
 (PCD) bit. If the PCD bit is set, the CPU cannot cache the respective page. Bit
 3 (PWT) controls page-level write-through. If system software sets this bit, the
 page table has a write-through caching policy.
-
-\todo{write about bootflow}
-\subsection{Bootflow of Modern x86 CPUs}
-\label{sec:state:technical:boot}
