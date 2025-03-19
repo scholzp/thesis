@@ -1,10 +1,10 @@
 \section{Attack Mitigations}
-\subsubsection{Isolation through SMM}
+\subsection{Isolation through SMM}
 \label{sec:20:isolation_smm}
 An early work on how to isolate processes was done by Azab et al. in
 2011.\cite{azab_sice_2011} The work dates before introducing TEE extensions in
-x86 hardware and uses the SMM to isolate tasks. The problem SICE tries to
-protect the memory integrity of isolated tasks and virtual machines. In
+x86 hardware and uses the SMM to isolate tasks. The problem SICE tries to solve
+is to protect the memory integrity of isolated tasks and virtual machines. In
 principle, SICE uses the strong hardware-enforced isolation of the SMM and its
 SMRAM to install applications into it. The authors used an AMD platform for
 their practical implementation because AMD platforms allow the adjustment of
@@ -21,15 +21,20 @@ not support this feature, and adapting SICE to those platforms was left as an
 open problem. Moreover, firmware modifications have to be implemented by the
 user to install the correct SMI handler. These modifications require the
 firmware to be open source to implement the SMI handler. This requirement
-further reduces the amount of hardware used for this approach.
+further reduces the amount of hardware used for this approach. Moreover the
+authors state that practical deployment would require CPU and hardware vendors
+to do extensive security reviews on their firmware and SMM implementations.
+Additionally, multiple attacks are known targeting the SMM breaking it's
+isolation.\cite{wojtczuk2014attacking, wojtczuk2009attacking, wojtczuk2009poisining}
 
-\subsubsection{Enma}
+\subsection{Enma}
 \label{sec:20:enma}
 Enma is short for Enclave Manager and is a software solution to implement TEEs
 for the L4Re operating system framework. \cite{reitz_isolierende_2019} L4Re uses
 the Fiasco.OC microkernel that is part of the L4 microkernel family. The
-microkernel approach aims for minimized code to run in the supervisor mode. The
-creator of L4 defined the concept of microkernels as follows:
+microkernel approach aims for minimizing the amount of code to run in the
+supervisor mode. The creator of L4 defined the concept of microkernels as
+follows:
 
 \begin{quote}
     \textit{ More precisely, a concept is tolerated inside the \mu-kernel only
@@ -39,52 +44,31 @@ creator of L4 defined the concept of microkernels as follows:
     } \mbox{ -- Liedke\cite{liedtke1995micro}}
 \end{quote}
 
-
 Following this philosophy, Fiasco.OC only implements the mere minimal services.
 All other services, such as memory management, are implemented as user space
 applications. The minimal setup of a L4Re system consists of the Fiasco.OC
-kernel, Sigma0, which manages memory, and moe, which is responsible for loading
-applications. The kernel ensures that only applications with proper rights can
-access their respective memory. It vigorously enforces isolation between threads
-and applications. Enma uses these properties to create isolated enclaves in
-which programs can execute isolated.\\
+kernel, Sigma0, which manages memory, and root task moe, which is responsible
+for loading applications. As a capability based system, the kernel ensures that
+only applications with the right capabilities have access to process memory.
+Initially, only the creator of a process posses these capabilities and the
+ability to grant them to other processes. Enma uses these properties to create
+isolated enclaves in which programs can execute isolated.\\
 
 Enma follows the same approach as SGX for implementing remote attestation. Enma
 hosts a quoting enclave that sings reports to verify the state of an enclave.
 The appraiser can then check the signature of the quoting enclave, upon which
 they decide how to interact with the enclave. Enma encrypts the memory of its
-enclaves. Security-wise, Enma is vulnerable to side-channel attacks as the other
-solution. The TCB is also increased when compared to hardware solutions. An
-application that trusts Enma must also trust the L4Re runtime environment as
-much as the firmware and hardware. Enma utilizes a \gls{tpm} as the hardware root of
-trust for verifying the system state and that the expected versions of L4Re and
-Enma were booted. The soft backend of Enma, which I described in this
-section, can also be replaced by another backend. The authors propose an SGX
-back end that utilizes hardware features.
+enclaves. Security-wise, Enma is vulnerable to side-channel attacks as
+explicitly stated in the work. The TCB is also increased when compared to
+hardware solutions. An application that trusts Enma must also trust the L4Re
+runtime environment as much as the firmware and hardware. Enma utilizes a
+\gls{tpm} as the hardware root of trust for verifying the system state and that
+the expected versions of L4Re and Enma were booted. The soft backend of Enma,
+which I described in this section, can also be replaced by another backend. The
+authors propose an SGX back end that utilizes hardware features.
 
-% \subsection{Iago mitigations}
-% Arnautov et al. and Baumann et al. published two potential countermeasures
-% against Iago attacks in 2016 and 2015, SCONE and Haven, respectively. SCONE aims
-% to protect applications in Linux environments, while Haven protects applications
-% in Windows environments.\cite{arnautov_scone_2016, baumann_shielding_2015} Both
-% SCONE and Haven try to solve two problems with using SGX. The first problem is
-% the threat described through Iago attacks, and the second is to make legacy
-% applications executable with SGX enclaves without modifying them. SCONE achieves
-% this by integrating a modified Linux library OS consisting of the Linux Kernel
-% Library and the musl libc implementation, aiming for a similar solution as
-% Haven. Haven uses a reduced Windows runtime environment to create a library OS
-% as part of the enclave. In both cases, the library OS implements or emulates
-% system calls that the legacy application would otherwise perform to the
-% potentially malicious OS. Additionally, in both solutions, the library OS
-% emulates instructions that the execution of SGX enclaves otherwise forbids.
-% Haven and SCONE implement a shielding component for system calls that the
-% library OS cannot emulate. This shielding component reduces the interface
-% through which system calls to the host kernel are made. Moreover, the shielding
-% component in both solutions implements sanity checks of the values returned by
-% the host OS system calls. Both solutions reduce the TCB by integrating a reduced
-% subset of the respective systems' runtime environment.
-
-\subsection{Interrupt based side channel defenses}
+\subsection{Defenses Against Interrupt Based Side Channel Attacks}
+\label{sec:20:interrupt_sca}
 To defend against interrupt-based side-channel attacks, Cui et al. proposed a
 defense solution in 2023 that they call QuanShield.\cite{cui_quanshield_2023}
 QuanShield goal is to enable SGX enclaves to detect interrupt-based side-channel
@@ -114,20 +98,31 @@ the code fault as fast as possible. QuanShield uses a library OS to support
 legacy applications. It implements the protection mechanism by utilizing SGX-LKL
 to manage the second stack in the state save area. SGX-LKL is a Linux kernel
 port that can run in an SGX enclave as a LibraryOS, similar to the approach used
-by SCONE and Haven(see~\ref{sec:20:iago}).\cite{priebe2019sgx}
+by SCONE and Haven to mitigate effects of Iago attacks, which I just want to
+name as a side node because these solutions are less relevant for this
+work.\cite{priebe2019sgx,arnautov_scone_2016,baumann_shielding_2015,
+    checkoway2013iago}
 
 \subsection{Transient Execution Mitigations}
+\label{sec:20:def_sca}
+Because Spectre and Meltdown target microarchitectural behavior, a complete
+redesign is necessary to entirely fix the issue. Software mitigations are
+available for specific attacks. For example, the Linux Kernel uses techniques
+called Retpoline and Kernel Page Table Isolation (KPTI) to mitigate Spectre
+version 2 and Meltdown, respectively.\cite{retpoline} On the other hand, software mitigations
+can greatly impact performance, reaching from a 10\% to 800\% overhead,
+depending on the workload.\cite{low2018overview}\\
+
 Another approach for systems to defend against side-channel attacks, in general,
 is active detection of the attack and reacting appropriately. Quanshield
 implements such a solution for interrupt-based side channel attacks described in
 chapter~\ref{sec:20:interrupt_sca}. For attacks abusing transient execution,
 this approach of deactivating transient execution would come with a
-high-performance penalty. Instead, existing solutions attempt to monitor the
+high-performance penalty.\\
+
+Instead, existing solutions attempt to monitor the
 cache and other microarchitectural behavior through hardware performance
-counters to find any anomaly. Early works on anomaly detection come from the
-field of malware detection. For example, Yubin et al. experimented in 2012 using
-performance counters to monitor the control flow integrity of a program.
-\cite{yubin_xia_cfimon_2012} The idea behind this approach is that a program
+counters to find any anomaly. The idea behind this approach is that a program
 shows specific behavior. This behavior results from the instructions it executes
 and their order, which leaves a kind of footprint. When monitoring the hardware
 performance counters closely enough, the observer can deduce what parts of code
@@ -137,12 +132,13 @@ the known state and then reason if the control flow was highjacked, for example,
 by an ROP attack. As a side note, monitoring through hardware Performance
 counters can also be used for attacks, which is why performance counters are
 unavailable while the CPU operates in SGX mode.
-\cite{uhsadel2008exploiting,costan2016intel} Like ROP attacks, transient
-execution attacks show special behavior when preparing the attack or side
-channel. Li et al. and Van Bulck et al. examined how to trace the behavior of
-transient execution attacks with performance counters on the examples of Spectre
-and Load Value injection attacks, respectivley.
-\cite{li_detecting_2021, van_bulck_lvi_2020}
+\cite{uhsadel2008exploiting,costan2016intel}
+
+Like ROP attacks, transient execution attacks show special behavior when
+preparing the attack or side channel. Li et al. and Van Bulck et al. examined
+how to trace the behavior of transient execution attacks with performance
+counters on the examples of Spectre and Load Value injection attacks,
+respectivley.\cite{li_detecting_2021, van_bulck_lvi_2020}
 They found that when in the preparation phase, while the attacker trains the
 branch predictor, fewer instructions are retired compared to typical workloads.
 Moreover, employing the cache side channel leaves traces, too. For a cache-based
