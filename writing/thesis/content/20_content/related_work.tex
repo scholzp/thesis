@@ -1,4 +1,11 @@
-\section{Attack Mitigations}
+\section{Attack Mitigations and countermeasures}
+\label{sec:20:mitigations}
+In this section I want to list review mitigations and countermeasures for known
+side channel attacks. These mitigations and countermeasures serve as examples
+for my implementation and can be viewed as part of related work, as they show
+how to either detect or prevent the usage of side channels and attacks that
+utilize them.
+
 \subsection{Isolation through SMM}
 \label{sec:20:isolation_smm}
 An early work on how to isolate processes was done by Azab et al. in
@@ -26,46 +33,6 @@ authors state that practical deployment would require CPU and hardware vendors
 to do extensive security reviews on their firmware and SMM implementations.
 Additionally, multiple attacks are known targeting the SMM breaking it's
 isolation.\cite{wojtczuk2014attacking, wojtczuk2009attacking, wojtczuk2009poisining}
-
-\subsection{Enma}
-\label{sec:20:enma}
-Enma is short for Enclave Manager and is a software solution to implement TEEs
-for the L4Re operating system framework. \cite{reitz_isolierende_2019} L4Re uses
-the Fiasco.OC microkernel that is part of the L4 microkernel family. The
-microkernel approach aims for minimizing the amount of code to run in the
-supervisor mode. The creator of L4 defined the concept of microkernels as
-follows:
-
-\begin{quote}
-    \textit{ More precisely, a concept is tolerated inside the \mu-kernel only
-        if moving it outside the kernel, i.e., permitting competing
-        implementations, would prevent the implementation of the system's
-        required functionality. \\
-    } \mbox{ -- Liedke\cite{liedtke1995micro}}
-\end{quote}
-
-Following this philosophy, Fiasco.OC only implements the mere minimal services.
-All other services, such as memory management, are implemented as user space
-applications. The minimal setup of a L4Re system consists of the Fiasco.OC
-kernel, Sigma0, which manages memory, and root task moe, which is responsible
-for loading applications. As a capability based system, the kernel ensures that
-only applications with the right capabilities have access to process memory.
-Initially, only the creator of a process posses these capabilities and the
-ability to grant them to other processes. Enma uses these properties to create
-isolated enclaves in which programs can execute isolated.\\
-
-Enma follows the same approach as SGX for implementing remote attestation. Enma
-hosts a quoting enclave that sings reports to verify the state of an enclave.
-The appraiser can then check the signature of the quoting enclave, upon which
-they decide how to interact with the enclave. Enma encrypts the memory of its
-enclaves. Security-wise, Enma is vulnerable to side-channel attacks as
-explicitly stated in the work. The TCB is also increased when compared to
-hardware solutions. An application that trusts Enma must also trust the L4Re
-runtime environment as much as the firmware and hardware. Enma utilizes a
-\gls{tpm} as the hardware root of trust for verifying the system state and that
-the expected versions of L4Re and Enma were booted. The soft backend of Enma,
-which I described in this section, can also be replaced by another backend. The
-authors propose an SGX back end that utilizes hardware features.
 
 \subsection{Defenses Against Interrupt Based Side Channel Attacks}
 \label{sec:20:interrupt_sca}
