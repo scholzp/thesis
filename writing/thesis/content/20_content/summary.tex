@@ -1,4 +1,5 @@
 \section{Summary}
+\label{sec:20:summary}
 Next to the introduction to the technical aspects of x86 processors, we have seen
 examples for \glspl{tee}, attacks on \glspl{tee}, and possible mitigations to
 those attacks. \\
@@ -23,4 +24,5 @@ least mitigates this attack vector for \gls{sgx}.\\
 Putting these together, I identified an approach that was not tested to the best
 of my knowledge. This excludes architectural side channels by creating a
 completely isolated execution environment that only uses core local resources
-and monitors its integrity by utilizing \glspl{pmc}.
+and monitors its integrity by utilizing \glspl{pmc}. How to design such an
+\gls{tee} will be topic in chapter~\ref{sec:design}.
