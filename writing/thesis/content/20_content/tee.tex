@@ -1,4 +1,12 @@
-\section{Chain of Trust}
+\section{TEE building blocks}
+\label{sec:20:building_blocks}
+Before we have a broader look at \glspl{tee}, their definition, and how existing
+implementations look, we need to learn about standard building blocks of
+\glspl{tee}. For this, we first take a look at chains of trust and \gls{pki}.
+Then, we revisit the fundamentals of remote attestation and how the root of
+trust is defined.
+
+\subsection{Chain of Trust}
 \label{sec:20:chain_of_trust}
 Signatures of real humans differ because humans do not work entirely
 deterministic. The process of forging signatures of other humans requires
@@ -143,7 +151,6 @@ cards or unique, secure operation modes in CPU hardware. \\
 
 \section{Trusted Execution Environments}
 \label{sec:state:tee}
-
 GlobalPlatform first used the term trusted execution environment to define a
 solution for mobile trusted computing solutions.\cite{globaltee} Since then,
 many definitions inconsistent and unspecific definitions have been published for
@@ -185,7 +192,11 @@ communication between the insecure world outside the TEE and the application
 executing inside of it. Secure storage is one more building block. It allows the
 application in the TEE to store data in a confidentiality, integrity, and
 freshness-conserving way. Trusted I/O paths secure the communication between a
-TEE and its users.
+TEE and its users.\\
+
+In the following sections we will see multiple implementations of CPU vendors,
+learn about \glspl{tpm} and how a software solution can look. All of them serve
+as input for my implementation.
 
 \subsection{TPM}
 \label{sec:20:tpm}
@@ -446,6 +457,46 @@ not isolated from other applications in the Secure World by hardware. Using a
 trusted OS brings the downside of an increased trusted computing base compared
 to a bare metal trusted application. TrustZone does not encrypt the memory of
 the secure world, instead it utilizes the physical isolation of both worlds.\\
+
+\subsection{Enma}
+\label{sec:20:enma}
+Enma is short for Enclave Manager and is a software solution to implement TEEs
+for the L4Re operating system framework. \cite{reitz_isolierende_2019} L4Re uses
+the Fiasco.OC microkernel that is part of the L4 microkernel family. The
+microkernel approach aims for minimizing the amount of code to run in the
+supervisor mode. The creator of L4 defined the concept of microkernels as
+follows:
+
+\begin{quote}
+    \textit{ More precisely, a concept is tolerated inside the \mu-kernel only
+        if moving it outside the kernel, i.e., permitting competing
+        implementations, would prevent the implementation of the system's
+        required functionality. \\
+    } \mbox{ -- Liedke\cite{liedtke1995micro}}
+\end{quote}
+
+Following this philosophy, Fiasco.OC only implements the mere minimal services.
+All other services, such as memory management, are implemented as user space
+applications. The minimal setup of a L4Re system consists of the Fiasco.OC
+kernel, Sigma0, which manages memory, and root task moe, which is responsible
+for loading applications. As a capability based system, the kernel ensures that
+only applications with the right capabilities have access to process memory.
+Initially, only the creator of a process posses these capabilities and the
+ability to grant them to other processes. Enma uses these properties to create
+isolated enclaves in which programs can execute isolated.\\
+
+Enma follows the same approach as SGX for implementing remote attestation. Enma
+hosts a quoting enclave that sings reports to verify the state of an enclave.
+The appraiser can then check the signature of the quoting enclave, upon which
+they decide how to interact with the enclave. Enma encrypts the memory of its
+enclaves. Security-wise, Enma is vulnerable to side-channel attacks as
+explicitly stated in the work. The TCB is also increased when compared to
+hardware solutions. An application that trusts Enma must also trust the L4Re
+runtime environment as much as the firmware and hardware. Enma utilizes a
+\gls{tpm} as the hardware root of trust for verifying the system state and that
+the expected versions of L4Re and Enma were booted. The soft backend of Enma,
+which I described in this section, can also be replaced by another backend. The
+authors propose an SGX back end that utilizes hardware features.
 
 % \subsection{Security of Hardware Solutions}
 % All hardware solutions isolate critical functions to protect them from being
