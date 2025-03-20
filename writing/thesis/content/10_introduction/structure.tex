@@ -1,34 +1,58 @@
 \section{Structure}
 \label{sec:10_structure}
-In chapter~\ref{sec:state}, I will discuss technical Grundlagen that is
-important to follow the rest of the work. The first part ~\ref{sec:20:technical}
-I will discuss some details of the x86 microarchitecture. These details will
-allow us to understand the attacks and what countermeasures to implement in the
-remaining parts of the thesis. Section~\ref{sec:20:tee} will then discuss the
-state of the art by reviewing related work. In this, I will look at how trusted
-execution environments are implemented. First, I will review hardware
-extensions followed by software solutions or software that enhances the security
-of hardware extensions.
+In the following section, I want to give an overview of the content of this work and how
+it's structured.\\
 
-In chapter~\ref{sec:design}, I will explain the design of my implementation. In
-particular, I will explain in~\ref{sec:30:system} the general design.
-In~\ref{sec:30:attacker}, I will revisit the attacker model and what design
-feature can be used to mitigate which attack.
+In chapter~\ref{sec:state}, I want to give some background information and
+introduce concepts to help us understand the remaining parts of my
+thesis. First, in section~\ref{sec:20:technical}, I want to explain some
+technical details about the x86 \gls{isa}, which are important to understand the
+design decisions and implementation from a technical background. This includes
+the different operation modes of x86\_64 processors, information on how
+interrupt delivery works, how memory is managed using paging, and how caches
+work. Moreover, I will give insight into how \glspl{pmc} work and how they are
+programmed, as they form the technical backbone of my detection routine.
 
-Chapter~\ref{sec:implementation} will explain how I implemented the design
-proposed in~\ref{sec:design}. I will look at specific parts of the
-implementation that are important to fulfill the security guarantees. Moreover,
-I will investigate what part of the design was problematic to implement.
+Following the technical background of the x86\_64 \gls{isa} I want to explain
+some building block for \glspl{tee} (section~\ref{sec:20:chain_of_trust}) before
+we review selected \gls{tee} implementations in section~\ref{sec:state:tee},
+which serve as inspiration for my work.
 
-In chapter~\ref{sec:evaluation}, I will revisit the implementation described in
-chapter~\ref{sec:implementation}. I will evaluate the implementation in
-chapter~\ref{sec:50:security} regarding how it protects against the attacker
-model described in~\ref{sec:30:attacker}. Moreover, I will evaluate the
-practical use of our design in~\ref{sec:50:security}.
+These solutions have shortcomings, so it's important to see under
+what conditions they fail to uphold their security promises. For this, I want
+to explain selected attacks on \glspl{tee} in section~\ref{sec:20:attacks} and
+in section~\ref{sec:20:mitigations} approaches to mitigate them or detect them.
 
-After I evaluate the implementation, I will look at missing parts and how to
-improve the implementation further. I will do all of this in
-section~\ref{sec:futurework}, which gives an outlook on future work.
+After this, I summarize chapter~\ref{sec:state} in
+section~\ref{sec:20:summary}.\\
 
-To come to terms with our results, I will give a short overview and summary of
-the results and findings of our work in chapter~\ref{sec:conclusion}.
+Chapter~\ref{sec:design} will give insights into my design decisions for
+the prototype implementation. Because the prototype is no standalone solution, I
+will first explain the environment in which the prototype will operate and how
+it interacts with other system components (c.f.
+section~\ref{sec:30:environment}). Section~\ref{sec:30:tee_kernel} will then
+describe the \gls{tee} component and its design in more detail before we
+see how different attacks could mounted against the design in
+section~\ref{sec:30:attack}.\\
+
+Once we learn about the design, chapter~\ref{sec:40} will give
+details about the implementation and some of its highlights. First, the kernel
+used in the implementation and what modifications were made will be
+explained in section~\ref{sec:implementation:teeKernel}. Next, in
+section~\ref{sec:implementation:hostKernel}, I explain how Linux is used in the
+system as the host kernel. Because Linux cannot communicate
+out-of-the-box with my prototype, I programmed a kernel module that serves as a
+driver. Implementation details on this module will be explained in
+section~\ref{sec:implementation:kmod}. The last part of chapter~\ref{sec:40}
+consists of details about applications and attacks that I use to demonstrate the
+security properties of my prototype and benchmark different characteristics.
+Those can be found in section~\ref{sec:implementation:attacks}. \\
+
+In the evaluation chapter~\ref{sec:evaluation}, I will evaluate the prototype
+regarding its defense probability against the attacks implemented in
+section~\ref{sec:implementation:attacks}. Moreover, I measure the memory
+requirements of the \gls{tee} runtime component of the prototype to conclude
+what resources are left for payload tasks. \todo{add more about evluation}
+
+\todo{add more about furuture work}
+\todo{add more about conclusion}

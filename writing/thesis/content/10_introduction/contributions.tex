@@ -8,27 +8,32 @@ goals:
 
 \begin{enumerate}
     \item I create an execution environment fully isolated from the remaining
-          system by utilizing features found in all commodity CPUs. This means
-          that I do not use any vendor-specific ISA extensions.
-    \item I propose a TEE design to detect side-channel attacks and react
+          system by utilizing features found in all commodity CPUs. The backend
+          implementation might still be vendor-specific because those features
+          might be specific to the respective CPU implementation. The overall
+          concept stays the same on all CPUs. I show, that once running, system
+          software cannot influence my design.
+    \item I propose a \gls{tee} design to detect side-channel attacks and react
           appropriately.
-    \item Our design ensures the usage of only core local resources. This means
+    \item My design ensures the usage of only core local resources. This means
           I implement a policy that is restricted to core local caches.
     \item I evaluate ways to enable such an execution environment to offer
           remote attestation features.
-    \item I evaluate our implementation regarding system resources. In detail,
-          I will evaluate what workload fits next to the local cache's runtime
-          environment.
-    \item I evaluate the TCB and against what attacker model our sole software
+    \item I evaluate my implementation regarding system resources. In detail,
+          I will evaluate what workload fits next to the runtime
+          environment in the core's local caches.
+    \item I evaluate the TCB against what attacker model my sole software
           solution can defend.
 \end{enumerate}
 
-With complete isolation and the exclusion of possible side channels, I aim for
-a TEE solution that can withstand a wide array of possible attacks. Because of
-time constraints in this thesis, I cannot implement a fully working TEE ;
-instead, I can show the properties and concepts on a working proof of concept
-implementation. I show that our solution can run next to a commodity operating
-system such as Linux, implement communication channels through a well-defined
-interface, and show that I can protect our implementation from being interfered
-with by the commodity OS. Because I explore the technical feasibility, our
-solution still depends on the commodity to install the environment.
+With complete isolation and the exclusion of possible side channels, I aim for a
+\gls{tee} solution that can withstand various attacks. I show the properties and
+concepts on a working proof of concept implementation. My solution can run next
+to a commodity operating system such as Linux. The prototype implements
+communication channels through a well-defined interface that does not influence
+the security properties of my design, and I show that the prototype can protect
+itself from being interfered with by the commodity OS. My solution still depends
+on the commodity OS to install the environment. Therefore, the prototype will
+not be a standalone solution but a technology demonstrator. Designing systems
+components in a way that makes my implementation a standalone component is not
+the scope of this work and is left for future work.
