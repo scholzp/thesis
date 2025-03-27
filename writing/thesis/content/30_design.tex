@@ -131,6 +131,20 @@ of the TEE and data provided by user applications from the host system. After
 signing the report with the signing key, the TEE kernel transmits the report to
 the requesting third party.
 
+\subsection{Remote Attestation}
+\begin{itemize}
+    \item We need to trust Firmware, so we can use its Features SecureBott on EFI systems
+    \item Process well known from self signed (grub) and bootloaders signed by micorsoft
+    \item Linux can be booted through secure boot.
+    \item in a full implementation signed loader would load TEE, that would have sole control over system
+    \item Would install itself and on a core and PMC handler routines
+    \item From this time on the TEE is would register manipulation
+    \item after installation, TEE would signal bootloader to continue loading commodity kernel
+    \item commodity does not require ownership of TPM; TEE would claim ownership
+    \item
+\end{itemize}
+
+
 \section{Attacks}
 \label{sec:30:attack}
 The goal of the TEE prototype is to defend against an attacker with access to it
