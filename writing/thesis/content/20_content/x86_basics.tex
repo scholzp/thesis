@@ -22,19 +22,22 @@ microprocessor design, the Intel 8086 physically can only address 64 KiB of
 memory, which was enlarged by two segment registers to allow addressing nearly 1
 MiB of memory. To maintain compatibility with the Intel 8086, later 32-bit
 designs of the x86 \gls{isa} introduced an operation mode called \gls{g_rmode}.
-The name \gls{g_rmode} originates from the fact that the 16-bit design used
-linear memory addresses along the 32-bit mode called \gls{g_pmode}. All x86
-processors boot in \gls{g_rmode} for the same compatibility reasons. With the
-64-bit extension x86\_64, AMD introduced an operation mode called \gls{g_lmode}
-and two sub-modes called Compatibility Mode and 64-bit mode. Compatibility mode
-allows the execution of legacy 32-bit and 16-bit code. 64-bit mode extends the
-\gls{isa} by 64-bit operands and addresses, bringing changes to the registers
-and additional instruction. To use \gls{g_rmode}, a programmer has to write code
-that first transitions the processor from \gls{g_rmode} to \gls{g_pmode} by
-enabling additional processor features and creating required data structures.
-Because of the limitation to the first 1 MiB of memory, they have to place this
-code in this address region. A second transition must be made to make the
-processor enter \gls{g_rmode} before it can execute 64-bit programs.
+The name \gls{g_rmode} originates from the fact that the 16-bit design used the
+real location in memory for addressing. The 32-bit operation mode of this CPUs
+is called \gls{g_pmode}, because it allows addressing memory through virtual
+addresses, allowing for memory protection. All x86 processors boot in
+\gls{g_rmode} to maintain compatibility to legacy software originally written
+for 16-bit CPUs. With the 64-bit extension x86\_64, AMD introduced an operation
+mode called \gls{g_lmode} that consists of two sub-modes called Compatibility
+Mode and 64-bit mode. Compatibility mode allows 64-bit system software to
+execute legacy 32-bit and 16-bit software. 64-bit mode extends the \gls{isa} by
+64-bit operands and addresses, bringing changes to the registers and additional
+instruction. To use \gls{g_lmode}, a programmer has to write code that first
+transitions the processor from \gls{g_rmode} to \gls{g_pmode} by enabling
+additional processor features and creating required data structures. Because of
+the limitation to the first 1 MiB of memory, they have to place this code in
+this address region. A second transition must be made to make the processor
+enter \gls{g_rmode} before it can execute 64-bit programs.
 
 \subsubsection{System Management Mode}
 \label{sec:state:technical:smm}
@@ -67,7 +70,7 @@ Interrupts, on the other hand, can be divided into two classes:
     \item Maskable Interrupts: Can be masked. Masking an interrupt means that
           software can temporarily disable them. The interrupt controller holds
           them back until interrupts are enabled again.
-    \item \Gls{nmi}~(\gls{nmi}): Software cannot turn off
+    \item \Gls{nmi}: Software cannot turn off
           \glspl{nmi}. The interrupt controller delivers~
           \glspl{nmi} to the CPU unless it currently serves another~
           \gls{nmi}. When the CPU executes the IRET instruction in the
@@ -107,40 +110,35 @@ Intel later introduced the advanced programmable interrupt controller, short
 APIC with its 486 processor line to allow the system to operate with multiple
 CPUs. In modern CPUs, multiprocessor configurations are prevalent, and each
 processor core has its own APIC. Because the APIC is CPU local, these APICs are
-called local APICs or \gls{lapic}. \glspl{lapic}
-forward interrupts from different sources to the respective CPU core. For
-example, the \gls{lapic} receives interrupts such as \gls{ipi}
-(\gls{ipi}) from other \glspl{lapic} and legacy interrupts from the
-PIC. CPU external devices deliver their interrupts to the IOAPIC, which
-forwards them to the respective LAPIC. Figure~\ref{fig:state:technical:lapic}
-shows a schematic view on how the LAPIC of each CPU core integrates into the
-system. System software must change the CPU to \gls{g_pmode} to activate the
-\gls{lapic} system. After changing to \gls{g_pmode}, system software must
-write a valid address to the APIC base address register. All APIC registers are
-then mapped to the 4-KiB APIC register space starting at the address specified
-in APIC base address register. System software can then access APIC registers
-with memory reads and writes to the APIC register space.
+called local APICs or \gls{lapic}. \glspl{lapic} forward interrupts from
+different sources to the respective CPU core. For example, the \gls{lapic}
+receives interrupts such as \gls{ipi} from other \glspl{lapic} and legacy
+interrupts from the PIC. CPU external devices deliver their interrupts to the
+IOAPIC, which forwards them to the respective LAPIC.
+Figure~\ref{fig:state:technical:lapic} shows a schematic view on how the LAPIC
+of each CPU core integrates into the system. System software must change the CPU
+to \gls{g_pmode} to activate the \gls{lapic} system. After changing to
+\gls{g_pmode}, system software must write a valid address to the APIC base
+address register. All APIC registers are then mapped to the 4-KiB APIC register
+space starting at the address specified in APIC base address register. System
+software can then access APIC registers with memory reads and writes to the APIC
+register space.
 
 \subsection{Caches}
 \label{sec:state:technical:caches}
 Since 1980, the performance growth of memory and processors has diverged
 steadily with an ever-growing gap. Hennessy et al. note a difference in
 performance growth of factor 1,000 for a single CPU core and memory
-technologies. To highlight the problem, they show the difference between the
-peak bandwidth offered by memory and the peak memory bandwidth demand of an
-Intel i7 processor of the Nehalem architecture employing four CPU cores. This
-processor, which Intel introduced in the year 2009, can generate an instruction
-stream that peaks in a maximum bandwidth need of 409.6 GB/sec, while its
-dual-channel DDR3 memory interface can yield a maximum bandwidth of 25GB per
-second.\cite{hennessy2011computer} With processor implementations growing
-further in width, the demand for fast memory further grows. For example, from
-November 2023 to January 2024, the number of systems in the TOP500 list that
-employed CPUs with 96 cores per socket increased from 0 to 3, with the former
-maximum number of cores per socket being 72.\cite{top500} To hide latencies and
-bridge the gap between CPU demand and actual main memory bandwidth, CPUs today
-employ fast local on-chip memory to buffer data they already accessed. If they
-reaccess this memory item, they can use these buffers to speed up access. This
-on-chip buffer described is called cache.\\
+technologies.\cite{hennessy2011computer} With processors gaining capabilities to
+process more and more data in parallel, for example by increasing the core count
+or introducing new instructions, the demand for fast memory further grows. For
+example, from November 2023 to January 2024, the number of systems in the TOP500
+list that employed CPUs with 96 cores per socket increased from 0 to 3, with the
+former maximum number of cores per socket being 72.\cite{top500} To hide
+latencies and bridge the gap between CPU demand and actual main memory
+bandwidth, CPUs today employ fast local on-chip memory to buffer data they
+already accessed. If they reaccess this memory item, they can use these buffers
+to speed up access. This on-chip buffer described is called cache.\\
 
 The cache is an integral component organized in a multi-level hierarchy in
 modern CPUs. In this hierarchy, the lowest and the nearest to the core level,
@@ -157,32 +155,10 @@ opposite of a cache hit is called a cache miss, in which the CPU subsequently
 queries the next level in the memory hierarchy. If it finds the data needed, it
 loads these into the nearest cache for faster access. Caches can only store a
 limited number of items, organized in cache lines. Each cache line is either 32
-or 64 bytes in size, with x86\_64 processors mainly implement a cache line size
+or 64 bytes in size, with x86\_64 processors mainly implementing a cache line size
 of 64 bytes. Cache lines are a copy of the main memory, and the processor uses
 this copy for all of its operations unless otherwise configured. The processor
-loads data in cache line size granularity from the main memory. Modern x86 CPU
-designs organize caches in sets. In a set, all of the cache lines are
-exclusively mapped to a specific, non-overlapping address range of physical
-memory. The number of cache lines a physical address can be mapped to is
-indirectly proportional to the number of sets in a cache, which is called the
-associativity of the cache. For example, a cache with one cache line per set is
-called a direct mapped cache because a physical address can only be mapped to
-one set and its cache line. The hardware cost of a mapped cache is the lowest.
-Direct-mapped caches bring the drawback of a higher probability of conflict
-misses. A conflict miss in caching describes the situation in which the
-processor loads data from the main memory and has to evict lines from the cache
-because no suitable cache line is available. Because a physical address range
-with multiple cache line-sized chunks is exclusively mapped to one line in a
-directly mapped cache, loads from the same range can cause conflict misses.
-Conversely, in a cache with a single set containing all cache lines, all
-physical addresses can be mapped to each line in the set. Such a cache is called
-fully associative and has the highest hardware costs but comes with the
-advantage of minimal fragmentation. Often, processors implement a trade-off
-between hardware cost and flexibility of the cache. Such caches are called
-$n$-way set associative, where $n$ is the number of cache lines in each set. On
-a cache fill, the processor first finds the set of cache lines to which it can
-map the physical address. Once it identifies the set, the processor can place
-the data in any line. \\
+loads data in cache line size granularity from the main memory. \\
 
 Caches use the principle of locality, which consists of two kinds of locality.
 The first is called spatial locality. Spatial locality describes the observation
@@ -195,22 +171,9 @@ principle is temporal locality, which states that a program soon reuses memory
 references with a high probability. The CPU can, therefore, gain performance by
 storing recently used data in the cache for reuse.\\
 
-Modern caches are still small compared to the size of the main memory. For
-example, CPUs of the recent AMD Zen 5 microarchitecture have an L1 cache size of
-92 KiB (data and instruction combined) and 32 MiB of L3 cache shared between the
-cores, from which eight physically exist on the same chiplet. The same CPU
-supports 128 GiB of main memory, which is seven orders of magnitude larger than
-the L1 and 4 orders of magnitude larger than the L3 cache.\todo{cite amd zen
-    five paper (When writing this SLUB Shibboleth was broken...)} Caches, therefore,
-can not buffer the content of the whole main memory and need strategies for
-their management. For example, CPUs of the Nehalem microarchitecture use a
-pseudo least recently used (LRU) strategy to manage their cache's
-content.\cite{hennessy2011computer} With this, cache lines are marked as
-frequently or less frequently used. The least frequently used lines are evicted
-from the cache and replaced by the newly cached data. Evicted lines are moved
-one level up in the hierarchy. Other management strategies are the least
-frequently used (LFU) or a first-in-first-out (FIFO) policy. Next to eviction
-strategies, different strategies for writing data back to main memory exist:
+With cache lines being copies of main memory items, the need for synchronization
+arises. For this, different strategies for writing data back to main memory
+exist:
 \begin{itemize}
     \item \textbf{write-back}: Data modified in the cache is stored and written
           back to the main memory later. Until cache and main memory are
@@ -234,21 +197,17 @@ a write-back strategy.
 \label{sec:state:technical:caches_protocol}
 An interesting difference in the x86\_64 implementation of Intel and AMD
 processors are the cache coherency and inclusion policies. AMD processors use
-MOESI is a cache coherency protocol.\cite{amd_manual} Intel processors, on the
+MOESI as a cache coherency protocol.\cite{amd_manual} Intel processors, on the
 other hand, use MESI as a coherency protocol.\cite{intel_sdm} MOESI is an
 extension of the MESI protocol, introducing the \textit{Owned} state. The
-meaning of the states are as follows:
+meaning of the states in the MESI protocol are as follows:
 \begin{itemize}
     \item \textbf{Modified}: The copy in the processor's cache is the most
           recent and modified. The copy in the main memory needs to be updated.
           No other processor in the system maintains a copy.
-    \item \textbf{Owned}: Similar to shared state, but copy in main memory can
-          be stale. All other processors must hold their copy in the shared
-          state.
     \item \textbf{Shared}:  The copy is the most recent and correct copy of the
           data. Other processors may hold copies, too. Main memory holds the
-          most recent and correct copy, too, if no processor holds a copy with
-          \textbf{Owned} state.
+          most recent and correct copy, too.
     \item \textbf{Exclusive}: The processors and the main memory's copy are the
           most recent and correct copies. No other processor holds a copy.
     \item \textbf{Invalid}: The local copy is invalid. Either main memory or
@@ -259,7 +218,7 @@ case are the following state transitions:
 
 \paragraph{Exclusive to Shared}
 Processor $0$ has the exclusive copy of a cache line. Processor $1$ acquires a
-copy to read or write. In this case, the state of the line in processor $0$'s
+copy to read. In this case, the state of the line in processor $0$'s
 cache changes from exclusive to shared to reflect that other cores use the line.
 
 \paragraph{Shared to Exclusive/Invalid}
@@ -334,40 +293,47 @@ correctly.
     \end{figure}
 \end{center}
 
-Historically, paging replaced segmentation in x86 for working with virtual
-memory. Virtual memory is an abstraction that does not allow direct addressing
-of physical main memory through programs. Instead, a program sees the whole
-address space as available. Once the program tries to allocate memory, system
-software creates a virtual memory address and hands it to the program. System
-software decides through its mapping implementation, through which physical
-memory the respective virtual memory is backed. Virtual memory, therefore,
-allows system software to decide if a given virtual address is backed by main
-memory or to move it to secondary memory, such as disk storage. Moreover, two or
-more virtual addresses can be mapped to the same physical memory, allowing
-efficient use of shared program libraries. Mapping happens transparently to the
-program, which means that the program does not have to worry about what memory
-is used to back its virtual memory physically.\\
+With the evolution of computer systems not strictly processing data in a batched
+manner anymore but instead allowing for multiple applications to run
+concurrently, a need for complex memory management arose. For example, system
+software must ensure that two applications programmed to use the same memory
+addresses do not influence each other. Segmentation is a legacy technique used
+in x86 systems to solve this problem. Segmentation allows the construction of
+address spaces that allow transparent translation of application addresses
+within an address space dedicated to the application. However, if applications
+do not entirely fit into memory, system software must perform expensive swapping
+operations between main and disk memory. In this swapping operation, programmers
+either need to split up their application into parts that must reside in the
+main memory simultaneously, or system software must swap the complete
+application.
 
-Paging is an approach to virtual memory that replaces segment-based virtual
-memory in modern x86 CPUs. With paging, the system divides memory into chunks
-equal to the page size. System software uses pages to manage memory on
-allocation requests from programs. Pages are virtual memory chunks mapped to
-page frames in physical memory. Access rights are controlled by system software
-that sets the respective rights in the pages and is enforced by hardware with
-page granularity. Hardware translates virtual to physical addresses. This
-process is called page translation. In the following, we view the paging
-implementation of x86\_64 in more detail to explain page translation in more
-detail.\\
+A solution to this is virtual memory implemented through
+paging.\cite{tanenbaum2015modern} Paging splits the physical address space into
+small, evenly sized-parts called pages. The main memory is split into parts of
+the same size, called page frames, by which each page can be backed. By
+splitting the address space into pages, system software can now perform swapping
+more fine-grained. If an application accesses a page not backed by a frame,
+hardware emits a fault, and system software can take the necessary steps to load
+it into physical memory. On the other hand, applications are now implicitly
+split into parts, allowing system software to only swap out parts of running
+applications. Additionally, paging allows applications to theoretically use the
+whole address space, with system software to decide what virtual address is
+currently backed by what physical page frame through its mapping function. This
+allows system software even to map a single physical page frame to the address
+spaces of two applications simultaneously, for example, when both applications
+use the same shared library.
 
-Hardware uses page tables for page translation that are hierarchically
-organized. Each page table forms a level in the table hierarchy and is the size
-of one page, storing references (addresses) to the next lower level. The last
-page table in this hierarchy stores the address of the physical page frame. By
-default, x86\_64 uses pages of size 4 KiB. Because x86\_64 uses 64-bit
-addresses, each page table can store 512 entries.
+Hardware uses page tables that are hierarchically organized for the translation
+of virtual to physical addresses. Each page table forms a level in the table
+hierarchy and is the size of one page, storing references (addresses) to the
+next lower level. The last page table in this hierarchy stores the address of
+the physical page frame. By default, x86\_64 uses pages of size 4 KiB. Because
+x86\_64 uses 64-bit addresses, each page table can store 512 entries.
 Figure~\ref{fig:state:technical:paging} shows the page translation of a virtual
 64-bit address in x86\_64 with a page table hierarchy of four levels and a page
-size of 4 KiB. \\
+size of 4 KiB. A virtual 64-bit address consists thereby of indices in the
+respective page tables to find the address as an entry in the lowest-level page
+table\\
 
 The virtual address is divided into a 12-bit field used as an index in the
 physical page and four 9-bit fields, which the hardware uses as an index to
