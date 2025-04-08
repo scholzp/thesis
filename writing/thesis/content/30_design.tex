@@ -63,13 +63,13 @@ measurement, the prototype requires the presence of a TPM.
 \section{System description}
 \label{sec:30:system_description}
 
-\begin{center}
-    \begin{figure}
-        \includegraphics[width=.8\textwidth]{images/architecture.JPG}
-        \caption{Components of the TEE system}
+\begin{figure}
+    \begin{center}
+        \includestandalone{images/30_system.tex}
+        \caption{Integration of TEECore in a Commodity System}
         \label{fig:30:tee_system_design}
-    \end{figure}
-\end{center}
+    \end{center}
+\end{figure}
 
 A complete system that utilizes my TEE prototype is shown in
 figure~\ref{fifig:30:tee_system_design}. The system consists of two privileged
@@ -132,18 +132,79 @@ signing the report with the signing key, the TEE kernel transmits the report to
 the requesting third party.
 
 \subsection{Remote Attestation}
+\begin{figure}
+    \begin{center}
+        \includestandalone{images/30_remote_attestation.tex}
+        \caption{Remote Attestation Architecture of TEECore}
+        \label{fig:30:tee_ra}
+    \end{center}
+\end{figure}
 \begin{itemize}
-    \item We need to trust Firmware, so we can use its Features SecureBott on EFI systems
-    \item Process well known from self signed (grub) and bootloaders signed by micorsoft
-    \item Linux can be booted through secure boot.
-    \item in a full implementation signed loader would load TEE, that would have sole control over system
-    \item Would install itself and on a core and PMC handler routines
-    \item From this time on the TEE is would register manipulation
-    \item after installation, TEE would signal bootloader to continue loading commodity kernel
-    \item commodity does not require ownership of TPM; TEE would claim ownership
-    \item
+    \item In a complete remote attestation system (see cap. 2-irgendwas):
+          \begin{enumerate}
+              \item An attestation manager: This will be a (privileged) module of
+                    TEECore. TEECore implements services a attestation target can use to
+                    request an attestation report
+              \item Measurement tools: Implemented as privileged function in TEECore.
+                    TEECore has insight to target's memory and can thus measure it. Moreover
+                    it can monitor communication which can be parts of the measurement
+              \item We don't need an attestation proxy for now: I assume that an
+                    appraiser can check the report by itself.
+          \end{enumerate}
+    \item The trust base consisting of these components is self protecting:
+          \begin{enumerate}
+              \item Target and TEECore domains functionality are separated
+                    through hardware assisted privileges
+              \item TEECore configures hardware in a way that attacks on it are registers and trigger a system shutdown
+          \end{enumerate}
+    \item first we need a trustworthy system state from which on TEECore can attests
 \end{itemize}
 
+\subsubsection{Trustworthy System State}
+\begin{itemize}
+    \item Use measured boot to create a chain of trust
+    \item Root of trust for measurement: Some part of the firmware (not
+          necessarily part of the UEFI) that measures parts of the firmware
+          \begin{itemize}
+              \item This extends PCRs in the TPM
+              \item Each extend operation is also recorded in a report.
+              \item measurement is creation of a hash of the firmware $\rightarrow$ CPU implicitly trusted to calculate the correct hash
+          \end{itemize}
+    \item UEFI measures bootloader and stores value in PCR
+    \item bootloader measures TEECore and (other system components); extends PCR $x$
+    \item Such bootloader is not part of my work. They exist, see U-boot, shim, systemd-boot (in experimental phase)
+    \item Commodity kernel is measured and bootloader extends PCR
+    \item the value of each PCR can be checked by applying extend operations to the values in the log
+    \item Thus, commodity kernel is able to check that PCR value reflects the state of TEECore
+    \item Commodity OS can verify that the TPM is valid by checking its signature
+    \item Thus commmodity kernel is able to verify that TEECore is running
+    \item from this on, system is untrusted
+\end{itemize}
+
+\subsubsection{Attestation Scheme}
+\begin{itemize}
+    \item TEECore serves as Attestation agent
+    \item Performs measurement on executed code
+          \begin{itemize}
+              \item For example: Each invocation of communication routines
+              \item Each syscall is tracked
+              \item This monitors state changes of secure applications
+              \item Log similar to measurement log is created
+          \end{itemize}
+    \item Create a reports that contains the following data:
+          \begin{enumerate}
+              \item First extend the PCR $x$ with a given challange (freshness)
+              \item Create report that contains TPM identity and PCR $x$
+              \item Make the TPM attest to the PCR
+          \end{enumerate}
+    \item To make TPm attest to PCR value, we need an Attestation Identity Key (AIK)
+    \item Create a key with the help of TPM function TPM\_CreatePrimary that is only permitted fo data signing
+    \item This key resides leaves the TPM only in an encrpyted state
+    \item To actually use this key for singing, we must get a certificate for it
+    \item This requires a certification authority, that is tursted by the appraiser and TEECore
+    \item the CA delivers the certificate and thus attests that the AIK origins from a genuiene TPM
+    \item the Report is shipped to the appriase together with the AIK's certificate
+\end{itemize}
 
 \section{Attacks}
 \label{sec:30:attack}
