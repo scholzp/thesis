@@ -1,0 +1,55 @@
+\documentclass[crop,tikz]{standalone}
+\begin{document}
+\begin{tikzpicture}[scale=1]
+    %------------------- Start isolated core block
+    % Coordinate to move the whole block
+    \coordinate (x) at (0, 10);
+    % Box fo the isolated core with caption
+    \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (5, -4.5)$) node[pos=0.5, align=center] (IC) {};;
+    \node[scale=0.8, align=center] at ($ (IC) + (0, 2.0)$) {Isolated Core};
+
+    % Components running on the isolated core
+    \draw ($ (x) + (0.25, -.5)$) rectangle ($ (x) + (4.75, -1.5)$) node[pos=0.5, scale=.8, align=center] {Attestation Target};
+    \draw ($ (x) + (0.25, -2.25)$) rectangle ($ (x) + (4.75, -4.25)$) node[pos=0.5, align=center] (TC) {};
+    \draw ($ (x) + (0.5, -2.5)$) rectangle ($ (x) + (2.4, -3.5)$) node[pos=0.5, scale=0.8, align=center] {Measurement\\Tool};
+    \draw ($ (x) + (2.6, -2.5)$) rectangle ($ (x) + (4.5, -3.5)$) node[pos=0.5, scale=0.8, align=center] {Attestation\\Manager};
+    \node[scale=.8, align=center] at ($ (TC) + (0, -.8)$) {TEECore};
+
+    % Connections between components
+    \draw [very thick, dashed, arrows = {-Latex[width=5pt, length=5pt]}] ($ (x) + (1.5, -1.5)$) -- ($ (x) + (1.5, -2.5)$);
+    \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (3.5, -1.5)$) -- ($ (x) + (3.5, -2.5)$);
+    \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}]
+    ($ (x) + (3.25, -3.5)$) -- ($ (x) + (3.25, -3.8)$)
+    -- ($ (x) + (3.25, -3.8)$) -- ($ (x) + (1.5, -3.8)$)
+    -- ($ (x) + (1.5, -3.8)$) -- ($ (x) + (1.5, -3.5)$);
+    \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (3.75, -3.5)$) -- ($ (x) + (3.75, -4.75)$);
+
+    % Domain separation indicator
+    \fill[fill=none, align=left, text width= 3cm] ($ (x) + (1.1, -1.75)$) rectangle ($ (x) + (1.1, -1.9)$) node[scale=.7] {Domain\\Separation};
+    \draw [blue!60, dashed, thick] ($ (x) + (-0.0, -1.885) $) -- ($ (x) + (5, -1.885) $);
+
+    % TPM box
+    \draw ($ (x) + (0, -4.75)$) rectangle ($ (x) + (5, -5.25)$) node[pos=0.5, scale=0.8, align=center] {TPM};
+
+    % Self protecting trust base box
+    \draw[red!60, dashed, thick] ($ (x) + (-0.25, 0.25)$) rectangle ($ (x) + (5.25, -5.75)$);
+    \node[scale=.7, align=center] at ($ (x) + (1.3, -5.55)$) {Self protecting trust base};
+    %------------------- End isolated core block
+
+    %------------------- Start block of external components
+    % Coordinate to move the whole block
+    \coordinate (y) at (6.5, 10);
+    % Boxes for Appraiser and ICA
+    \draw ($ (y) + (0, -0.5)$) rectangle ($ (y) + (3, -1.5)$) node[pos=0.5, scale=0.8, align=center] {Appraiser};
+    \draw ($ (y) + (0, -3.5)$) rectangle ($ (y) + (3, -5.0)$) node[pos=0.5, scale=0.8, align=center] {Identity\\Certification\\Authority (ICA)};
+    % Arrow between boxes of this block
+    \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (y) + (2.25, -1.5)$) -- ($ (y) + (2.25, -3.5)$);
+    %------------------- End isolated core block
+
+    %------------------- Connectors between blocks
+    % Appraiser <-> Trusted App
+    \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (4.75, -1)$) -- ($ (y) + (0, -1)$);
+    % Attestation Manager <-> ICA
+    \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (4.5, -3.0)$) -- ($ (y) + (0.75, -3)$) -- ($ (y) + (0.75, -3.5)$);
+\end{tikzpicture}
+\end{document}
