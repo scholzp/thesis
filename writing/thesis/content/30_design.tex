@@ -17,10 +17,6 @@
 % Seiten haben, mehr als 20 können ein Hinweis darauf sein, daß das
 % Abstraktionsniveau verfehlt wurde.
 
-\ldots design \ldots
-
-\todo{write design}
-
 In this chapter, I will explain the design of the TEE software and how a system
 that utilized my TEE prototype looks. The design tries to mitigate the risk of
 covered side channels by fully excluding them on an architectural base.\\
@@ -32,71 +28,61 @@ are designed with section~\ref{sec:30:tee_kernel}  explaining the TEE kernel in
 more detail. In section~\ref{sec:30:attack}, I review different attack vectors
 and define attacks against which the TEE prototype has to defend itself.
 
-\section{Environment}
-\label{sec:30:environment}
+\section{General System Overview}
+In this section we will review how TEECore integrates in a system with other
+components. Before we take a more detailed look on some of the components in
+such a system, this section describes how system parts interact with each other.
 
-I decided to implement the prototype for processors implementing the Intel Alder
-Lake microarchitecture. In particular, I used the Intel Core i7 13700k processor
-as a test vehicle. Because Intel and AMD use different address schemes for their
-performance measurement extensions, the prototype will be bound to processors of
-the chosen microarchitecture. These processors support the Intel Hyper-threading
-feature that makes utilization of unused physical resources for a second logical
-threat available. Because these sibling threats use the same physical resources,
-they pose a security risk in the environment. For example,  sibling threats
-compete for resources such as L1 Cache\todo{cite}, which could leak information
-between threads\todo{cite} and denial of service through the competition.
-Because of this, I decided to limit the environment and not use the
-Hyperthreading feature.\\
-
-Furthermore, the primary purpose of this work is to evaluate the feasibility of
-a PMC-based monitoring approach. For simplicity, I will assume that I will be
-able to install the TEE management software without being exposed to malicious
-software. Features such as SecureBoot\todo{cite} support this assumption. The
-prototype will, therefore, implement features to protect the running TEE.
-Creating a trusted bootloader that is able to install the TEE in a trusted way
-is left for future work.\\
-
-For cryptographic key generation and as a hardware root of trust for
-measurement, the prototype requires the presence of a TPM.
-
-
-\section{System description}
-\label{sec:30:system_description}
-
+\label{sec:30:system_overview}
 \begin{figure}
     \begin{center}
         \includestandalone{images/30_system.tex}
-        \caption{Integration of TEECore in a Commodity System}
+        \caption{TEECore running in a System next to a commodity \gls{os}}
         \label{fig:30:tee_system_design}
     \end{center}
 \end{figure}
 
-A complete system that utilizes my TEE prototype is shown in
-figure~\ref{fifig:30:tee_system_design}. The system consists of two privileged
-software pieces: the TEE kernel and the host OS. Both run next to each other on
-the same physical CPU package and cooperate to some extent with each other.\\
+Figure~\ref{fig:30:tee_system_design} shows an overview of a system integrating
+TEECore next to an commodity \gls{os}. Speaking on a higher level, the
+bootloader is responsible to partition the system into two part: The first being
+managed by TEECore and the second partition running the commodity \gls{os}.
+Because TEECore is designed to run the in local CPU cache, the first partition
+hosting it essentially consist of a single CPU core. Thus, the remaining system
+resources, such as I/O ports, additional CPU cores and memory, is part of the
+second partition running the commodity \gls{os}.\\
 
-The host OS is a general-purpose operating system that runs user space
-applications and offers services to those applications through an interface that
-can communicate with the TEE kernel. Communication and management of a TEE and
-its app Alication are implemented by the host OS through a driver. The host also
-sets up the isolated core and shared memory communication path in the prototype.
-\\
+The design goal of TEECore is to enable the commodity \gls{os} to run workloads
+in a shielded location, so that no information can be leaked to other
+applications. In figure~\ref{fig:30:tee_system_design}, such a workload is
+defined as a trusted application. TEECore employs isolation mechanisms that
+protects data from being leaked, while protecting itself from modification, by
+both, trusted application and the commodity \gls{os} running on the rest of the
+system. For protecting TEECore against malicious workloads, I Use hardware
+assisted domain separation through different privilege levels, as widely used in
+other \gls{os}. TEECore uses \glspl{pmc} to observe the platform state and build
+protection measurements upon those observations. The key component for this are
+hardware events that are triggered when the CPU core under TEECore's control
+forced to share data with the remaining systems. Using respective interrupts,
+TEECore can react to these leaks and react in an appropriate way. I decided that
+the consequences of such a leak should lead to a platform reset, effectively
+undermining an attack attempt.\\
 
-The TEE kernel, on the other hand, is responsible for setting up the environment
-in which isolated trusted applications run. It manages the resources and brings
-the CPU core into a state that can execute services. It additionally sets up a
-communication path through shared memory. This shared memory must be known by
-both the host OS and the TEE kernel.\\
+TEECore uses a \gls{tpm} as a hardware trust anchor and to store data and keys.
+It utilizes measured boot to conclude if the system is in a trustworthy state
+when setting up it's services. Extend operations to the content of the
+\gls{tpm}'s \glspl{pcr} form the backbone of TEECore's attestation feature and
+allow it to fulfill all requirements of a \gls{tee}.\\
 
-Once booted with Secure boot, the TEE kernel can take ownership of the TPM and
-use it as a hardware root of trust. With an x.509 certificate chain, the TEE can
-create reports about its state. For this, the TEE kernel asks the TPM to create
-a certificate and bind it to the TEE's signing key. Outstanders can then check
-the validity of the certificate by verifying the key chain of the x.509 PKI.
+The second partition runs the commodity \gls{os} and all of it's applications.
+The commodity \gls{os} implements system functions that allows applications
+running on top of it to access services hosted in the partition running TEECore.
+The commodity \gls{os} needs a special driver that implements the routines
+necessary to communicate with TEECore and it's services. Both partitions
+communicate via a shared memory region. In the setup phase, this shared memory
+regions is reserved and placed into the memory map of both partition for their
+systems to include and map it.
 
-
-\section{TEE kernel}
+\section{TEECore}
 \label{sec:30:tee_kernel}
 
 The TEE kernel must manage all resources available to the  TEE and Implements
@@ -130,8 +116,59 @@ registers and a report based on this information. A report also contains the ID
 of the TEE and data provided by user applications from the host system. After
 signing the report with the signing key, the TEE kernel transmits the report to
 the requesting third party.
+-interrupt free environment
 
-\subsection{Remote Attestation}
+\section{Trusted applications}
+Trusted application are application running in user space in the secure
+partition that provide services to software in the normal partition. Compared to
+applications running on top of commodity \gls{os}, application running in
+an environment managed by TEECore have to respect multiple restrictions.\\
+
+For now, the design doesn't support the dynamic installation of user space
+application in the \gls{tee} environment. This restriction is the consequence of
+TEECore not being a fully fledged \gls{os} and the missing availability of
+\gls{os}-specific libraries such as a standard C library. As a result, an
+application must be implemented as a function in the TEECore using the
+respective framework. Changing the application requires the recreation of the
+whole TEECore binary. While this reduces the flexibility of running systems, it
+allows for easier integrity measurement of application, because they are
+statically embedded in the TEECore binary, which is already measured in the
+bootflow through measured boot. Moreover, embedding the application in the
+TEECore binary as a function removes the necessity to implement a executable
+loader, which reduces the amount of code and therefore the size of the binary.
+Another restriction, as the whole run time environment has to fit together with
+the application into the CPU's local cache.\\
+
+The small size of available memory also restricts the size of data the workload
+can generate. Working with large data sets is not possible, as exceeding the
+capacity of the cache will lead to replacements in the local cache, which will
+result in leakage to shared part of the memory subsystem, an event considered by
+TEECore as an attack. TEECore then will take the same consequences, which
+results in a reset of the whole system. Moreover, organization of cache
+structures can influence how the memory is actually used. i will evaluate such
+effects in chapter\todo{hier die Kapilnummer nennen}. The last aspect regarding
+memory is how it is managed. Trusted application are disallowed for the
+prototype of TEECore to freely allocate heap memory. This is because cache lines
+must be set to either exclusive or modified by TEECore to enable protection,
+which in turn means, that all used memory addresses must be known beforehand.
+Applications can circumvent the last restriction by allocating large enough
+memory chunks through structures of size known at compile time.\\
+
+Another restriction comes form the fact, that the whole secure partition is only
+using local resources of a single core. In the current model, trusted
+application are forbidden to do any I/O access beyond the boundaries of the
+local resources of the core that the secure partition forms. The only access
+allowed is that to the shared memory path managed by the TEECore kernel. While
+would be possible to use the same resources, for exmplae I/O port, as the
+commodity \gls{os} in the normal partition, this would require the
+implementation of complex protocols for each shared resource in TEECore and the
+commodity \gls{os}'s kernel, potentially leading to reduced performance in both
+systems by the introduced overhead. On the side of TEECore this would also
+require to find a way to uphold it's security guaranties while permitting the
+use of core external resources. Therefore, the prototype to implement will
+forbid usage of core external resources and any access to I/O paths.
+
+\section{Remote Attestation Scheme of TEECore}
 \begin{figure}
     \begin{center}
         \includestandalone{images/30_remote_attestation.tex}
@@ -139,123 +176,122 @@ the requesting third party.
         \label{fig:30:tee_ra}
     \end{center}
 \end{figure}
+As described in section~\ref{sec:20:remote_attestation}, remote attestation
+serves to purpose of verifying a claim made about the state of the system. In
+the case of TEECore this means, that TEECore must provide evidence that it holds
+it's defense properties, that it was setup correctly and that the trusted
+application was executed as expected. To fulfill these tasks, TEECore implements
+two key components:
+\begin{enumerate}
+    \item An attestation manager: This is a privileged module of
+          TEECore. TEECore implements services a attestation target can use to
+          request an attestation report.
+    \item Measurement tools: Implemented as privileged function in TEECore.
+          TEECore has insight to a target's memory because of it's elevated
+          privileges and can thus measure the target's memory. Moreover it can
+          monitor communication which can be parts of the measurement.
+\end{enumerate}
+To measure a part of the target means to create a hash of it, that can be used
+to extend a \gls{pcr} in the \gls{tpm}. TEECore uses the \gls{tpm}'s gls{pcr} to
+integrate a hardware root of trust. Additionally, the \gls{tpm} is required to
+act as a hardware token to identify the platform. With it's security features,
+the \gls{tpm} form a trust anchor for external parties by attesting it's
+genuineness. It furthermore contains the results of the measured boot chain as a
+result of a technology called measured boot. Measured boot allows the creation
+of a chain of trust, by which each step in the boot chain measures software of
+the next step. This allows for comparing the hash value with an expected good
+value. Additionally, each hash value extends a specific \gls{pcr} in the
+\gls{tpm}. Beginning from the firmware, each involved measurement is added to a
+measurement log, that tracks what component was measurement and what \gls{pcr}
+was extended. A given \gls{pcr} can then prove the integrity of the log. TEECore
+uses this chain in two ways. First, TEECore can verify on the contents of the
+\gls{pcr} that it's setup phase is performed in a known good and therefore
+trusted state of the platform. Second, by making the \gls{tpm} attest to it's
+\gls{pcr} values, TEECore can prove that it started from a trusted state and
+that the values that left TEECore were not modified. The latter aspect is
+important because it prevents man in the middle attacks. \\
+
+A \gls{tpm} never uses it's \gls{ek} to sing or encrypt data. Instead, it uses
+key derivation functions to create keys on demand with the help of it's
+\glspl{ek}. The attestation manager of TEECore request a such a \gls{aik}, that
+can be used to sign \gls{pcr} values by the \gls{tpm}. A problem arises when
+TEECore has to prove that the \gls{aik} originates from a genuine \gls{tpm}. For
+this, the signing processes for the \gls{aik} needs to be performed with the
+help of a \gls{ca} trusted by the appraiser and TEECore. The \gls{aikca} serves
+this role. It is trusted by the appraiser and TEECore. It serves as a proxy to
+issue a certificate for TEECore that the \gls{tpm} it uses is genuine and that
+the \gls{aik} used by it for attestation of it's \glspl{pcr} belongs to it's
+\gls{ek}. The \gls{aikca} in this process learns the identity of the \gls{tpm}
+through it's \gls{ek}'s certificate. The appraiser on the other hand does not,
+as it does only know that the \gls{aikca} issued the certificate. It can
+therefore prove the correctness of the \gls{aik}'s certificate by proving that
+it was issued by the \gls{aikca}.\\
+
+The attestation manager uses both, the \gls{aikca} and \gls{tpm} to generate a
+report on the behalf of the attestation target. As a third source of data, the
+attestation manager uses digests generated by the measurement tool. The report
+created by the attestation manager contains:
 \begin{itemize}
-    \item In a complete remote attestation system (see cap. 2-irgendwas):
-          \begin{enumerate}
-              \item An attestation manager: This will be a (privileged) module of
-                    TEECore. TEECore implements services a attestation target can use to
-                    request an attestation report
-              \item Measurement tools: Implemented as privileged function in TEECore.
-                    TEECore has insight to target's memory and can thus measure it. Moreover
-                    it can monitor communication which can be parts of the measurement
-              \item We don't need an attestation proxy for now: I assume that an
-                    appraiser can check the report by itself.
-          \end{enumerate}
-    \item The trust base consisting of these components is self protecting:
-          \begin{enumerate}
-              \item Target and TEECore domains functionality are separated
-                    through hardware assisted privileges
-              \item TEECore configures hardware in a way that attacks on it are registers and trigger a system shutdown
-          \end{enumerate}
-    \item first we need a trustworthy system state from which on TEECore can attests
+    \item The \gls{aik} certificate: The appraise can check with this that the
+          \gls{aik} is trusted by the \gls{aikca} and the report data were
+          therefore signed by a genuine \gls{tpm}.
+    \item The measured boot report together with \gls{pcr} contents: This attest
+          to the platform integrity.
+    \item \gls{pcr} content of the target measurement results.
+    \item The \gls{pcr} value of the report itself.
 \end{itemize}
 
-\subsubsection{Trustworthy System State}
-\begin{itemize}
-    \item Use measured boot to create a chain of trust
-    \item Root of trust for measurement: Some part of the firmware (not
-          necessarily part of the UEFI) that measures parts of the firmware
-          \begin{itemize}
-              \item This extends PCRs in the TPM
-              \item Each extend operation is also recorded in a report.
-              \item measurement is creation of a hash of the firmware $\rightarrow$ CPU implicitly trusted to calculate the correct hash
-          \end{itemize}
-    \item UEFI measures bootloader and stores value in PCR
-    \item bootloader measures TEECore and (other system components); extends PCR $x$
-    \item Such bootloader is not part of my work. They exist, see U-boot, shim, systemd-boot (in experimental phase)
-    \item Commodity kernel is measured and bootloader extends PCR
-    \item the value of each PCR can be checked by applying extend operations to the values in the log
-    \item Thus, commodity kernel is able to check that PCR value reflects the state of TEECore
-    \item Commodity OS can verify that the TPM is valid by checking its signature
-    \item Thus commmodity kernel is able to verify that TEECore is running
-    \item from this on, system is untrusted
-\end{itemize}
+The appraiser is able to verify on basis of the attestation report, that the
+respective target was executed and what operations it performed. Moreover, the
+appraise can verify that TEECore was run and that it's integrity was not
+violated.
 
-\subsubsection{Attestation Scheme}
-\begin{itemize}
-    \item TEECore serves as Attestation agent
-    \item Performs measurement on executed code
-          \begin{itemize}
-              \item For example: Each invocation of communication routines
-              \item Each syscall is tracked
-              \item This monitors state changes of secure applications
-              \item Log similar to measurement log is created
-          \end{itemize}
-    \item Create a reports that contains the following data:
-          \begin{enumerate}
-              \item First extend the PCR $x$ with a given challange (freshness)
-              \item Create report that contains TPM identity and PCR $x$
-              \item Make the TPM attest to the PCR
-          \end{enumerate}
-    \item To make TPm attest to PCR value, we need an Attestation Identity Key (AIK)
-    \item Create a key with the help of TPM function TPM\_CreatePrimary that is only permitted fo data signing
-    \item This key resides leaves the TPM only in an encrpyted state
-    \item To actually use this key for singing, we must get a certificate for it
-    \item This requires a certification authority, that is tursted by the appraiser and TEECore
-    \item the CA delivers the certificate and thus attests that the AIK origins from a genuiene TPM
-    \item the Report is shipped to the appriase together with the AIK's certificate
-\end{itemize}
+\section{Attacker model}
+The design of TEECore aims mainly to disable any form of covert side channel
+that uses architectural components to form the side channel. In particular I aim
+to detect cache based side channels and therefore actively defend against attack
+such as Spectre and Meltdown. The main defense mechanism is the configuration of
+the \gls{pmc} together with the \gls{idt} that lead to system reset upon
+registering an attack. Because TEECore does not prevent the attack, information
+leakage is still possible in the time frame between. How big this time frame is
+and how an attacker could abuse it, is an open question that I will investigate
+in chapter~\ref{eval}\todo{correct reference}. TEECore also protects against
+interrupt based single stepping attacks like SGX-Step (\todo{verwies auf
+    attacks}). With the special configuration of the \gls{idt}, all interrupts
+received by TEECore lead to the same result, that is a platform reset. To
+summarize, TEECore is able to defend against an attacker that reads and writes
+to memory addresses contained in the cache of the isolated core, as these action
+result in MESI state changes. This attacker can have arbitrary privileges as
+long as the attack is not executed from within the \gls{smm}. Likewise I/O ports
+are not considered an attack vector by me, as the application model of TEECore
+forbids access to I/O devices. \\
 
-\section{Attacks}
-\label{sec:30:attack}
-The goal of the TEE prototype is to defend against an attacker with access to it
-is backing memory. An attacker could trigger leakage or modification through
-access to the right memory address with the help of cache coherence protocols.
-These are the same mechanisms used in the Spectre and meltdown class
-side-channel attacks. By simulating these kinds of attacks, we can study the
-behavior of the prototype's implementation.\\
+The \gls{smm} serves as an exception from the aforementioned security
+guarantees, because it can effectively prevent TEECore from reacting to the
+occurrence of measurement events. The main reason for this is, that \gls{smm}
+can simply denial TEECore from executing and thus reacting to performance
+monitoring events. Additionally, Intel allows for freezing debug features while
+\gls{smm} code is executed. This feature allows system software for masking
+events originating from \gls{smm}.\cite{intel_sdm} Moreover, malicious \gls{smm}
+software could modify the \gls{pmc} configuration. To summarize, \gls{smm} could
+be used to mount an attack from different vectors. How the actual interaction
+with \gls{smm} would look like is at the point of writing this not clear.
+Evaluating such attacks would require a platform that allows modification of
+\gls{smm} software and is therefore left for future work. \\
 
-From this, we can derive two attackers based on their invasions. The first class
-of attackers are passive ones, those who can read memory and are only interested
-in spying secrets from the TEE. The second attacker is an active one that
-modified code protected in the TEE with malicious intent.\\
+TEECore is immune to other software that spies on its memory access patterns,
+because all memory accesses happen in cache. Once the setup phase succeeds, an
+attacker could only observe access to the shared memory region that TEECore and
+software in the normal partition use to communicate with each other.\\
 
-From a technical perspective, the active attacker is easier to spot. Code that
-resides in the cache of the isolated core that attackers did not exfiltrate will
-be exclusive or shared in the MESI state. Shared denotes the state where the
-respective cache line is contained in another cache, possibly in an invalid
-state in the remote cache. Exclusive denotes the state of exclusive ownership of
-the cache line. In other words, the item is not contained in any other cache. If
-the attacker now attempts to change the memory item, this results in
-invalidating the cache line in the core owned by the TEE. The result on the test
-CPU is a snoop, which offcore performance counter events can track.\\
+TEECore can detect if it is running inside of a \gls{vm}, or at least if the
+platform is using a genuine \gls{tpm}. This would require network access or a
+protocol that allows TEECore network communication through software running in
+the normal partition. Physical attacks that aim on manipulation or taping the
+bus through which the \gls{tpm} is connect to the system can not be prevented by
+TEECore.
 
-The passive attacker is harder to spot. Because changing a cache line from
-exclusive to shared does not necessarily result in data transfer between the
-CPU-exclusive parts of the cache. For example, if both the TEE and a remote CPU
-have valid copies of a data item in their respective caches, the cache line in
-both CPUs is tagged as shared. If one core modifies the data item, the write
-access results in communication between the cores, invalidating the remote cache
-line. A scenario in which a passive attacker might not be spotted is if the
-attacker can somehow gain access to memory that the TEE did not modify after
-setting up the environment protection routines. Therefore, we assume the
-attacker can read arbitrary memory at any time. A successful defense is if those
-reading attempts can be reliably spotted by the TEE.\\
-
-A third class of attackers could try to send interrupts to the TEE with varying
-goals. Like SGX step\todo{cite}, an attacker could try to single-step the TEE.
-Regarding the isolation, this single stepping does not allow us to learn
-anything from the TEE. Another goal could be to flood the TEE with NMIs to
-prevent the TEE from reacting to an attack. Theoretically, the TEE must react to
-the NMIs before doing anything else. While the design creates an interrupt-free
-environment, I must consider the possibility of such an attack. The TEE
-implementation should react appropriately even if flooded by NMIs.\\
-
-The last possible attack vector is IPIs. If the attacker can reset the CPU and
-make it execute code that leaks secret, appropriate countermeasures should be
-thought of. How a CPU reacts to such IPIs is implementation-specific. Therefore,
-the purpose of the simulation of such an attack is to collect data about this
-topic and not necessarily find a defense mechanism.\\
+\todo{software stack. what forms the TCB?}
 
 \cleardoublepage
 
