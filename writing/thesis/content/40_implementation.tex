@@ -279,6 +279,57 @@ and transfers control over the memory area on this way back to the TEE. The TEE
 now reports on the state of the performance counters.\todo{maybe add some code
     examples?}\\
 
+% \section{Attacks}
+% \label{sec:30:attack}
+% The goal of the TEE prototype is to defend against an attacker with access to it
+% is backing memory. An attacker could trigger leakage or modification through
+% access to the right memory address with the help of cache coherence protocols.
+% These are the same mechanisms used in the Spectre and meltdown class
+% side-channel attacks. By simulating these kinds of attacks, we can study the
+% behavior of the prototype's implementation.\\
+
+% From this, we can derive two attackers based on their invasions. The first class
+% of attackers are passive ones, those who can read memory and are only interested
+% in spying secrets from the TEE. The second attacker is an active one that
+% modified code protected in the TEE with malicious intent.\\
+
+% From a technical perspective, the active attacker is easier to spot. Code that
+% resides in the cache of the isolated core that attackers did not exfiltrate will
+% be exclusive or shared in the MESI state. Shared denotes the state where the
+% respective cache line is contained in another cache, possibly in an invalid
+% state in the remote cache. Exclusive denotes the state of exclusive ownership of
+% the cache line. In other words, the item is not contained in any other cache. If
+% the attacker now attempts to change the memory item, this results in
+% invalidating the cache line in the core owned by the TEE. The result on the test
+% CPU is a snoop, which offcore performance counter events can track.\\
+
+% The passive attacker is harder to spot. Because changing a cache line from
+% exclusive to shared does not necessarily result in data transfer between the
+% CPU-exclusive parts of the cache. For example, if both the TEE and a remote CPU
+% have valid copies of a data item in their respective caches, the cache line in
+% both CPUs is tagged as shared. If one core modifies the data item, the write
+% access results in communication between the cores, invalidating the remote cache
+% line. A scenario in which a passive attacker might not be spotted is if the
+% attacker can somehow gain access to memory that the TEE did not modify after
+% setting up the environment protection routines. Therefore, we assume the
+% attacker can read arbitrary memory at any time. A successful defense is if those
+% reading attempts can be reliably spotted by the TEE.\\
+
+% A third class of attackers could try to send interrupts to the TEE with varying
+% goals. Like SGX step\todo{cite}, an attacker could try to single-step the TEE.
+% Regarding the isolation, this single stepping does not allow us to learn
+% anything from the TEE. Another goal could be to flood the TEE with NMIs to
+% prevent the TEE from reacting to an attack. Theoretically, the TEE must react to
+% the NMIs before doing anything else. While the design creates an interrupt-free
+% environment, I must consider the possibility of such an attack. The TEE
+% implementation should react appropriately even if flooded by NMIs.\\
+
+% The last possible attack vector is IPIs. If the attacker can reset the CPU and
+% make it execute code that leaks secret, appropriate countermeasures should be
+% thought of. How a CPU reacts to such IPIs is implementation-specific. Therefore,
+% the purpose of the simulation of such an attack is to collect data about this
+% topic and not necessarily find a defense mechanism.\\
+
 \cleardoublepage
 
 %%% Local Variables: %% TeX-master: "diplom" %% End:
