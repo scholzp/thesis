@@ -13,6 +13,9 @@
     \draw ($ (x) + (0.0, -3.75)$) rectangle ($ (x) + (2.75, -4.75)$) node[pos=0.5, scale=.8, align=center] {TEECore};
     \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (1.375, -1.5)$) -- ($ (x) + (1.375, -3.75)$);
 
+    \draw[red!60, dashed, thick] ($ (x) + (-0.5, 0.25)$) rectangle ($ (x) + (3.25, -5.35)$);
+    \node[scale=.7, align=center] at ($ (x) + (0.5, -5.2)$) {Secure Partition};
+
     % Memory mapped components
     \coordinate (x) at (4, 10);
     \draw ($ (x) + (0, -1.0)$) rectangle ($ (x) + (3, -2)$) node[pos=0.5, scale=.8, align=center] {Shared Memory} ;
@@ -21,7 +24,6 @@
     \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (-1.25, -4.45)$) -- ($ (x) + (1.5, -4.45)$) -- ($ (x) + (1.5, -4)$);
     \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (-1.25, -4.05)$) -- ($ (x) + (-0.5, -4.05)$) -- ($ (x) + (-0.5, -1.5)$) -- ($ (x) + (0, -1.5)$);
     \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (4.25, -4.25)$) -- ($ (x) + (3.5, -4.25)$) -- ($ (x) + (3.5, -1.5)$) -- ($ (x) + (3, -1.5)$);
-
     % Remaining system
     \coordinate (x) at (8, 10);
     \node[scale=0.8, align=center] at ($ (x) + (1.625, -.2)$) {Remaining System};
@@ -36,5 +38,8 @@
     \draw ($ (x) + (0.25, -3.75)$) rectangle ($ (x) + (3.0, -4.75)$) node[pos=0.5, scale=.8, align=center] {TEECore Driver};
     \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (1.625, -1.5)$) -- ($ (x) + (1.625, -2.25)$);
     \draw [arrows = {Latex[width=5pt, length=5pt]-Latex[width=5pt, length=5pt]}] ($ (x) + (1.625, -3.25)$) -- ($ (x) + (1.625, -3.75)$);
+
+    \draw[red!60, dashed, thick] ($ (x) + (-0.25, 0.25)$) rectangle ($ (x) + (3.5, -5.35)$);
+    \node[scale=.7, align=center] at ($ (x) + (0.8, -5.2)$) {Normal Partition};
 \end{tikzpicture}
 \end{document}
