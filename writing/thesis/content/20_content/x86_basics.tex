@@ -1,6 +1,6 @@
 \section{Technical Background}
 \label{sec:state:technical}
-This chapter give us an overview of important mechanisms used by modern CPUs.
+This chapter gives us an overview of important mechanisms used by modern CPUs.
 While there are other widely used architectures, such as ARM on mobile devices,
 we explore these features in the example of the x86\_64 architecture. \\
 
@@ -10,12 +10,7 @@ can differ between \gls{isa} and even implementations of the
 same \gls{isa} on the microarchitectural plane. I, therefore, note
 differences in implementations of x86\_64 whenever appropriate.
 
-\subsection{Miscellaneous Features}
-\label{sec:state:technical:misc}
-In this section I want to explain features of the x86 architecture that are
-relevant to understand details of this work but not absolutely necessary.
-
-\subsubsection{Operation Modes}
+\subsection{Operation Modes}
 \label{sec:state:technical:modes}
 The x86 architecture is rooted in the Intel 8086, designed in 1978. As a 16-bit
 microprocessor design, the Intel 8086 physically can only address 64 KiB of
@@ -39,7 +34,7 @@ the limitation to the first 1 MiB of memory, they have to place this code in
 this address region. A second transition must be made to make the processor
 enter \gls{g_rmode} before it can execute 64-bit programs.
 
-\subsubsection{System Management Mode}
+\subsection{System Management Mode}
 \label{sec:state:technical:smm}
 Besides the operations modes described in
 section~\ref{sec:state:technical:modes}, \gls{smm} does not activate additional
@@ -244,7 +239,7 @@ or when other processors request the same data item. If another processor
 requests the data item, then the owning processor will make the item available
 in a shared memory structure, such as \gls{llc}.
 
-\subsection{Cache inclusivity}
+\subsection{Cache Inclusivity}
 \label{sec:state:technical:caches_inclusivity}
 The use of different coherency protocols to synchronize data between multiple
 CPU cores has a direct effect on the inclusivity of the cache implementation. On
@@ -295,14 +290,6 @@ correctly.
 
 \subsection{Paging}
 \label{sec:state:technical:paging}
-\begin{figure}
-    \begin{center}
-        \includestandalone{images/paging.tex}
-        \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables}
-        \label{fig:state:technical:paging}
-    \end{center}
-\end{figure}
-
 With the evolution of computer systems not strictly processing data in a batched
 manner anymore but instead allowing for multiple applications to run
 concurrently, a need for complex memory management arose. For example, system
@@ -315,7 +302,15 @@ do not entirely fit into memory, system software must perform expensive swapping
 operations between main and disk memory. In this swapping operation, programmers
 either need to split up their application into parts that must reside in the
 main memory simultaneously, or system software must swap the complete
-application.
+application.\\
+
+\begin{figure}
+    \begin{center}
+        \includestandalone{images/paging.tex}
+        \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables}
+        \label{fig:state:technical:paging}
+    \end{center}
+\end{figure}
 
 A solution to this is virtual memory implemented through
 paging.\cite{tanenbaum2015modern} Paging splits the physical address space into
@@ -331,7 +326,7 @@ whole address space, with system software to decide what virtual address is
 currently backed by what physical page frame through its mapping function. This
 allows system software even to map a single physical page frame to the address
 spaces of two applications simultaneously, for example, when both applications
-use the same shared library.
+use the same shared library.\\
 
 Hardware uses page tables that are hierarchically organized for the translation
 of virtual to physical addresses. Each page table forms a level in the table
