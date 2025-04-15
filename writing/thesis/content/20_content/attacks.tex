@@ -1,32 +1,9 @@
-\section{Attacks on Trusted Execution Environments}
+\section{Side Channel Attacks}
 \label{sec:20:attacks}
-In this section I want to highlight some attacks on TEE implementations. This
-section does not claim to be a review of all attacks out there targeting TEEs.
-Instead, I want to give a short explanation of attacks and their
-countermeasures, if any exist, that I try to mitigate with my prototype
-implementation.
-
-\subsection{Interrupt Based Attacks}
-\label{sec:20:interrupt_sca}
-In section~\ref{sec:20:transientattacks}, we have seen that data can be leaked
-from various TEE implementations over side channels if an attacker can interrupt
-a TEE in a high temporal resolution. With SGX-step Van et al. presented the
-first framework with which an attacker can mount attacks on SGX with
-instruction-level granularity.\cite{van2017sgx} Next to the aforementioned
-covered side channels, this allows the attacker to learn access patterns of the
-TEE and tightly monitor its control flow. Wilke et al. and Kou et al.
-implemented similar attacks for AMD and ARM processors.\cite{wilke2023sev,
-    kou2021load}\\
-
-On x86 processors, the attack scheme uses the \gls{lapic}, while on ARM, it uses
-a separate core to send inter-processor interrupts to overcome the boundaries
-set by the two worlds in TrustZone. While Kou et al. use these interrupts to
-mount high-precision flush+evict attacks, both x86 attacks additionally describe
-how to monitor TTE behavior by manipulating the page tables of the TEE. By
-setting the accessed bit to 0, the attacker can at least learn of memory
-accesses on page granularity. All three attacks are, therefore, able to break
-the security guarantees of the TEE while not granting an attacker more power
-than the attacker model of the respective solution does.
+In this section I want to highlight some attacks on \gls{tee} implementations.
+This section does not claim to be a review of all attacks out there targeting
+\glspl{tee}. Instead, I want to give a short explanation of attacks that I try
+to mitigate with my prototype implementation (c.f chapter 3 \todo{ref auf design}).
 
 \subsection{Transient Execution Attacks}
 \label{sec:20:transientattacks}
@@ -38,8 +15,8 @@ Intel, Qualcomm, and other ARM designs were affected. This class of new
 transient execution side-channel attacks abuses the speculative execution
 feature of modern CPU and defines an entirely new class of attacks. Furthermore,
 they are the first class of attacks that abuse microarchitectural bugs. We
-review this class of attacks in more detail as I aim to implement a TEE that
-can defend against such an attack.\\
+review this class of attacks in more detail as I aim to implement a TEE that can
+defend against such an attack.\\
 
 Both attacks abuse a race condition between transient executed instructions and
 memory access (Spectre) or exception delivery (Meltdown). In strictly sequential
@@ -64,3 +41,24 @@ TEE solutions are affected, too, because these attacks enable attackers to read
 arbitrary memory. The problem persists, and no solution exists to mitigate
 transient execution attacks in general.\\
 
+\subsection{Interrupt Based Attacks}
+\label{sec:20:interrupt_sca}
+In section~\ref{sec:20:transientattacks}, we have seen that data can be leaked
+from various \gls{tee} implementations over side channels if an attacker can
+interrupt a \gls{tee} in a high temporal resolution. With SGX-step Van et al.
+presented the first framework with which an attacker can mount attacks on
+\gls{sgx} with instruction-level granularity.\cite{van2017sgx} Next to the
+aforementioned covered side channels, this allows the attacker to learn access
+patterns of the \gls{tee} and tightly monitor its control flow. Wilke et al. and
+Kou et al. implemented similar attacks for AMD and ARM
+processors.\cite{wilke2023sev, kou2021load}\\
+
+On x86 processors, the attack scheme uses the \gls{lapic}, while on ARM, it uses
+a separate core to send inter-processor interrupts to overcome the boundaries
+set by the two worlds in TrustZone. While Kou et al. use these interrupts to
+mount high-precision flush+evict attacks, both x86 attacks additionally describe
+how to monitor \gls{tee} behavior by manipulating the page tables of the
+\gls{tee}. By setting the accessed bit to 0, the attacker can at least learn of
+memory accesses on page granularity. All three attacks are, therefore, able to
+break the security guarantees of the \gls{tee} while not granting an attacker
+more power than the attacker model of the respective solution does.

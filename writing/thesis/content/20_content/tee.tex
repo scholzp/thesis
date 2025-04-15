@@ -3,7 +3,7 @@
 Before we have a broader look at \glspl{tee}, their definition, and how existing
 implementations look, we need to learn about standard building blocks of
 \glspl{tee}. For this, we first take a look at chains of trust and \gls{pki}.
-Then, we revisit the fundamentals of remote attestation and how the root of
+Then, we revisit the fundamentals of remote attestation and how a root of
 trust is defined.
 
 \subsection{Chain of Trust}
@@ -153,8 +153,8 @@ cards or unique, secure operation modes in CPU hardware. \\
 GlobalPlatform first used the term trusted execution environment to define a
 solution for mobile trusted computing solutions.\cite{globaltee} Since then,
 many definitions inconsistent and unspecific definitions have been published for
-TEEs until the first precise definition was proposed by Sabt
-et.al.\cite{sabt2015trusted}. They define the TEE in the following way:
+\glspl{tee} until the first precise definition was proposed by Sabt
+et.al.\cite{sabt2015trusted}. They define the \gls{tee} in the following way:
 \begin{quote}
     \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
         environment that runs on a separation kernel. It guarantees the authenticity of
@@ -173,25 +173,25 @@ The first half of the definition describes a secure execution environment. A
 secure execution environment can protect the integrity, authenticity, and
 confidentiality of the application hosted by the SEE. Malicious privileged
 software is thus neither able to modify the code, tamper with the runtime state,
-nor observe code and data through the runtime. Contrary to TEEs, a SEE cannot
-prove these claims against an appraiser, lest a third party outside the system.
-This is because it does not require a root of trust to present in the system. To
-prove its trustworthiness, TEEs employ remote attestation, which is the second
-important aspect of the definition.\\
+nor observe code and data through the runtime. Contrary to \glspl{tee}, a SEE
+cannot prove these claims against an appraiser, lest a third party outside the
+system. This is because it does not require a root of trust to present in the
+system. To prove its trustworthiness, \glspl{tee} employ remote attestation,
+which is the second important aspect of the definition.\\
 
 Trusted execution environment consists of several building blocks. The first
 building block Sabt et al. propose is a secure boot. This building block allows
-TEEs are used to verify that only a specific code of a particular state is
-loaded. For a secure boot, a chain of trust is formed by verifying each
-component's state. To generalize the secure boot requirement, a TEE must be
-capable of verifying what code it loads to the environment. The second building
-block is secure scheduling. Task executing in the TEE should not be able to
-disrupt the main OS. Moreover, a TEE should implement means to allow
-communication between the insecure world outside the TEE and the application
-executing inside of it. Secure storage is one more building block. It allows the
-application in the TEE to store data in a confidentiality, integrity, and
-freshness-conserving way. Trusted I/O paths secure the communication between a
-TEE and its users.\\
+\glspl{tee} are used to verify that only a specific code of a particular state
+is loaded. For a secure boot, a chain of trust is formed by verifying each
+component's state. To generalize the secure boot requirement, a \gls{tee} must
+be capable of verifying what code it loads to the environment. The second
+building block is secure scheduling. Task executing in the \gls{tee} should not
+be able to disrupt the main OS. Moreover, a \gls{tee} should implement means to
+allow communication between the insecure world outside the \gls{tee} and the
+application executing inside of it. Secure storage is one more building block.
+It allows the application in the \gls{tee} to store data in a confidentiality,
+integrity, and freshness-conserving way. Trusted I/O paths secure the
+communication between a \gls{tee} and its users.\\
 
 In the following sections we will see multiple implementations of CPU vendors,
 learn about \glspl{tpm} and how a software solution can look. All of them serve
@@ -267,14 +267,14 @@ words, the core root of trust is trusted software that is believed to perform
 the first measurement of the system correctly.\\
 
 Software that performs the measurements instructs the \gls{tpm} to store its
-result in \gls{pcr}. \glspl{pcr} are special registers of the \gls{tpm} that only
-allow the \texttt{extend} operation and only reset when resetting the system.
-The \texttt{extend} operation takes the current value of the \gls{pcr} and a new
-value as input, concatenates both values, and processes the result with the help
-of a hash function to create a digest that reflects the current system state.
-The \gls{tpm} can assist in creating a chain of trust
-(see~\ref{sec:20:chain_of_trust}) with the help of \glspl{pcr}. An example of how
-to use the \gls{tpm} to build up a chain of trust is given by Arthur et
+result in \gls{pcr}. \glspl{pcr} are special registers of the \gls{tpm} that
+only allow the \texttt{extend} operation and only reset when resetting the
+system. The \texttt{extend} operation takes the current value of the \gls{pcr}
+and a new value as input, concatenates both values, and processes the result
+with the help of a hash function to create a digest that reflects the current
+system state. The \gls{tpm} can assist in creating a chain of trust
+(see~\ref{sec:20:chain_of_trust}) with the help of \glspl{pcr}. An example of
+how to use the \gls{tpm} to build up a chain of trust is given by Arthur et
 al.\cite{arthur2015practical} The system software can extend a certain \gls{pcr}
 for each state before transferring control to the next application. The
 application can then check the respective \gls{pcr} to contain a known good
