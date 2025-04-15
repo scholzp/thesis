@@ -1,0 +1,40 @@
+\documentclass[crop,tikz]{standalone}
+\begin{document}
+\begin{tikzpicture}[scale=1]% Third party
+    \node[circle,draw=black, inner sep=1pt,minimum size=6mm]	(M)	at ( 0,1.5) {M};
+    \node[circle,draw=black, inner sep=1pt,minimum size=6mm]	(E)	at ( 0,-1.5) {E};
+    \node[circle,draw=black, inner sep=1pt,minimum size=6mm]	(S)	at ( 1.5,0) {S};
+    \node[circle,draw=black, inner sep=1pt,minimum size=6mm]	(I)	at ( -1.5,0) {I};
+
+
+    \draw [magenta, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($ (E) + (0, 0.35) $) to ($ (M) + (0, -0.35) $);
+    % \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (M) + (-0.2,-0.4) $) to ($ (E) + (-0.2, 0.45) $);
+
+    \draw [blue!60, dashed,dashed] ($ (S) + (-0.35, +0.2) $) to ($ (S) + (-1.15, +0.2) $);
+    \draw [blue!60, dashed,dashed] ($ (S) + (-1.15, +0.2) $) to [controls=+(90:3mm) and +(up:3mm)] ($ (I) + (1.15, +0.2) $);
+    \draw [blue!60, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($ (I) + (1.15, +0.2) $) to ($ (I) + (0.375, +0.2) $);
+
+    \draw [magenta, -] ($ (I) + (0.35, -0.2) $) to ($ (I) + (1.15, -0.2) $);
+    \draw [magenta, -] ($ (I) + (1.15, -0.2) $) to [controls=+(down:3mm) and +(down:3mm)] ($ (S) + (-1.15, -0.2) $);
+    \draw [magenta, arrows = {-Latex[width=3pt, length=5pt]}] ($ (S) + (-1.15, -0.2) $) to ($ (S) + (-0.375, -0.2) $);
+
+    \draw [magenta, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($ (I) + (0.1, 0.35) $) to [in=180, out=90] ($ (M) + (-0.35, -0.1) $);
+    \draw [blue!60, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($ (M) + (-0.35,+0.1) $) to [out=180, in=90] ($ (I) + (-0.1, 0.35) $);
+
+    \draw [magenta, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($ (S) + (-0.1, 0.35) $) to [in=0, out=90] ($ (M) + (+0.35, -0.1) $);
+    \draw [blue!60, arrows = {-Latex[width=3pt, length=5pt]}] ($ (M) + (+0.35,+0.1) $) to [out=0, in=90] ($ (S) + (0.1, 0.35) $);
+
+    \draw [magenta, arrows = {-Latex[width=3pt, length=5pt]}] ($ (I) + (0.1, -0.35) $) to [in=180, out=-90] ($ (E) + (-0.35, 0.1) $);
+    \draw [blue!60, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($ (E) + (-0.35,-0.1) $) to [out=180, in=-90] ($ (I) + (-0.1, -0.35) $);
+
+    % \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (S) + (-0.1, -0.35) $) to [in=0, out=-90] ($ (E) + (+0.35, 0.1) $);
+    \draw [blue!60, arrows = {-Latex[width=3pt, length=5pt]}] ($ (E) + (+0.35, -0.1) $) to [out=0, in=-90] ($ (S) + (0.1, -0.35) $);
+
+    \coordinate (x) at (2.5, .5);
+    \draw [blue!60, arrows = {-Latex[width=3pt, length=5pt]}] ($(x) + (0, 0)$) to ($(x) + (0.5, 0)$) node[black, right] {remote read};
+    \draw [blue!60, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($(x) + (0, -.35)$) to ($(x) + (0.5, -.35)$) node[black, right] {remote write};
+    \draw [magenta, arrows = {-Latex[width=3pt, length=5pt]}] ($(x) + (0, -.7)$) to ($(x) + (0.5, -.7)$) node[black, right] {local read};
+    \draw [magenta, dashed, arrows = {-Latex[width=3pt, length=5pt]}] ($(x) + (0, -1.05)$) to ($(x) + (0.5, -1.05)$) node[black, right] {local write};
+
+\end{tikzpicture}
+\end{document}
