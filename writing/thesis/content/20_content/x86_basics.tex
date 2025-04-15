@@ -91,11 +91,11 @@ System software can enable maskable interrupts by executing the \textit{STI}
 instruction.\\
 
 Over time, interrupt controllers were improved and adapted to new use cases
-similar to CPUs. In \gls{g_rmode}, the CPU falls back to using the Intel 8259 or a
-compatible programmable interrupt controller, short PIC, that delivers
+similar to CPUs. In \gls{g_rmode}, the CPU falls back to using the Intel 8259 or
+a compatible programmable interrupt controller, short PIC, that delivers
 interrupts to the CPU. Once the PIC delivers an interrupt to the CPU, the CPUs
-must serve it and signal the PIC with an \gls{eoi}, that
-the serving routine is done, before it can receive the next interrupt. \\
+must serve it and signal the PIC with an \gls{eoi}, that the serving routine is
+done, before it can receive the next interrupt. \\
 
 \begin{figure}
     \begin{center}
@@ -155,10 +155,10 @@ opposite of a cache hit is called a cache miss, in which the CPU subsequently
 queries the next level in the memory hierarchy. If it finds the data needed, it
 loads these into the nearest cache for faster access. Caches can only store a
 limited number of items, organized in cache lines. Each cache line is either 32
-or 64 bytes in size, with x86\_64 processors mainly implementing a cache line size
-of 64 bytes. Cache lines are a copy of the main memory, and the processor uses
-this copy for all of its operations unless otherwise configured. The processor
-loads data in cache line size granularity from the main memory. \\
+or 64 bytes in size, with x86\_64 processors mainly implementing a cache line
+size of 64 bytes. Cache lines are a copy of the main memory, and the processor
+uses this copy for all of its operations unless otherwise configured. The
+processor loads data in cache line size granularity from the main memory. \\
 
 Caches use the principle of locality, which consists of two kinds of locality.
 The first is called spatial locality. Spatial locality describes the observation
@@ -213,8 +213,19 @@ meaning of the states in the MESI protocol are as follows:
     \item \textbf{Invalid}: The local copy is invalid. Either main memory or
           other processors hold a valid copy.
 \end{itemize}
-All cache lines are tracked to be in one of the states. Important for my use
-case are the following state transitions:
+
+\begin{figure}
+    \begin{center}
+        \includestandalone{images/mesi.tex}
+        \caption{MESI state transition of a cache line resulting from a (remote) read/write}
+        \label{fig:state:technical:mesi}
+    \end{center}
+\end{figure}
+
+All cache lines are tracked to be in one of the states.
+Figure~\ref{fig:state:technical:mesi} shows transitions of MESI states of a
+cache line as a result from a cores own or another cores remote access.
+Important for my use case are the following state transitions:
 
 \paragraph{Exclusive to Shared}
 Processor $0$ has the exclusive copy of a cache line. Processor $1$ acquires a
@@ -232,7 +243,6 @@ Processors write back their data to the main memory once a cache line is evicted
 or when other processors request the same data item. If another processor
 requests the data item, then the owning processor will make the item available
 in a shared memory structure, such as \gls{llc}.
-\todo{this might be more understandable with a graphic}
 
 \subsection{Cache inclusivity}
 \label{sec:state:technical:caches_inclusivity}
@@ -285,13 +295,13 @@ correctly.
 
 \subsection{Paging}
 \label{sec:state:technical:paging}
-\begin{center}
-    \begin{figure}
+\begin{figure}
+    \begin{center}
         \includestandalone{images/paging.tex}
         \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables}
         \label{fig:state:technical:paging}
-    \end{figure}
-\end{center}
+    \end{center}
+\end{figure}
 
 With the evolution of computer systems not strictly processing data in a batched
 manner anymore but instead allowing for multiple applications to run

@@ -1,0 +1,49 @@
+\documentclass[crop,tikz]{standalone}
+\begin{document}
+\begin{tikzpicture}[scale=1]
+    \coordinate (x) at (0, 10);
+    \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (3, -3.5)$) node[pos=0.5, scale=.9, align=center] (C) {};
+    \node[align=center, scale=0.9] at ($(C) + (0, 1.5)$) {CA};
+    \draw ($ (x) + (.25, -.5)$) rectangle ($ (x) + (2.75, -1.25)$) node[pos=0.5, scale=.8, align=center] {Private Key};
+    \draw ($ (x) + (.25, -1.5)$) rectangle ($ (x) + (2.75, -2.25)$) node[pos=0.5, scale=.8, align=center] {Certificate};
+    \draw ($ (x) + (.25, -2.5)$) rectangle ($ (x) + (2.75, -3.25)$) node[pos=0.5, scale=.8, align=center] {Public Key};
+
+    \coordinate (x) at (4, 10);
+    \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (3, -3.5)$) node[pos=0.5, scale=.9, align=center] (C) {};
+    \node[align=center, scale=0.9] at ($(C) + (0, 1.5)$) {ICA};
+    \draw ($ (x) + (.25, -.5)$) rectangle ($ (x) + (2.75, -1.25)$) node[pos=0.5, scale=.8, align=center] {Private Key};
+    \draw ($ (x) + (.25, -1.5)$) rectangle ($ (x) + (2.75, -2.25)$) node[pos=0.5, scale=.8, align=center] {Certificate};
+    \draw ($ (x) + (.25, -2.5)$) rectangle ($ (x) + (2.75, -3.25)$) node[pos=0.5, scale=.8, align=center] {Public Key};
+
+    \coordinate (x) at (8, 10);
+    \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (3, -1.5)$) node[pos=0.5, scale=.9, align=center] (C) {};
+    \node[align=center, scale=0.9] at ($(C) + (0, 0.5)$) {Bob};
+    \draw ($ (x) + (.25, -.5)$) rectangle ($ (x) + (2.75, -1.25)$) node[pos=0.5, scale=.8, align=center] {Certificate};
+
+    \coordinate (x) at (8, 8);
+    \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (3, -1.5)$) node[pos=0.5, scale=.9, align=center] (C) {};
+    \node[align=center, scale=0.9] at ($(C) + (0, 0.5)$) {Alice};
+    \draw ($ (x) + (.25, -.5)$) rectangle ($ (x) + (2.75, -1.25)$) node[pos=0.5, scale=.8, align=center] {Certificate};
+
+    \coordinate (x) at (0, 6);
+    \draw ($ (x) + (2, -.5)$) rectangle ($ (x) + (5, -1.25)$) node[pos=0.5, scale=.8, align=center] {Verification Function};
+    \draw ($ (x) + (6, -.5)$) rectangle ($ (x) + (9, -1.25)$) node[pos=0.5, scale=.8, align=center] {Verification Function};
+    \draw ($ (x) + (4, -1.75)$) rectangle ($ (x) + (7, -2.25)$) node[pos=0.5, scale=.8, align=center] {Is Alice trustworthy?};
+
+    \coordinate (x) at (0, 10);
+    \node[align=center, scale=.7] at ($(x) + (3.5, -0.675)$) {sign};
+    \draw [dashed, thick, arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2.75, -0.875)$) -- ($ (x) + (3.75, -.875)$) --($ (x) + (3.75, -1.75)$) -- ($ (x) + (4.25, -1.75)$);
+    \node[align=center, scale=.7] at ($(x) + (7.5, -0.675)$) {sign};
+    \draw [dashed, thick, arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (6.75, -0.875)$) -- ($ (x) + (7.75, -.875)$) --($ (x) + (7.75, -2.75)$) -- ($ (x) + (8.25, -2.75)$);
+    \draw [dashed, thick, arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (6.75, -0.875)$) -- ($ (x) + (8.25, -.875)$);
+
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2.75, -2.875)$) -- ($ (x) + (3.25, -2.875)$) --($ (x) + (3.25, -4.5)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4.25, -2.)$) -- ($ (x) + (3.75, -2.)$) --($ (x) + (3.75, -4.5)$);
+
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (6.75, -2.875)$) -- ($ (x) + (7.25, -2.875)$) --($ (x) + (7.25, -4.5)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (8.25, -3.)$) -- ($ (x) + (7.75, -3.)$) --($ (x) + (7.75, -4.5)$);
+
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4.5, -5.25)$) -- ($ (x) + (4.5, -5.75)$);
+    \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (6.5, -5.25)$) -- ($ (x) + (6.5, -5.75)$);
+\end{tikzpicture}
+\end{document}
