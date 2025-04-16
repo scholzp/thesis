@@ -3,7 +3,8 @@
 
 In the following sections we will see multiple implementations of CPU vendors,
 learn about \glspl{tpm} and how a software solution can look. All of them serve
-as input for my implementation.
+as input for my implementation as they show how to construct a \gls{tee} that
+contains all necessary features.
 
 \section{Intel SGX}
 \label{sec:20:sgx}
@@ -17,10 +18,10 @@ microarchitecture. Costan et al. did an extensive study of SGX in 2016 and
 documented in detail how SGX works and what it's security properties
 are.\cite{costan2016intel} \\
 
-Features of SGX include the creation of enclaves. Enclaves are especially
-access-protected and encrypted system memory regions, with SGX preventing direct
+Features of \gls{sgx} include the creation of enclaves. Enclaves are especially
+access-protected and encrypted system memory regions, with \gls{sgx} preventing direct
 memory access. In the creation process, memory pages are added to the enclave
-page cache (EPC) and assigned to the enclave. Once assigned to an enclave, SGX
+page cache (EPC) and assigned to the enclave. Once assigned to an enclave, \gls{sgx}
 protects the memory page from unprivileged access, which includes all access
 attempts not originating from the memory-owning enclave. After the system
 software adds all pages to the enclave, it is marked as initialized. For the
@@ -29,7 +30,7 @@ enclave is marked initialized, no more pages can be added to the EPC, and
 interaction with the enclave is only allowed by using dedicated instructions
 available only in user space. The EPC is similar to an inverted page table,
 which purpose is to protect an enclaves security by ensuring the correctness of
-the allocation process. SGX would, for example, refuse operation if it detects
+the allocation process. \gls{sgx} would, for example, refuse operation if it detects
 that the same page frame was used for two different enclaves.\\
 
 The enclave code runs at the permission level of
@@ -37,19 +38,19 @@ the application from which the enclave was called. Intel equips each CPU with
 unique cryptographic keys that the CPU uses to encrypt code and data placed in
 the EPC. These keys reside in memory made of electronic fuses that can not be
 reprogrammed. Intel programs this memory in the factory process by burning some
-of the fuses. Applications using SGX services do not necessarily need to run as
-a whole in an SGX enclave. Because of restrictions on the size of the enclave's
+of the fuses. Applications using \gls{sgx} services do not necessarily need to run as
+a whole in an \gls{sgx} enclave. Because of restrictions on the size of the enclave's
 memory, only parts of the data were handed to enclaves. Again, communications
 between the enclave and user applications use special CPU instructions. In cases
 where applications are split into parts residing in and outside of the enclave,
 an application might want to verify the identity before sharing secrets. For
-this, SGX implements local attestation.\\
+this, \gls{sgx} implements local attestation.\\
 
-As mentioned, SGX implements processor instructions dedicated to managing and
-interacting with enclaves. Furthermore, SGX implementations create at least a
+As mentioned, \gls{sgx} implements processor instructions dedicated to managing and
+interacting with enclaves. Furthermore, \gls{sgx} implementations create at least a
 Launch Enclave signed by Intel. Third party enclaves that are not signed by
 Intel require the Launch Enclave for successful initialization. It is necessary
-in all cases when SGX is used.\\
+in all cases when \gls{sgx} is used.\\
 
 An attesting enclave can verify its identity with another enclave in the same
 system by generating a report. The attesting enclave calls the \textbf{ERPEORT}
@@ -66,28 +67,28 @@ ships the generated report to another enclave for local attestation.
     \end{figure}
 \end{center}
 Figure~\ref{fig:state:tee:sgx_attestation} shows the remote attestation scheme
-implemented by Intel SGX. It extends the local attestation scheme so that a
+implemented by Intel \gls{sgx}. It extends the local attestation scheme so that a
 third party not part of the system can verify the identity of an enclave. The
 quoting enclave serves as a root of trust in this process. It is a unique
 enclave provided by Intel that has access to the CPUs infused keys and can thus
 act as a trust anchor. Upon receiving a report from another enclave, the quoting
 enclave verifies said report and signs it. A remote third party can then check
-the quoting enclave's signature to verify the correctness of the report..
+the quoting enclave's signature to verify the correctness of the report.
 
 \section{Confidential Virtual Machine Extensions}
 \label{section:20:confidential_vms}
 The goal of confidential Virtual machines is to protect the entire \gls{vm} from
 the influence of a malicious hypervisor or other privileged software. Intel and
 AMD offer individual \gls{isa} extensions for their processors to host
-confidential Virtual Machines. Intel calls its solution Intel TDX, while AMDs
-solution is called AMD SEV-SNP.\cite{tdx_whitepaper,kaplan_amd_2020} Both
+confidential \glspl{vm}. Intel calls its solution Intel \gls{tdx}, while AMDs
+solution is called AMD \gls{sev}.\cite{tdx_whitepaper,kaplan_amd_2020} Both
 solutions use the same fundamental building blocks to achieve the goals of
-confidential \gls{vm}s. Misano et al. did a extensive comparison of both
-technologies.\cite{misono_confidential_2024} Intel uses the SGX module for its
-implementation. Additionally, to interact with a confidential \gls{vm}, the CPU
-must be in the dedicated CPU operation mode called SEAM mode. Memory access is
-only allowed in SEAM mode to protect confidential \gls{vm}s. Once in SEAM mode,
-the CPU uses its Virtual Machine Extensions (VMX) capabilities to host and
+confidential \glspl{vm}. Misano et al. did a extensive comparison of both
+technologies.\cite{misono_confidential_2024} Intel uses the \gls{sgx} module for
+its implementation. Additionally, to interact with a confidential \gls{vm}, the
+CPU must be in the dedicated CPU operation mode called SEAM mode. Memory access
+is only allowed in SEAM mode to protect confidential \glspl{vm}. Once in SEAM
+mode, the CPU uses its Virtual Machine Extensions (VMX) capabilities to host and
 interact with the \gls{vm}. For cryptographical features, such as signing and
 key generation, Intel processors utilize the Intel Management Engine. The Intel
 management Engine is a coprocessor located in the CPU package with special
@@ -99,18 +100,17 @@ extensions. In its initial version SEV encrypts the memory of a virtual machine
 with a dedicated key per virtual machine. SEV-ES extends the feature set by
 additionally encrypting the system state, e.g. processor register, too. With the
 most recent version, AMD introduced a feature called nested paging, which
-manages an inverted page table similar to SGX to prevent attacks targeting the
-\gls{vm}s page tables.\\
+manages an inverted page table similar to \gls{sgx} to prevent attacks targeting
+the \gls{vm}s page tables.\\
 
 Unlike Intel's implementation, AMD processors do not utilize a dedicated CPU
 mode but extend the existing \gls{vm} control structure by fields to enable
 Secure Nested paging. For cryptography, the integrated AMD Platform Security
 Processor, short PSP, is used. Both solutions encrypt the \gls{vm}'s memory to
-protect the \gls{vm} from being manipulated by system software. While in Intel's
-implementation, each \gls{vm} is encrypted separately, AMD's implementation
-encrypts, once activated, the whole memory.\\
+protect the \gls{vm} from being manipulated by system software with one key per
+\gls{vm}.\\
 
-Both solutions use the trustee's knowledge of the initial state of the \gls{vm}
+Both solutions use the appraisers knowledge of the initial state of the \gls{vm}
 image. The assumption that the approach follows is that if the \gls{vm} is
 started in a known state and protected from manipulation by the hypervisor or
 other privileged software, then the \gls{vm} can be trusted in the following. To
@@ -118,11 +118,11 @@ follow this approach, a measurement of the initial \gls{vm} image is created and
 cryptographically bound to the respective \gls{vm} instance through a message
 authentication code. Before the trustee interacts with the \gls{vm}, they
 request the \gls{vm} to verify its identity. For this, the \gls{vm} requests the
-cryptographical hardware to sign a report. By signing the report, the
+cryptographic hardware to sign a report. By signing the report, the
 cryptographic hardware attests to its correctness and then hands it to the
-trustee. The trustee trusts the implementation in the CPU and verifies the
-signature of the CPU signed report. With this, the trustee knows if the \gls{vm}
-images were expected. In the following, both the trustee and the \gls{vm}
+appraiser. The appraiser trusts the implementation in the CPU and verifies the
+signature of the CPU signed report. With this, the appraiser knows if the \gls{vm}
+images were expected. In the following, both the appraiser and the \gls{vm}
 exchange keys for further communication.\\
 
 \section{ARM TrustZone}
@@ -134,9 +134,9 @@ implementations and slightly differs between the ARM Cortex-A application
 processors and the ARM Cortex-M microcontroller-aimed processors. In the
 following, we concentrate on the implementation of ARM application
 processors. Pinto and Santos did an extensive survey of ARM TrustZone in 2019.
-In their work, they describe technical properties of AMR TrustZone and how to
+In their work, they describe technical properties of ARM TrustZone and how to
 use it for the implementation of \glspl{tee} and hypervisors. Moreover they
-explain technical details of Trustzone and review it's security properties
+explain technical details of TrustZone and review its security properties
 against other \glspl{tee}.\cite{pinto_demystifying_2019}\\
 
 Conceptually, ARM TrustZone-enabled processors offer three processor operation
@@ -173,7 +173,7 @@ the secure world, instead it utilizes the physical isolation of both worlds.\\
 
 \section{Enma}
 \label{sec:20:enma}
-Enma is short for Enclave Manager and is a software solution to implement TEEs
+Enma is short for Enclave Manager and is a software solution to implement \glspl{tee}
 for the L4Re operating system framework. \cite{reitz_isolierende_2019} L4Re uses
 the Fiasco.OC microkernel that is part of the L4 microkernel family. The
 microkernel approach aims for minimizing the amount of code to run in the
@@ -198,22 +198,25 @@ Initially, only the creator of a process posses these capabilities and the
 ability to grant them to other processes. Enma uses these properties to create
 isolated enclaves in which programs can execute isolated.\\
 
-Enma follows the same approach as SGX for implementing remote attestation. Enma
-hosts a quoting enclave that sings reports to verify the state of an enclave.
-The appraiser can then check the signature of the quoting enclave, upon which
-they decide how to interact with the enclave. Enma encrypts the memory of its
-enclaves. Security-wise, Enma is vulnerable to side-channel attacks as
-explicitly stated in the work. The TCB is also increased when compared to
-hardware solutions. An application that trusts Enma must also trust the L4Re
-runtime environment as much as the firmware and hardware. Enma utilizes a
+Enma follows the same approach as \gls{sgx} for implementing remote attestation
+and \gls{tee} functionality. Enma hosts a quoting enclave that sings reports to
+verify the state of an enclave. The appraiser can then check the signature of
+the quoting enclave, upon which they decide how to interact with the enclave.
+Enma encrypts the memory of its enclaves. Security-wise, Enma is vulnerable to
+side-channel attacks as explicitly stated in the work, just as hardware
+extensions like \gls{sgx} and \gls{sev}. The \gls{tcb} is also increased when
+compared to hardware solutions. An application that trusts Enma must also trust
+the L4Re runtime environment as much as the firmware and hardware. Enma is
+designed to support different backend, with the default backend utilizing a
 \gls{tpm} as the hardware root of trust for verifying the system state and that
-the expected versions of L4Re and Enma were booted. The soft backend of Enma,
-which I described in this section, can also be replaced by another backend. The
-authors propose an SGX back end that utilizes hardware features
+the expected versions of L4Re and Enma were booted. The authors additionally
+sketch how a back end implementation could look that uses \gls{sgx} and other
+hardware solutions. It is therefore not aiming to replace such solutions but
+rather compliment them.
 
 \section{Attack Mitigations and countermeasures}
 \label{sec:20:mitigations}
-In this section I want to list review mitigations and countermeasures for known
+In this section I want to list mitigations and countermeasures for known
 side channel attacks. These mitigations and countermeasures serve as examples
 for my implementation and can be viewed as part of related work, as they show
 how to either detect or prevent the usage of side channels and attacks that
@@ -245,18 +248,19 @@ further reduces the amount of hardware used for this approach. Moreover the
 authors state that practical deployment would require CPU and hardware vendors
 to do extensive security reviews on their firmware and SMM implementations.
 Additionally, multiple attacks are known targeting the SMM breaking it's
-isolation.\cite{wojtczuk2014attacking, wojtczuk2009attacking, wojtczuk2009poisining}
+isolation.\cite{wojtczuk2014attacking, wojtczuk2009attacking,
+    wojtczuk2009poisining}
 
 \subsection{Defenses Against Interrupt Based Side Channel Attacks}
 \label{sec:20:interrupt_sca}
 To defend against interrupt-based side-channel attacks, Cui et al. proposed a
 defense solution in 2023 that they call QuanShield.\cite{cui_quanshield_2023}
-QuanShield goal is to enable SGX enclaves to detect interrupt-based side-channel
-attacks and react adequately. For this, QuanShield isolates a CPU core from the
-system to let it run an Intel SGX enclave. The goal of the isolation is to
-prevent the scheduler from interrupting the isolated core because no other
-workload is to be executed by this core. The authors turned off all other
-interrupts as far as possible. The authors used a Linux kernel that runs in
+QuanShield goal is to enable \gls{sgx} enclaves to detect interrupt-based
+side-channel attacks and react adequately. For this, QuanShield isolates a CPU
+core from the system to let it run an Intel \gls{sgx} enclave. The goal of the
+isolation is to prevent the scheduler from interrupting the isolated core
+because no other workload is to be executed by this core. The authors turned off
+all other interrupts as far as possible and used a Linux kernel that runs in
 tickless mode to ensure that the kernel does not send scheduling interrupts to
 the isolated core. The authors built tickless kernels by using the kernel
 KConfig option \textit{CONFIG\_NO\_HZ\_FULL=y}. In this mode, the kernel does
@@ -269,7 +273,7 @@ switches, e.g., when stopping to execute enclave code. QuanShield stores
 non-canonical memory addresses in these unused parts. Once the control returns,
 the enclave code uses one of these non-canonical addresses, which results in a
 CPU exception and leads to the termination of the enclave, effectively stopping
-the attack.\\
+an attack using interrupt based side channels.\\
 
 QuanShield uses code instrumentation to make the enclave use one of the
 manipulated addresses. For this, the authors added code to the LLVM compiler.
@@ -279,7 +283,7 @@ legacy applications. It implements the protection mechanism by utilizing SGX-LKL
 to manage the second stack in the state save area. SGX-LKL is a Linux kernel
 port that can run in an SGX enclave as a LibraryOS, similar to the approach used
 by SCONE and Haven to mitigate effects of Iago attacks, which I just want to
-name as a side node because these solutions are less relevant for this
+name as a side node because these solutions are less relevant for my
 work.\cite{priebe2019sgx,arnautov_scone_2016,baumann_shielding_2015,
     checkoway2013iago}
 
@@ -289,9 +293,9 @@ Because Spectre and Meltdown target microarchitectural behavior, a complete
 redesign is necessary to entirely fix the issue. Software mitigations are
 available for specific attacks. For example, the Linux Kernel uses techniques
 called Retpoline and Kernel Page Table Isolation (KPTI) to mitigate Spectre
-version 2 and Meltdown, respectively.\cite{retpoline} On the other hand, software mitigations
-can greatly impact performance, reaching from a 10\% to 800\% overhead,
-depending on the workload.\cite{low2018overview}\\
+version 2 and Meltdown, respectively.\cite{retpoline} On the other hand,
+software mitigations can greatly impact performance, reaching from a 10\% to
+800\% overhead, depending on the workload.\cite{low2018overview}\\
 
 Another approach for systems to defend against side-channel attacks, in general,
 is active detection of the attack and reacting appropriately. Quanshield
@@ -300,58 +304,59 @@ chapter~\ref{sec:20:interrupt_sca}. For attacks abusing transient execution,
 this approach of deactivating transient execution would come with a
 high-performance penalty.\\
 
-Instead, existing solutions attempt to monitor the
-cache and other microarchitectural behavior through hardware performance
-counters to find any anomaly. The idea behind this approach is that a program
-shows specific behavior. This behavior results from the instructions it executes
-and their order, which leaves a kind of footprint. When monitoring the hardware
+Instead, existing solutions attempt to monitor the cache and other
+microarchitectural behavior through hardware performance counters to find any
+anomaly. The idea behind this approach is that a program shows specific
+behavior. This behavior results from the instructions it executes and their
+order, which leaves a kind of footprint. When monitoring the hardware
 performance counters closely enough, the observer can deduce what parts of code
 have been executed by the CPU. If the performance counter traces of the program
 are known beforehand, an Observer can compare the values of the counters with
 the known state and then reason if the control flow was highjacked, for example,
 by an ROP attack. As a side note, monitoring through hardware Performance
 counters can also be used for attacks, which is why performance counters are
-unavailable while the CPU operates in SGX mode.
+unavailable while the CPU operates in \gls{sgx} mode.
 \cite{uhsadel2008exploiting,costan2016intel}
 
 Like ROP attacks, transient execution attacks show special behavior when
 preparing the attack or side channel. Li et al. and Van Bulck et al. examined
 how to trace the behavior of transient execution attacks with performance
 counters on the examples of Spectre and Load Value injection attacks,
-respectivley.\cite{li_detecting_2021, van_bulck_lvi_2020}
-They found that when in the preparation phase, while the attacker trains the
-branch predictor, fewer instructions are retired compared to typical workloads.
-Moreover, employing the cache side channel leaves traces, too. For a cache-based
-side-channel to work, the attacker tries to evict pages that map to addresses
-they want to use for the attack. This results in a high amount of TLB flushes.
-Later addresses are accessed by the side channel code to retrieve information.
-Because the cache was flushed, the number of cache misses increased
-significantly. An observer can detect all of these side effects by using
-performance counters. Still, an attacker can hide their activities by slowing
-down their attack. While the total number of cache misses induced by the attack,
-for example, does not change this way, the attack distributes the misses more
-evenly over time. Because events such as cache misses and TLB flushes are normal
-behavior of a running system, the environment in which an attack runs introduces
-noise that can help hide an attack. Thus, detecting said attack becomes nearly
-impossible if an attacker distributes the effects of their attack over time.
-Consequently, the results of Li et al. and Van Bulck et al. lead us to conclude
-that a detection approach using hardware performance counters in this way is
-unreliable. Kosasih et al. came to a similar conclusion in their survey of
-knowledge in 2024.\cite{kosasih2024sok}
+respectivley.\cite{li_detecting_2021, van_bulck_lvi_2020} They found that when
+in the preparation phase, while the attacker trains the branch predictor, fewer
+instructions are retired compared to typical workloads. Moreover, employing the
+cache side channel leaves traces, too. For a cache-based side-channel to work,
+the attacker tries to evict pages that map to addresses they want to use for the
+attack. This results in a high amount of \gls{tlb} flushes. Later, addresses are
+accessed by the side channel code to retrieve information. Because the cache was
+flushed, the number of cache misses increased significantly. An observer can
+detect all of these side effects by using performance counters. Still, an
+attacker can hide their activities by slowing down their attack. While the total
+number of cache misses induced by the attack, for example, does not change this
+way, the attack distributes the misses more evenly over time. Because events
+such as cache misses and \gls{tlb} flushes are normal behavior of systems
+running a general purpose \gls{os}, the environment in which an attack runs
+introduces noise that can help to hide an attack. Thus, detecting said attack
+becomes nearly impossible if an attacker distributes the effects of their attack
+over time. Consequently, the results of Li et al. and Van Bulck et al. lead us
+to conclude that a detection approach using hardware performance counters in the
+precense of other software is unreliable. Kosasih et al. came to a similar
+conclusion in their survey of knowledge in 2024.\cite{kosasih2024sok}
 
 \section{Summary}
 \label{sec:20:summary}
-Next to the introduction to the technical aspects of x86 processors, we have seen
-examples for \glspl{tee}, attacks on \glspl{tee}, and possible mitigations to
-those attacks. \\
+We have seen examples for \glspl{tee}, attacks on \glspl{tee}, possible
+mitigations to those attacks and solutions that try to enhance existing
+\gls{tee} implementations. \\
 
 All \gls{tee} solutions have in common that they do not implement the whole
 functionality exclusively in hardware. For example, Intel and AMD employ
-dedicated security processors in their x86 \gls{soc} to implement \gls{sgx} and
-\gls{sev} features, respectively. Together with Enma, which uses the \gls{tpm}
-as a root of trust, these solutions implement a signature-based remote
-attestation scheme. Next, they all share the property of being vulnerable to
-side-channel attacks, with Spectre and Meltdown being rather prominent. These
+dedicated security processors in their x86 \glspl{soc} as a hardware trust
+anchor and implement the remaining \gls{tee} functionalities of \gls{sgx} and
+\gls{sev} in CPU micocode/firmware, respectively. Together with Enma, which uses
+the \gls{tpm} as a root of trust, these solutions implement a signature-based
+remote attestation scheme. Next, they all share the property of being vulnerable
+to side-channel attacks, with Spectre and Meltdown being rather prominent. These
 attacks abuse observable (micro-) architectural side effects to leak secrets
 through covert channels. Mitigations for some attacks exist, but they impact
 performance or cannot be applied to all side-channel attacks. Additionally,
@@ -365,8 +370,11 @@ least mitigates this attack vector for \gls{sgx}.\\
 Putting these together, I identified an approach that was not tested to the best
 of my knowledge. This excludes architectural side channels by creating a
 completely isolated execution environment that only uses core local resources
-and monitors its integrity by utilizing \glspl{pmc}. How to design such an
-\gls{tee} will be topic in chapter~\ref{sec:design}.
+and monitors its integrity by utilizing \glspl{pmc}. While I want to follow
+Enmas approach of using the \gls{tpm} as a trust anchor, I will not use any
+vendor specific \gls{isa} extensions to overcome vendor locking, problems
+present in \gls{sgx}, \gls{sev} and \gls{tdx}. How to design such an \gls{tee}
+will be topic in chapter~\ref{sec:design}.
 
 
 \cleardoublepage
