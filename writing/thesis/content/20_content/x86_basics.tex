@@ -40,7 +40,7 @@ Besides the operations modes described in
 section~\ref{sec:state:technical:modes}, \gls{smm} does not activate additional
 processor features. Instead, it is a hardware-assisted isolation
 mechanism that protects firmware code from system software. In legacy systems,
-firmware used the SMM to react to special hardware events that required the
+firmware used the \gls{smm} to react to special hardware events that required the
 firmware to react to platform events, e.g., energy management. The \gls{smm} code
 resides in a specially protected area of the main memory, referred to as
 \gls{smram}. \gls{smm} executes with the highest privileges in x86, and system
@@ -109,15 +109,15 @@ called local APICs or \gls{lapic}. \glspl{lapic} forward interrupts from
 different sources to the respective CPU core. For example, the \gls{lapic}
 receives interrupts such as \gls{ipi} from other \glspl{lapic} and legacy
 interrupts from the PIC. CPU external devices deliver their interrupts to the
-IOAPIC, which forwards them to the respective LAPIC.
-Figure~\ref{fig:state:technical:lapic} shows a schematic view on how the LAPIC
-of each CPU core integrates into the system. System software must change the CPU
-to \gls{g_pmode} to activate the \gls{lapic} system. After changing to
-\gls{g_pmode}, system software must write a valid address to the APIC base
-address register. All APIC registers are then mapped to the 4-KiB APIC register
-space starting at the address specified in APIC base address register. System
-software can then access APIC registers with memory reads and writes to the APIC
-register space.
+IOAPIC, which forwards them to the respective gls{lapic}.
+Figure~\ref{fig:state:technical:lapic} shows a schematic view on how the
+\gls{lapic} of each CPU core integrates into the system. System software must
+change the CPU to \gls{g_pmode} to activate the \gls{lapic} system. After
+changing to \gls{g_pmode}, system software must write a valid address to the
+APIC base address register. All APIC registers are then mapped to the 4-KiB APIC
+register space starting at the address specified in APIC base address register.
+System software can then access APIC registers with memory reads and writes to
+the APIC register space.
 
 \subsection{Caches}
 \label{sec:state:technical:caches}
@@ -368,8 +368,8 @@ Each CPU manages its page tables and \gls{tlb}. System software must
 maintain consistency between page tables and each \gls{tlb} by
 invalidating individual entries or the entire \gls{tlb}. If system
 software invalidates an entry, the CPU has to complete a page walk for this
-virtual address, upon which the MMU updates the \gls{tlb}. The INVLPGB
-can additionally be used to invalidate a range of TLB entries and broadcast
+virtual address, upon which the \gls{mmu} updates the \gls{tlb}. The INVLPGB
+can additionally be used to invalidate a range of \gls{tlb} entries and broadcast
 these invalidations to other CPUs. \\
 
 \begin{figure}

@@ -15,8 +15,8 @@ Intel, Qualcomm, and other ARM designs were affected. This class of new
 transient execution side-channel attacks abuses the speculative execution
 feature of modern CPU and defines an entirely new class of attacks. Furthermore,
 they are the first class of attacks that abuse microarchitectural bugs. We
-review this class of attacks in more detail as I aim to implement a TEE that can
-defend against such an attack.\\
+review this class of attacks in more detail as I aim to implement a \gls{tee}
+that can defend against such an attack.\\
 
 Both attacks abuse a race condition between transient executed instructions and
 memory access (Spectre) or exception delivery (Meltdown). In strictly sequential
@@ -37,8 +37,8 @@ channel to which they transfer data with the help of transient executed
 instructions. The class of transient execution attacks is still highly relevant
 today, with at At least five attacks have been published since 2023.
 \cite{ormandy2023zenbleed,trujillo2023inception, moghimi2023downfall,ragab_ghostrace_2024, wilke2024tdxdown}
-TEE solutions are affected, too, because these attacks enable attackers to read
-arbitrary memory. The problem persists, and no solution exists to mitigate
+\gls{tee} solutions are affected, too, because these attacks enable attackers to
+read arbitrary memory. The problem persists, and no solution exists to mitigate
 transient execution attacks in general.\\
 
 \subsection{Interrupt Based Attacks}
