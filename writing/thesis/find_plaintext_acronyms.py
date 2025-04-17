@@ -20,7 +20,7 @@ def find_in_file(tokens: [str], file_path: str) -> None :
         while line := f.readline():
             hit = False
             for token in tokens:
-                s = re.search(token, line)
+                s = re.search(" " + token + " ", line)
                 if s != None:
                     line = re.sub(token, '\033[96m' + token + '\033[0m', line)
                     hit = True
