@@ -109,7 +109,7 @@ that shared parts of the CPU can be used to create a hidden channel for
 transferring data. If the CPU uses such resources, for example, a shared L3
 cache, then those effects trigger respective performance monitoring events. With
 respectively programmed \glspl{pmc}, those events can be counted by the TEECore.
-\glspl{pmc} can be programmed to emit a \gls{pmi}, which the TEE uses to
+\glspl{pmc} can be programmed to emit a \gls{pmi}, which the \gls{tee} uses to
 register forbidden events. Because the source of those events must be known to
 conclude the presence of an attacker safely, only selected events can be used by
 TEECore and the TEE must ensure their regular operation does not trigger the
@@ -149,7 +149,7 @@ The payload of TEECore is called a trusted application. In the proof of concept,
 implementation tasks are implemented as functions and are thus statically
 embedded into the TEECore binary. A trusted application is allowed to access the
 shared memory communication channel. TEECore monitors this access and makes it
-part of its measurements. After a trusted application run, the TEE kernel
+part of its measurements. After a trusted application run, the \gls{tee} kernel
 creates a Snapshot from the \gls{pmc} registers and a report based on this
 information.
 
