@@ -1,4 +1,4 @@
-\section{TEE building blocks}
+\section{Trusted Execution Environment Building Blocks}
 \label{sec:20:building_blocks}
 Before we have a broader look at \glspl{tee}, their definition, and how existing
 implementations look, we need to learn about standard building blocks of
@@ -186,18 +186,18 @@ is loaded. For a secure boot, a chain of trust is formed by verifying each
 component's state. To generalize the secure boot requirement, a \gls{tee} must
 be capable of verifying what code it loads to the environment. The second
 building block is secure scheduling. Task executing in the \gls{tee} should not
-be able to disrupt the main OS. Moreover, a \gls{tee} should implement means to
-allow communication between the insecure world outside the \gls{tee} and the
-application executing inside of it. Secure storage is one more building block.
-It allows the application in the \gls{tee} to store data in a confidentiality,
-integrity, and freshness-conserving way. Trusted I/O paths secure the
-communication between a \gls{tee} and its users.\\
+be able to disrupt the main \gls{os}. Moreover, a \gls{tee} should implement
+means to allow communication between the insecure world outside the \gls{tee}
+and the application executing inside of it. Secure storage is one more building
+block. It allows the application in the \gls{tee} to store data in a
+confidentiality, integrity, and freshness-conserving way. Trusted I/O paths
+secure the communication between a \gls{tee} and its users.\\
 
 In the following sections we will see multiple implementations of CPU vendors,
 learn about \glspl{tpm} and how a software solution can look. All of them serve
 as input for my implementation.
 
-\subsection{TPM}
+\subsection{Trusted Platform Module}
 \label{sec:20:tpm}
 \todo{A lot of passive to fix here}
 The \gls{tpm} is a low-cost cryptographical coprocessor that offers different
