@@ -6,51 +6,52 @@ learn about \glspl{tpm} and how a software solution can look. All of them serve
 as input for my implementation as they show how to construct a \gls{tee} that
 contains all necessary features.
 
-\section{Intel SGX}
+\section{Intel Software Guard Extensions}
 \label{sec:20:sgx}
 \todo{A lot of passive to fix here}
-Intel SGX is an extension in x86\_64 processors manufactured by Intel, that
-allows the creation of trusted execution environments. Intel first shipped SGX
-in 2015, with processors implementing the Skylake microarchitecture. While
-server-grade CPUs are still implementing SGX, Intel marked SGX was deprecated in
-2021 in consumer-grade CPUs, beginning from CPUs implementing the Rocket Lake
-microarchitecture. Costan et al. did an extensive study of SGX in 2016 and
-documented in detail how SGX works and what it's security properties
-are.\cite{costan2016intel} \\
+Intel \gls{sgx} is an extension in x86\_64 processors manufactured by Intel,
+that allows the creation of trusted execution environments. Intel first shipped
+\gls{sgx} in 2015, with processors implementing the Skylake microarchitecture.
+While server-grade CPUs are still implementing \gls{sgx}, Intel marked \gls{sgx}
+was deprecated in 2021 in consumer-grade CPUs, beginning from CPUs implementing
+the Rocket Lake microarchitecture. Costan et al. did an extensive study of
+\gls{sgx} in 2016 and documented in detail how \gls{sgx} works and what it's
+security properties are.\cite{costan2016intel} \\
 
 Features of \gls{sgx} include the creation of enclaves. Enclaves are especially
-access-protected and encrypted system memory regions, with \gls{sgx} preventing direct
-memory access. In the creation process, memory pages are added to the enclave
-page cache (EPC) and assigned to the enclave. Once assigned to an enclave, \gls{sgx}
-protects the memory page from unprivileged access, which includes all access
-attempts not originating from the memory-owning enclave. After the system
-software adds all pages to the enclave, it is marked as initialized. For the
-initialization process, system software uses privileged instructions. After the
-enclave is marked initialized, no more pages can be added to the EPC, and
-interaction with the enclave is only allowed by using dedicated instructions
-available only in user space. The EPC is similar to an inverted page table,
-which purpose is to protect an enclaves security by ensuring the correctness of
-the allocation process. \gls{sgx} would, for example, refuse operation if it detects
-that the same page frame was used for two different enclaves.\\
+access-protected and encrypted system memory regions, with \gls{sgx} preventing
+direct memory access. In the creation process, memory pages are added to the
+enclave page cache (EPC) and assigned to the enclave. Once assigned to an
+enclave, \gls{sgx} protects the memory page from unprivileged access, which
+includes all access attempts not originating from the memory-owning enclave.
+After the system software adds all pages to the enclave, it is marked as
+initialized. For the initialization process, system software uses privileged
+instructions. After the enclave is marked initialized, no more pages can be
+added to the EPC, and interaction with the enclave is only allowed by using
+dedicated instructions available only in user space. The EPC is similar to an
+inverted page table, which purpose is to protect an enclaves security by
+ensuring the correctness of the allocation process. \gls{sgx} would, for
+example, refuse operation if it detects that the same page frame was used for
+two different enclaves.\\
 
-The enclave code runs at the permission level of
-the application from which the enclave was called. Intel equips each CPU with
-unique cryptographic keys that the CPU uses to encrypt code and data placed in
-the EPC. These keys reside in memory made of electronic fuses that can not be
-reprogrammed. Intel programs this memory in the factory process by burning some
-of the fuses. Applications using \gls{sgx} services do not necessarily need to run as
-a whole in an \gls{sgx} enclave. Because of restrictions on the size of the enclave's
-memory, only parts of the data were handed to enclaves. Again, communications
-between the enclave and user applications use special CPU instructions. In cases
-where applications are split into parts residing in and outside of the enclave,
-an application might want to verify the identity before sharing secrets. For
-this, \gls{sgx} implements local attestation.\\
+The enclave code runs at the permission level of the application from which the
+enclave was called. Intel equips each CPU with unique cryptographic keys that
+the CPU uses to encrypt code and data placed in the EPC. These keys reside in
+memory made of electronic fuses that can not be reprogrammed. Intel programs
+this memory in the factory process by burning some of the fuses. Applications
+using \gls{sgx} services do not necessarily need to run as a whole in an
+\gls{sgx} enclave. Because of restrictions on the size of the enclave's memory,
+only parts of the data were handed to enclaves. Again, communications between
+the enclave and user applications use special CPU instructions. In cases where
+applications are split into parts residing in and outside of the enclave, an
+application might want to verify the identity before sharing secrets. For this,
+\gls{sgx} implements local attestation.\\
 
-As mentioned, \gls{sgx} implements processor instructions dedicated to managing and
-interacting with enclaves. Furthermore, \gls{sgx} implementations create at least a
-Launch Enclave signed by Intel. Third party enclaves that are not signed by
-Intel require the Launch Enclave for successful initialization. It is necessary
-in all cases when \gls{sgx} is used.\\
+As mentioned, \gls{sgx} implements processor instructions dedicated to managing
+and interacting with enclaves. Furthermore, \gls{sgx} implementations create at
+least a Launch Enclave signed by Intel. Third party enclaves that are not signed
+by Intel require the Launch Enclave for successful initialization. It is
+necessary in all cases when \gls{sgx} is used.\\
 
 An attesting enclave can verify its identity with another enclave in the same
 system by generating a report. The attesting enclave calls the \textbf{ERPEORT}
@@ -62,13 +63,13 @@ ships the generated report to another enclave for local attestation.
     \begin{figure}
         \centering
         \includestandalone{images/25_sgx_attestation.tex}
-        \caption{Software Attestation Scheme of SGX}
+        \caption{Software Attestation Scheme of \gls{sgx}}
         \label{fig:state:tee:sgx_attestation}
     \end{figure}
 \end{center}
 Figure~\ref{fig:state:tee:sgx_attestation} shows the remote attestation scheme
-implemented by Intel \gls{sgx}. It extends the local attestation scheme so that a
-third party not part of the system can verify the identity of an enclave. The
+implemented by Intel \gls{sgx}. It extends the local attestation scheme so that
+a third party not part of the system can verify the identity of an enclave. The
 quoting enclave serves as a root of trust in this process. It is a unique
 enclave provided by Intel that has access to the CPUs infused keys and can thus
 act as a trust anchor. Upon receiving a report from another enclave, the quoting
@@ -92,8 +93,8 @@ mode, the CPU uses its Virtual Machine Extensions (VMX) capabilities to host and
 interact with the \gls{vm}. For cryptographical features, such as signing and
 key generation, Intel processors utilize the Intel Management Engine. The Intel
 management Engine is a coprocessor located in the CPU package with special
-firmware and a separate OS that is isolated from the remaining parts of the
-system\\
+firmware and a separate \gls{os} that is isolated from the remaining parts of
+the system\\
 
 For \gls{sev}, AMD uses the already implemented SEV capabilities and its
 extensions. In its initial version SEV encrypts the memory of a virtual machine
@@ -121,18 +122,18 @@ request the \gls{vm} to verify its identity. For this, the \gls{vm} requests the
 cryptographic hardware to sign a report. By signing the report, the
 cryptographic hardware attests to its correctness and then hands it to the
 appraiser. The appraiser trusts the implementation in the CPU and verifies the
-signature of the CPU signed report. With this, the appraiser knows if the \gls{vm}
-images were expected. In the following, both the appraiser and the \gls{vm}
-exchange keys for further communication.\\
+signature of the CPU signed report. With this, the appraiser knows if the
+\gls{vm} images were expected. In the following, both the appraiser and the
+\gls{vm} exchange keys for further communication.\\
 
 \section{ARM TrustZone}
 \label{sec:20:trustzone}
-As another widely spread ISA ARM dominates the mobile sector. Like x86, the ARM
-architecture offers technology to allow isolated program execution. On ARM, this
-technology is called ARM TrustZone. TrustZone is optional for ARM processor
-implementations and slightly differs between the ARM Cortex-A application
-processors and the ARM Cortex-M microcontroller-aimed processors. In the
-following, we concentrate on the implementation of ARM application
+As another widely spread \gls{isa} ARM dominates the mobile sector. Like x86,
+the ARM architecture offers technology to allow isolated program execution. On
+ARM, this technology is called ARM TrustZone. TrustZone is optional for ARM
+processor implementations and slightly differs between the ARM Cortex-A
+application processors and the ARM Cortex-M microcontroller-aimed processors. In
+the following, we concentrate on the implementation of ARM application
 processors. Pinto and Santos did an extensive survey of ARM TrustZone in 2019.
 In their work, they describe technical properties of ARM TrustZone and how to
 use it for the implementation of \glspl{tee} and hypervisors. Moreover they
@@ -157,19 +158,20 @@ the SM, which decides upon its configuration if the interrupt received serves as
 an entry point to the secure world. If so, the Secure Monitor invokes secure
 world code to serve the interrupt.\\
 
-ARM TrustZone does not specify the TEE and remote attestation features. Such
-functionality has to be implemented by the code running in the Secure World and
-might the implementation of those features might be specific to system or
-hardware vendors. TEE and remote attestation functionality can be implemented by
-a bare metal application or by using a trusted OS to host secure applications in
-the Secure World. The first solution minimizes code size, while the second
-offers the ability to host multiple applications in the Secure World. The
-trusted OS would be responsible for isolating services running in the Secure
-World against each other because applications running in the Secure World are
-not isolated from other applications in the Secure World by hardware. Using a
-trusted OS brings the downside of an increased trusted computing base compared
-to a bare metal trusted application. TrustZone does not encrypt the memory of
-the secure world, instead it utilizes the physical isolation of both worlds.\\
+ARM TrustZone does not specify the \gls{tee} and remote attestation features.
+Such functionality has to be implemented by the code running in the Secure World
+and might the implementation of those features might be specific to system or
+hardware vendors. \gls{tee} and remote attestation functionality can be
+implemented by a bare metal application or by using a trusted \gls{os} to host
+secure applications in the Secure World. The first solution minimizes code size,
+while the second offers the ability to host multiple applications in the Secure
+World. The trusted \gls{os} would be responsible for isolating services running
+in the Secure World against each other because applications running in the
+Secure World are not isolated from other applications in the Secure World by
+hardware. Using a trusted \gls{os} brings the downside of an increased trusted
+computing base compared to a bare metal trusted application. TrustZone does not
+encrypt the memory of the secure world, instead it utilizes the physical
+isolation of both worlds.\\
 
 \section{Enma}
 \label{sec:20:enma}
@@ -222,34 +224,34 @@ for my implementation and can be viewed as part of related work, as they show
 how to either detect or prevent the usage of side channels and attacks that
 utilize them.
 
-\subsection{Isolation through SMM}
+\subsection{Isolation through System Management Mode}
 \label{sec:20:isolation_smm}
 An early work on how to isolate processes was done by Azab et al. in
-2011.\cite{azab_sice_2011} The work dates before introducing TEE extensions in
-x86 hardware and uses the SMM to isolate tasks. The problem SICE tries to solve
-is to protect the memory integrity of isolated tasks and virtual machines. In
-principle, SICE uses the strong hardware-enforced isolation of the SMM and its
-SMRAM to install applications into it. The authors used an AMD platform for
-their practical implementation because AMD platforms allow the adjustment of
-SMRAM size and location after the SMM code locks the SMRAM.\cite{bios2014amd} To
-switch to the isolated task residing in SMRAM, the firmware SMI handler was
-modified to transfer control to the management runtime of the isolation
-environment. The strong hardware isolation guaranteed that even a malicious
-operating system could not access the memory of the isolated task. A downside to
-this approach is that it works only on a small amount of hardware. The
-implementation depends on the resizeable SMRAM to react to the growing memory
-demands of applications isolated through SICE. As the authors mentioned, they
-used AMD platforms for their implementation because of this. Intel platforms did
-not support this feature, and adapting SICE to those platforms was left as an
-open problem. Moreover, firmware modifications have to be implemented by the
-user to install the correct SMI handler. These modifications require the
-firmware to be open source to implement the SMI handler. This requirement
-further reduces the amount of hardware used for this approach. Moreover the
-authors state that practical deployment would require CPU and hardware vendors
-to do extensive security reviews on their firmware and SMM implementations.
-Additionally, multiple attacks are known targeting the SMM breaking it's
-isolation.\cite{wojtczuk2014attacking, wojtczuk2009attacking,
-    wojtczuk2009poisining}
+2011.\cite{azab_sice_2011} The work dates before introducing \gls{tee}
+extensions in x86 hardware and uses the \gls{smm} to isolate tasks. The problem
+SICE tries to solve is to protect the memory integrity of isolated tasks and
+virtual machines. In principle, SICE uses the strong hardware-enforced isolation
+of the \gls{smm} and its SMRAM to install applications into it. The authors used
+an AMD platform for their practical implementation because AMD platforms allow
+the adjustment of SMRAM size and location after the \gls{smm} code locks the
+SMRAM.\cite{bios2014amd} To switch to the isolated task residing in SMRAM, the
+firmware \gls{smi} handler was modified to transfer control to the management
+runtime of the isolation environment. The strong hardware isolation guaranteed
+that even a malicious operating system could not access the memory of the
+isolated task. A downside to this approach is that it works only on a small
+amount of hardware. The implementation depends on the resizeable SMRAM to react
+to the growing memory demands of applications isolated through SICE. As the
+authors mentioned, they used AMD platforms for their implementation because of
+this. Intel platforms did not support this feature, and adapting SICE to those
+platforms was left as an open problem. Moreover, firmware modifications have to
+be implemented by the user to install the correct \gls{smi} handler. These
+modifications require the firmware to be open source to implement the \gls{smi}
+handler. This requirement further reduces the amount of hardware used for this
+approach. Moreover the authors state that practical deployment would require CPU
+and hardware vendors to do extensive security reviews on their firmware and
+\gls{smm} implementations. Additionally, multiple attacks are known targeting
+the \gls{smm} breaking it's isolation.\cite{wojtczuk2014attacking,
+    wojtczuk2009attacking, wojtczuk2009poisining}
 
 \subsection{Defenses Against Interrupt Based Side Channel Attacks}
 \label{sec:20:interrupt_sca}
@@ -278,13 +280,13 @@ an attack using interrupt based side channels.\\
 QuanShield uses code instrumentation to make the enclave use one of the
 manipulated addresses. For this, the authors added code to the LLVM compiler.
 The compiler introduces load and store operations on each function entry to make
-the code fault as fast as possible. QuanShield uses a library OS to support
-legacy applications. It implements the protection mechanism by utilizing SGX-LKL
-to manage the second stack in the state save area. SGX-LKL is a Linux kernel
-port that can run in an SGX enclave as a LibraryOS, similar to the approach used
-by SCONE and Haven to mitigate effects of Iago attacks, which I just want to
-name as a side node because these solutions are less relevant for my
-work.\cite{priebe2019sgx,arnautov_scone_2016,baumann_shielding_2015,
+the code fault as fast as possible. QuanShield uses a library \gls{os} to
+support legacy applications. It implements the protection mechanism by utilizing
+SGX-LKL to manage the second stack in the state save area. SGX-LKL is a Linux
+kernel port that can run in an \gls{sgx} enclave as a LibraryOS, similar to the
+approach used by SCONE and Haven to mitigate effects of Iago attacks, which I
+just want to name as a side node because these solutions are less relevant for
+my work.\cite{priebe2019sgx,arnautov_scone_2016,baumann_shielding_2015,
     checkoway2013iago}
 
 \subsection{Transient Execution Mitigations}
@@ -302,7 +304,7 @@ is active detection of the attack and reacting appropriately. Quanshield
 implements such a solution for interrupt-based side channel attacks described in
 chapter~\ref{sec:20:interrupt_sca}. For attacks abusing transient execution,
 this approach of deactivating transient execution would come with a
-high-performance penalty.\\
+high-performance penalty.\\SGX
 
 Instead, existing solutions attempt to monitor the cache and other
 microarchitectural behavior through hardware performance counters to find any
