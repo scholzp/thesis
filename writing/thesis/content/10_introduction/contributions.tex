@@ -3,7 +3,7 @@
 As described in the motivation (see chapter~\ref{sec:10:motivation}) for this
 thesis, I see a big problem in the general vulnerability by side channel
 attacks on commodity processors. To fully exclude side channels, I propose
-<Fancy Name\todo{think about a really fancy name}> to tackle the following
+TEECore to tackle the following
 goals:
 
 \begin{enumerate}
@@ -22,7 +22,7 @@ goals:
     \item I evaluate my implementation regarding system resources. In detail,
           I will evaluate what workload fits next to the runtime
           environment in the core's local caches.
-    \item I evaluate the TCB against what attacker model my sole software
+    \item I evaluate the \gls{tcb} against what attacker model my sole software
           solution can defend.
 \end{enumerate}
 
@@ -32,8 +32,8 @@ concepts on a working proof of concept implementation. My solution can run next
 to a commodity operating system such as Linux. The prototype implements
 communication channels through a well-defined interface that does not influence
 the security properties of my design, and I show that the prototype can protect
-itself from being interfered with by the commodity OS. My solution still depends
-on the commodity OS to install the environment. Therefore, the prototype will
-not be a standalone solution but a technology demonstrator. Designing systems
-components in a way that makes my implementation a standalone component is not
-the scope of this work and is left for future work.
+itself from being interfered with by the commodity \gls{os}. My solution still
+depends on the commodity \gls{os} to install the environment. Therefore, the
+prototype will not be a standalone solution but a technology demonstrator.
+Designing systems components in a way that makes my implementation a standalone
+component is not the scope of this work and is left for future work.
