@@ -30,7 +30,7 @@ def find_in_file(tokens: [str], file_path: str) -> None :
             line_num += 1
 
 def find_in_directory(tokens: [str], path: str) -> None:
-    exclude_list = ["03_glossary.tex", "04_acronyms.tex"]
+    exclude_list = ["03_glossary.tex", "04_acronyms.tex", "05_task.tex"]
     matches = []
     for root, dirnames, filenames in os.walk(path):
         for filename in fnmatch.filter(filenames, '*.tex'):
