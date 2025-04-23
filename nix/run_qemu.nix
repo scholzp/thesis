@@ -23,7 +23,7 @@ writeShellScript "run_qemu_demo" ''
     -append "nr_cpus=3 console=ttyS0 memmap=${low_mem_size}!${start_address} nox2apic loglevel=7 nokaslr" \
     -initrd ${initrdPath} \
     -serial stdio \
-    -m 512M \
+    -m 2G \
     -no-reboot \
     -no-shutdown \
     -debugcon file:./debugcon.txt \

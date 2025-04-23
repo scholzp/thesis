@@ -13,7 +13,7 @@
 
 let
   kmodMod = "${kmod}/lib/modules/${kmod.kernel-version}/updates/kmod.ko";
-  Tkernel = "${tee_kernel}";
+  Tkernel = "${tee_kernel}/bin/phipsboot.elf32";
   session_conf = "${dbus_session_conf}";
   passwd = "${root_user}";
   app = "${user_app}";
@@ -39,7 +39,7 @@ pkgs.makeInitrd {
 
       mkdir -p /proc /sys /tmp /run /var /etc
       mount -t proc none /proc
-      mount -t sysfs none /sys
+      mount -t sysfs none /sys421
       mount -t tmpfs none /tmp
       mount -t tmpfs none /run
 

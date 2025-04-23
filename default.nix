@@ -17,14 +17,15 @@ let
   selectedLinuxKernelPkg = pkgs.linux_6_6; 
   kernel = pkgs.callPackage ./nix/linux_kernel.nix { inherit selectedLinuxKernelPkg; };
   lib = pkgs.lib;
-  tee_kernel = implementation/kernel.elf32;
+  PROJECT_ROOT = builtins.toString ./.;
+  # tee_kernel = implementation/kernel.elf32;
   # Hardcode start address of reserved low memory.
   # Take care of page granularity, which means the address should be divisible by 4096.
   start_address = "0x09000";
   low_mem_size = "4096";
 
   stdenv = pkgs.stdenv;
-  # tee_kernel = pkgs.callPackage ./nix/tee_kernel.nix{};
+  tee_kernel = pkgs.callPackage ./nix/tee_kernel.nix{inherit PROJECT_ROOT;};
   kmod = pkgs.callPackage ./nix/buildKmod.nix {inherit lib; inherit stdenv; inherit kernel; inherit start_address; inherit low_mem_size;};
   dbus_session_conf = pkgs.callPackage ./nix/dbus_conf.nix {};
   root_user = pkgs.callPackage ./nix/root_user.nix {};
