@@ -10,6 +10,7 @@ extern void __iomem * LAPIC_PAGE;
 // Init the LAPIC module. This maps the LAPIC page to memory. Needs to be 
 // called once. Call release_lapic() when done to free resources. 
 void lapic_init(void);
+void lapic_send_init_ipi(u32 target_lapic_id);
 // Sends an INIT IPI to the CPU with the given LAPIC ID.
 void lapic_send_init_ipi_waiting(u32 target_lapic_id);
 // Sends an STARTUP IPI to the CPU with the given LAPIC ID. The CPU is 

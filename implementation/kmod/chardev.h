@@ -8,7 +8,8 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
 
 #define TEE_DEVICE_NAME "tee_dev"
-#define TEE_DEVICE_BUFFER_SIZE (1024)
+// We use a page sized buffer
+#define TEE_DEVICE_BUFFER_SIZE 4096
 
 int init_tee_chardev(void);
 void purge_tee_chardev(void);

@@ -1,5 +1,6 @@
 #include <linux/types.h>
 #include "chardev.h"
+#include "tee_mgmt.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Pascal Scholz <pascal.scholz@cyberus-technology.de>");
@@ -175,15 +176,27 @@ ssize_t device_write(struct file *file, const char __user *buffer,
 	size_t length, loff_t *offset)
 {
 	char *buffered = memdup_user(buffer, length);
+	size_t bytes_to_write = 0;
 
 	pr_info("%s called", __FUNCTION__);
 	pr_info("Received %ld; Offset %lld\n", length, *offset);
-	
-	while (0 < length--) {
-		TEE_CHARDEV_OFFSET %= (TEE_DEVICE_BUFFER_SIZE -1);
-		TEE_CHARDEV_BUFFER[TEE_CHARDEV_OFFSET++] = *buffered;
-		pr_info("%c", *(buffered++));
+
+	// This is ugly, but after all, this is a PoC...
+	// Special handling in case we wish to send an INIT IPI
+	if ((buffered[0] == 0xde) && (buffered[1] == 0xad)) {
+		ipi_attack();
+		return length;
 	}
+	
+
+	// Proceed with all other write requests
+	TEE_CHARDEV_OFFSET = 0;
+	while (0 < length--) {
+		TEE_CHARDEV_BUFFER[TEE_CHARDEV_OFFSET++] = *(buffered++);
+		++bytes_to_write;
+		// pr_info("%c", *(buffered++));
+	}
+	write_to_com_mem(TEE_CHARDEV_BUFFER, bytes_to_write);
 	kfree(buffered);
 	return length;
 };

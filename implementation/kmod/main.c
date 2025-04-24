@@ -40,8 +40,6 @@ void start_ap(int apic_id);
 const size_t AP_LOWMEM_ADDRESS = START_ADDRESS;
 // currently 1 page. TODO: Make this also use configurable from nix 
 const size_t AP_LOWMEM_SIZE = LOW_MEM_SIZE;
-// APIC ID of the AP to use
-const u8 AP_ID = 3;
 // pages to use for shared memory communication
 struct page *shared_pages;  
 
@@ -138,7 +136,7 @@ int init_module(void)
 	pr_info("CPU physical ID diff: %d", id_diff);
 	pr_info("Boot CPU with APIC ID: %d", id_diff * (nr_cpu_ids));
 
-	setup_tee_poll_timer(shared_virt);
+	init_mgmt_module(shared_virt, id_diff * (nr_cpu_ids));
 	// setup character device for communication
 	init_tee_chardev();
 	// Activate the AP

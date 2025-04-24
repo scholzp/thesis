@@ -19,6 +19,22 @@ void lapic_init(void)
 	INITIALIZED = 1;
 }
 
+void lapic_send_init_ipi(u32 target_lapic_id) {
+	if (1 != INITIALIZED) 
+	{
+		pr_err("%s: LAPIC not initialized", __FUNCTION__);
+		return;
+	}
+	iowrite32(
+		(ioread32(LAPIC_PAGE + 0x310) & 0x00ffffff) | (target_lapic_id << 24),
+		LAPIC_PAGE + 0x310
+	);
+	iowrite32(
+		(ioread32(LAPIC_PAGE + 0x300) & 0xfff00000) | 0x00C500,
+		LAPIC_PAGE + 0x300
+	);
+}
+
 void lapic_send_init_ipi_waiting(u32 target_lapic_id) {
 	if (1 != INITIALIZED) 
 	{
