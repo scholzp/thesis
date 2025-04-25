@@ -27,7 +27,7 @@ struct shared_mem {
 	u8 memory[];
 };
 
-int init_mgmt_module(u8 *shared_mem_ptr, int apic_id);
+int init_mgmt_module(u8 *shared_mem_ptr, int apic_id, u64 entry_phys);
 void cleanup_tee_poll_timer(void);
 void write_to_com_mem(void* buffer, size_t len);
 void ipi_attack(void);

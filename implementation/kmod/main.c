@@ -53,6 +53,7 @@ int init_module(void)
 	u64 multiboot_info_phys_addr = 0;
 	u8* shared_virt = NULL;
 	int cpu, last_cpu, id_diff;
+	u64 entry_addr = 0;
 
 	pr_info("***KMOD: Hello world 1.\n");
 	lapic_init();
@@ -72,7 +73,6 @@ int init_module(void)
 		ssize_t bytes_read = 0;
 		elf32_file_t *elf_file= NULL;
 		u8* bytewise = NULL;
-		u64 entry_addr = 0;
 		struct file *f = file_open("/tmp/tee_kernel", O_RDWR, 0);
 		u8* buffer = kzalloc(1024 * 1024 * 1, GFP_KERNEL);  
 		bytes_read = kernel_read(f, buffer, 1024 * 1024 * 1, &offset);
@@ -136,7 +136,7 @@ int init_module(void)
 	pr_info("CPU physical ID diff: %d", id_diff);
 	pr_info("Boot CPU with APIC ID: %d", id_diff * (nr_cpu_ids));
 
-	init_mgmt_module(shared_virt, id_diff * (nr_cpu_ids));
+	init_mgmt_module(shared_virt, id_diff * (nr_cpu_ids), entry_addr);
 	// setup character device for communication
 	init_tee_chardev();
 	// Activate the AP

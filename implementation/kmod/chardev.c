@@ -108,8 +108,6 @@ int device_open(struct inode *inode, struct file *file)
 	int expected = 0;
 	int new_state = 1;
 
-	pr_info("%s called\n", __FUNCTION__);
-
 	acquired_exclusive_access = __atomic_compare_exchange(
 			&TEE_DEV_OPENED,
 			&expected,
@@ -122,8 +120,6 @@ int device_open(struct inode *inode, struct file *file)
 	if (!acquired_exclusive_access) {
 		pr_info("Another device has the driver file already open\n");
 		return -EBUSY;
-	} else {
-		pr_info("Acquired exclusive access to device\n");
 	}
 
 	return 0;
@@ -131,7 +127,6 @@ int device_open(struct inode *inode, struct file *file)
 
 int device_release(struct inode *inode, struct file *file)
 {
-	pr_info("%s called", __FUNCTION__);
 
 	// Non-atomic access is fine as there can only be one thread in this
 	// function.
@@ -177,8 +172,6 @@ ssize_t device_write(struct file *file, const char __user *buffer,
 {
 	char *buffered = memdup_user(buffer, length);
 	size_t bytes_to_write = 0;
-
-	pr_info("%s called", __FUNCTION__);
 	pr_info("Received %ld; Offset %lld\n", length, *offset);
 
 	// This is ugly, but after all, this is a PoC...
