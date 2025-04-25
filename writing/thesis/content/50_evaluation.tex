@@ -20,7 +20,65 @@
     \item Include measurements of the PMC events for each evaluation task
     \item measure time between attack registration and shutdown
 \end{itemize}
+- I replace the IDT with one that supplies debug data.
+- Still crashes on receiving interrupts but gives valuable information such as TSC for timing
+- Evaluate on Intel Core I7 13700k
+- Configuration does no emit PMI
 
+\section{Security Properties}
+- different tests
+- the first tests the reaction to an attacker using cache coherency protocol to read
+- The attacker knows what memory addresses back TEECore memory
+- to simulate, I use a trusted application that uses a local array of the size of one page
+- the trusted application communicates the arrays physical address to kernel module
+- kernel module maps address and reads form it
+- two different cases: to detect the attacker, TEECore should see changes in pmc values even if the trusted application does not read memory
+- this would prevent attacks. If this is not working, TEECore should register read attemts by the kernel module at latest when reading data itself
+- I expect both cases to yield the same result: TEECore registers the attack,
+- in both cases the state of the cache lines should change from exclusive/modified to shared
+- Second attacker is not interested by reading TEECOres memory
+- instead, it relies on the cache coherency protocol to inject data into TEECore
+- for this, again the a trusted application communicates the physical address of an array to the kernel module
+- kernel module writes to memory, again we expect a change in the cache line MESI states from exclusive/modified to shared
+- TEECOre should be able to find this attack
+- Other attack is denial of resources. The goal is to denail TEECore to execute
+- One possible vector is sending random interrupts. TEECore should react the same way as it reacts to PMIs: triple fault
+- The attacker can therefore kill TEECore, but this leads to the reset of whole platform
+- Other possible attack using interrupt are IPI.
+- With sending a INIT IPI the CPU turns into a state that makes it await a STARTUP IPI
+- This state is best described by an extended HALT state; The CPU does not proceed with executing TEECore's code
+- Instead waits for STARTUP IPI
+- In this wait state, the CPU ignores all other interrupts, including SMIs and PMIs
+- Receiving an INIT IPI does not change cache of target CPU
+- Goal: We try to abuse cache coherency protocol and test if the CPU halted this way answers to snooping attemps of other cores
+- the outcome is not documented in the SDM or AMD manual. We expect that this wa< it's possible to retrieve information from the core.
+- For this, we bring memory first to a shared state so that we know the value of it in the kernel module
+- second, we bring it back to modified state by writing to from TEECore. We ignore PMC changes this time, as the preparation does only serve the purpose to make changes observeable
+- in next step, kernel module send INIT IPI to CPU core in isolated partition, it is now halted and can't respond to attacks
+- In the last step, Kernel module reads memory. We check for changes in the memory. If we find the expected value, halted core participates in cache coherency
+- this way, we can retrieve data from the CPU core of isolated partition
+
+\section{Memory constraints}
+- Ping application to measure minimum size
+- Trusted application that does the mere minimum an service
+- Trusted application in secure partition and normal application in normal partition share a counting variable
+- located in first byte of the payload
+- normal partition initiates with ping command
+- places shared memory in known good state, initializes counter
+- secure partition increments counter portion in shared memory
+- secure partition sends message through filling respective fields in shared memory
+- demonstrates simple increments of a variable and communication
+- this is the expected minimum feature set to allow implementation of useful workloads
+- in this, only parts of TEECore required to fulfil communication and execution tasks are present in memory
+\subsection{Memory used by TEECore}
+- invalidate complete caches; measure cache misses on L1 and L2 to conclude the minimum size of TEECore runtime
+- what counter do I use
+\subsection{Remaining Memory on test CPU}
+- additionally, before answering ping message, secure partition iterates over memory array with volatile memory access
+- with increasing size of this memory array I can check how much memory is left for other workloads
+- using the L2 as unified cache; meaning data and code is stored in it
+- because L2 is splitted into sets, not the whole cache might be available to TEECore and it's applications
+- note what counters I use for this
 \cleardoublepage
 
 %%% Local Variables:
