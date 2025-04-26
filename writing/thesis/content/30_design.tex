@@ -112,8 +112,8 @@ respectively programmed \glspl{pmc}, those events can be counted by the TEECore.
 \glspl{pmc} can be programmed to emit a \gls{pmi}, which the \gls{tee} uses to
 register forbidden events. Because the source of those events must be known to
 conclude the presence of an attacker safely, only selected events can be used by
-TEECore and the TEE must ensure their regular operation does not trigger the
-respective events. TEECore, therefore, must ensure the use of local CPU
+TEECore and the \gls{tee} must ensure their regular operation does not trigger
+the respective events. TEECore, therefore, must ensure the use of local CPU
 resources only. On Intel platforms, I use events that measure interaction with
 the so-called offcore. Offcore events result from the core interacting with
 resources that are not local. These events include readings/writings to shared
