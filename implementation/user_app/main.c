@@ -21,7 +21,6 @@ static struct argp_option options[] = {
 	{ "command", 'c', "COMMAND", 0, "Command to send to TEECore. \nSupporting: none, send "},
 	{ "task", 't', "TASK_ID", 0, "TaskID To send to TEECore."},
 	{ "payload", 'p', "PAYLOAD", 0, "Payload to send along command and TaskID. Formatted as Hex"},
-	{ "init-ipi", 'i', "INIT-IPI", OPTION_ARG_OPTIONAL, "Ignore other Options and send an INIT-IPI to TEECore"},
 	{ 0 } 
 };
 
@@ -45,6 +44,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 			message->task_id = 0x03;
  		else if (0 == strcmp("nop_mem", arg))
 		 	message->task_id = 0x04;
+		else if (0 == strcmp("ipi_attack", arg))
+		 	message->task_id = 0x05;
 		break;
 	case 'p':
 		// Parse at most 4094 characters and copy them to the payload field in 

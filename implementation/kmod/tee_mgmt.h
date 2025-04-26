@@ -19,6 +19,7 @@ enum tee_task{
 	TEE_T_ATTACK_READ_MEM = 0x02,
 	TEE_T_ATTACK_WRITE_MEM = 0x03,
 	TEE_T_ATTACK_NOP_MEM = 0x04,
+	TEE_T_ATTACK_IPI = 0x05,
 };
 
 struct shared_mem {

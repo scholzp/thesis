@@ -174,14 +174,6 @@ ssize_t device_write(struct file *file, const char __user *buffer,
 	size_t bytes_to_write = 0;
 	pr_info("Received %ld; Offset %lld\n", length, *offset);
 
-	// This is ugly, but after all, this is a PoC...
-	// Special handling in case we wish to send an INIT IPI
-	if ((buffered[0] == 0xde) && (buffered[1] == 0xad)) {
-		ipi_attack();
-		return length;
-	}
-	
-
 	// Proceed with all other write requests
 	TEE_CHARDEV_OFFSET = 0;
 	while (0 < length--) {
