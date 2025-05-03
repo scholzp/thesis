@@ -167,14 +167,16 @@ void attack_mem(enum tee_task task) {
 			* copied the Elf to memory.
 			*/ 
 			secret_mem = kmap(pfn_to_page(address >> 12));
-			pr_info("Received phy. addr: 0x%016llx mapped tp 0x%016llx\n", 
+			pr_info("Received phy. addr: 0x%016llx mapped to 0x%016llx\n", 
 				address, (u64) secret_mem);
 				for (u64 offset = 0; offset < num_iterations; ++offset) {
-					const u32 value = *(secret_mem + offset);
+					const u32 value = ioread32(secret_mem + offset);
 					if (TEE_T_ATTACK_WRITE_MEM == task) {
-						*(secret_mem + offset) = value + 1;
+						iowrite32(value + 1, (secret_mem + offset));
+						hash += value + 1;
+					} else {
+						hash += value;
 					}
-					hash += value + 1;
 				}
 			pr_info("%s: Hash: 0x%016llx", __FUNCTION__, hash);
 			kunmap(pfn_to_page(address >> 12));
