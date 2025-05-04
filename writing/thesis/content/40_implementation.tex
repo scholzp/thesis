@@ -30,32 +30,57 @@ which I explain in section~\ref{sec:implementation:kmod}. In the last part of
 the implementation chapter, I will explain how I implemented the attack
 simulations.
 
-\section{\gls{tee} Kernel: phipsboot}
+\section{TEECore}
 \label{sec:implementation:teeKernel}
 
-PhipsBoot is a Multiboot 2 compliant kernel mainly written in the memory-safe
-programming language Rust, which is designed to be relocatable in the memory. It
-depends on a first-stage bootloader\todo{maybe this is not a multi-stage
-    bootloader} that brings the system to a state defined in the Multiboot 2
-specification. That is, the CPU is in 32-bit mode with segmentation enabled.
-After handover, PhipsBoot does all initialization steps to bring the CPU into
-64-bit with enabled PEA paging. It initializes the page tables and sets up huge
-pages for the initial mapping. PhipsBoot expects to be loaded to a 2 MiB-aligned
-address. Its small size, which is less than 2 MiB, allows PhipsBoot to set up
-the page table hierarchy using a single page table that maps the kernel.
-PhipsBoot uses memory statically reserved for dynamic memory allocation in the
-kernel's Elf image. Next to being relocatable, PhipsBoot does not implement more
-features but offers a great starting point for implementing the \gls{tee}
-features. \\
+PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}} is a Multiboot 2
+compliant kernel written in the memory-safe programming language Rust, with the
+purpose to serve as a bootloader for 64 bit x86 kernels. A feature of PhipsBoot
+is, that it is relocateable and so supports arbitrary load addreses. It depends
+on a first-stage bootloader\todo{maybe this is not a multi-stage bootloader}
+that brings the system to a state defined in the Multiboot 2 specification. That
+is, the CPU is in 32-bit protected mode with segmentation enabled. After
+handover, PhipsBoot does all initialization steps to bring the CPU into 64-bit
+mode with enabled PEA paging. This part of Phipsboot is written in x86 assembly
+code. It initializes the page tables and sets up huge pages before transfering
+the CPU into 64-bit mode. For later usage, Phipsboot sets up additional page
+tables for execution. PhipsBoot expects to be loaded to a 2 MiB-aligned address
+because of it memory mapping. Its small size, which is less than 2 MiB, allows
+PhipsBoot to set up the page table hierarchy using a single page table that maps
+the kernel. PhipsBoot uses memory statically reserved for dynamic memory
+allocation in the kernel's Elf image. Next to setting up the general run time,
+PhipsBoot does not implement more feature, but offers a great starting point for
+implementation of TEECore. \\
 
-The first feature I introduced was modifying page tables. This feature was
-lacking because PhipsBoot's purpose does not require the modification of the
-page to map, for example, mapping memory that is not contained in its binary.
-For this, I modified the page table setup routine and changed the last page
-table to be writable instead of read-only. Through observation, I found that not
-more than the first 128 entries in the page table are used to map all kernel
-memory. For dynamic mapping, I, therefore, reserved the last 128 entries. This
-enabled PhipsBoot to map memory that was not contained in the binary. This
+For the inent of my implementation, I forked PhipsBoot to begin developing
+TEECore. The first feature I introduced was the ability to modify page tables,
+because Phipsboot did not support mapping of arbitrary memory. Instead, the
+setup assembly routine of Phipsboot mapps the memory of the page table as read
+only. Moreover the address of the last level page tabel is not known by the Rust
+high level code. To allow mapping of arbitrary memory, I modified the page table
+setup routine and changed the last page table to be writable instead of
+read-only. Through observation, I found that not more than the first 128 entries
+in the page table are used to map all memory used by the kernel binary. For
+dynamic mapping of memory that is not contained in TEECore's binary, I,
+therefore, reserved the last 128 entries of the last level page table. This
+enabled TEECore to map memory that was not contained in the binary.
+\begin{lstlisting}[language=Rust, caption=Mapping of external memory]
+    pub unsafe fn get_virtual_address(phys_addr: u64) -> u64 {
+        // Calculate the last 12 bits from the offest in the page frame
+        let offset_within_page: u64 = (phys_addr & 0xFFF).try_into();
+        for x in 0..512 {
+            // Calculate the upper 52 bits of the virtual address from the
+            // L1 tables virtual address
+            let pt_entry = (ptr::read((LAST_L1 as *mut u64).add(x)) & !(0xFFF)) & !(0x1_u64 << 63);
+            if (phys_addr & !(0xFFF)) == pt_entry {
+                return pt_entry | offset_within_page;
+            }
+        }
+        return 0;
+    }
+\end{lstlisting}
+
+This
 feature is important to implement the shared memory communication path. The
 address is communicated to PhipsBoot through the Multiboot 2 memory map. To
 access this structure, PhipsBoot needs to be able to map the page containing it.
