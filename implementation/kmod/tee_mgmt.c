@@ -1,5 +1,6 @@
 #include <asm/nmi.h>
 #include <asm/delay.h>
+#include <asm/msr.h>
 #include <linux/sched.h>
 
 #include <linux/gfp.h>
@@ -125,6 +126,7 @@ void ipi_attack(void) {
 	kunmap(pfn_to_page(secret_phy_addr >> 12));
 	
 	SHARED_MEM_PTR->task_id = TEE_T_ATTACK_IPI;
+	pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
 	SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
 
 	pr_info("Read the following secrets: 0x%08x", secret);
@@ -137,10 +139,12 @@ void ping_app(void) {
 		pr_info("Ping count = %u\n", SHARED_MEM_PTR->memory[0]++);
 		pr_info("Pong");
 		SHARED_MEM_PTR->task_id = TEE_T_PING;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
 		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
 	} else {
 		pr_info("Done! Reached ping count %u", SHARED_MEM_PTR->memory[0]);
 		SHARED_MEM_PTR->task_id = TEE_T_UNKNOWN;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
 		SHARED_MEM_PTR->status = TEE_C_NONE;
 	}
 }
@@ -183,10 +187,12 @@ void attack_mem(enum tee_task task) {
 		} 
 		++SHARED_MEM_PTR->memory[1];
 		SHARED_MEM_PTR->task_id = task;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
 		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
 	} else {
 		pr_info("Done! Reached task count of %u", number_of_read_attempts);
 		SHARED_MEM_PTR->task_id = TEE_T_UNKNOWN;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
 		SHARED_MEM_PTR->status = TEE_C_NONE;
 	}
 }
