@@ -1,0 +1,39 @@
+\documentclass[crop,tikz]{standalone}
+\begin{document}
+\begin{tikzpicture}[scale=1]
+    \coordinate (x) at (0, 10);
+    \filldraw[fill=gray!40]                    ($ (x) + (1.5,0)$)
+    decorate [decoration=zigzag]{ -- ($(x) + (1.5,1)$) }
+        { -- ($ (x) + (2,1) $) }
+        { -- ($ (x) + (2,0) $) }
+        { -- ($ (x) + (1.5,0)$)};
+    \node[scale=0.8, align=center] at ($ (x) + (1.35, 0.5)$) {};
+    \node[scale=0.8, align=center] at ($ (x) + (1.75, 1.2)$) {32};
+    \coordinate (x) at (2, 10);
+    \node[scale=0.8, align=center] at ($ (x) + (0.25, 1.2)$) {31};
+    \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (2, 1)$) node[pos=0.5, scale=.8, align=center, ] {Counter Mask\\ (CMask)};
+    \node[scale=0.8, align=center] at ($ (x) + (1.75, 1.2)$) {24};
+    \node[scale=0.8, align=center] at ($ (x) + (2.25, 1.2)$) {23};
+    \draw ($ (x) + (2, 0)$) rectangle ($ (x) + (2.5, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {INV};
+    \node[scale=0.8, align=center] at ($ (x) + (2.75, 1.2)$) {22};
+    \draw ($ (x) + (2.5, 0)$) rectangle ($ (x) + (3, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {EN};
+    \node[scale=0.8, align=center] at ($ (x) + (3.25, 1.2)$) {21};
+    \draw [fill=gray!40]($ (x) + (3.0, 0)$) rectangle ($ (x) + (3.5, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {};
+    \node[scale=0.8, align=center] at ($ (x) + (3.75, 1.2)$) {20};
+    \draw ($ (x) + (3.5, 0)$) rectangle ($ (x) + (4.0, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {INT};
+    \node[scale=0.8, align=center] at ($ (x) + (4.25, 1.2)$) {19};
+    \draw ($ (x) + (4, 0)$) rectangle ($ (x) + (4.5, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {PC};
+    \node[scale=0.8, align=center] at ($ (x) + (4.75, 1.2)$) {18};
+    \draw ($ (x) + (4.5, 0)$) rectangle ($ (x) + (5.0, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {E};
+    \node[scale=0.8, align=center] at ($ (x) + (5.25, 1.2)$) {17};
+    \draw ($ (x) + (5, 0)$) rectangle ($ (x) + (5.5, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {OS};
+    \node[scale=0.8, align=center] at ($ (x) + (5.75, 1.2)$) {16};
+    \draw ($ (x) + (5.5, 0)$) rectangle ($ (x) + (6.0, 1)$) node[pos=0.5, scale=.8, align=center, rotate=90] {USR};
+    \node[scale=0.8, align=center] at ($ (x) + (6.25, 1.2)$) {15};
+    \node[scale=0.8, align=center] at ($ (x) + (7.75, 1.2)$) {8};
+    \draw ($ (x) + (6.0, 0)$) rectangle ($ (x) + (8.0, 1)$) node[pos=0.5, scale=.8, align=center] {Unit Mask\\(UMASK)};
+    \node[scale=0.8, align=center] at ($ (x) + (8.25, 1.2)$) {7};
+    \node[scale=0.8, align=center] at ($ (x) + (9.75, 1.2)$) {0};
+    \draw ($ (x) + (8.0, 0)$) rectangle ($ (x) + (10.0, 1)$) node[pos=0.5, scale=.8, align=center] {Event Select};
+\end{tikzpicture}
+\end{document}
