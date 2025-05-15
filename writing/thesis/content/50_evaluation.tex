@@ -10,75 +10,260 @@
 % bezüglich der Ergebnisse zu erläutern und anschließend eventuell
 % festgestellte Abweichungen zu erklären.
 
-\ldots evaluation \ldots
+% \todo{write evaluation}
+% - measure time between attack registration and shutdown
+% \begin{itemize}
+%     \item Evaluate memory constraints on ping task
+%     \item evaluate what of the attacks were detected
+%     \item Include measurements of the PMC events for each evaluation task
+%     \item measure time between attack registration and shutdown
+% \end{itemize}
+In the following I want to evaluate TEECore's properties with respect to
+security and constraints it imposes to workload tasks. For this, I use a
+slightly modified version of TEECore that allows me to gather data. For example,
+I replaced the \gls{idt} to implement rudimentary interrupt handling routines.
+These routines do nothing more then making sure, that all debug data is
+transferred and pr event the system from being reset. Nevertheless, the
+implemented interrupt routines ensure that TEECore becomes unresponsive in the
+event of an interrupt. To evaluate the content of \glspl{pmc} further, I
+configure them to don't yield any \gls{pmi}. This allows me to investigate
+behavior of the CPUs Cache in more detail. TEECore prints these information
+through a serial connection.\\
 
-\todo{write evaluation}
-- measure time between attack registration and shutdown
-\begin{itemize}
-    \item Evaluate memory constraints on ping task
-    \item evaluate what of the attacks were detected
-    \item Include measurements of the PMC events for each evaluation task
-    \item measure time between attack registration and shutdown
-\end{itemize}
-- I replace the IDT with one that supplies debug data.
-- Still crashes on receiving interrupts but gives valuable information such as TSC for timing
-- Evaluate on Intel Core I7 13700k
-- Configuration does no emit PMI
+The test environment I used for the following evaluation consists of an Intel
+Core i7 14700k processor. It is part of the hybrid Intel Raptor Lake
+micorarchitecture and ships with 20 CPU cores of two different kinds. The first
+kind of CPU cores implement the Raptor Cove micorarchitecture and are called
+performance Cores (P-cores), while the second kind of cores implement the intel
+Gracemont micorarchitecture and are called efficiency cores (E-Cores). In the
+following I will focus on the P-Core implementation, as these cores offer more
+core exclusive cache as compared to the E-Cores. The Intel Core i7 14700k has 8
+performance cores. To ensure that tests run only on P-Cores, I disabled E-Cores
+through UEFI settings. Moreover, I disabled SMT of the P-Cores, so only one
+thread runs on a physical core. P-Core provide s 80 KiB sized L1 cache, that is
+devided into a 32 KiB sized instruction and a 48 KiB sized data cache. The
+second level cache (L2) has a size of 2 MiB. This cache is a unified cache,
+meaning that it is not devided into data and instruction parts. The third and
+thus last level cache is shared among all cores of the CPU. It is implemented as
+core associated slices with a size of 3 MiB each, summing up to a total of 20
+MiB of shared L3 cache. All caches are inclusive, meaning they contain all data
+contained in the lower cache levels
+(see~\ref{sec:state:technical:caches_inclusivity}). Moreover, the cache line
+size in this CPU is 64 bytes.
 
 \section{Security Properties}
-- different tests
-- the first tests the reaction to an attacker using cache coherency protocol to read
-- The attacker knows what memory addresses back TEECore memory
-- to simulate, I use a trusted application that uses a local array of the size of one page
-- the trusted application communicates the arrays physical address to kernel module
-- kernel module maps address and reads form it
-- two different cases: to detect the attacker, TEECore should see changes in pmc values even if the trusted application does not read memory
-- this would prevent attacks. If this is not working, TEECore should register read attemts by the kernel module at latest when reading data itself
-- I expect both cases to yield the same result: TEECore registers the attack,
-- in both cases the state of the cache lines should change from exclusive/modified to shared
-- Second attacker is not interested by reading TEECOres memory
-- instead, it relies on the cache coherency protocol to inject data into TEECore
-- for this, again the a trusted application communicates the physical address of an array to the kernel module
-- kernel module writes to memory, again we expect a change in the cache line MESI states from exclusive/modified to shared
-- TEECOre should be able to find this attack
-- Other attack is denial of resources. The goal is to denail TEECore to execute
-- One possible vector is sending random interrupts. TEECore should react the same way as it reacts to PMIs: triple fault
-- The attacker can therefore kill TEECore, but this leads to the reset of whole platform
-- Other possible attack using interrupt are IPI.
-- With sending a INIT IPI the CPU turns into a state that makes it await a STARTUP IPI
-- This state is best described by an extended HALT state; The CPU does not proceed with executing TEECore's code
-- Instead waits for STARTUP IPI
-- In this wait state, the CPU ignores all other interrupts, including SMIs and PMIs
-- Receiving an INIT IPI does not change cache of target CPU
-- Goal: We try to abuse cache coherency protocol and test if the CPU halted this way answers to snooping attemps of other cores
-- the outcome is not documented in the SDM or AMD manual. We expect that this wa< it's possible to retrieve information from the core.
-- For this, we bring memory first to a shared state so that we know the value of it in the kernel module
-- second, we bring it back to modified state by writing to from TEECore. We ignore PMC changes this time, as the preparation does only serve the purpose to make changes observeable
-- in next step, kernel module send INIT IPI to CPU core in isolated partition, it is now halted and can't respond to attacks
-- In the last step, Kernel module reads memory. We check for changes in the memory. If we find the expected value, halted core participates in cache coherency
-- this way, we can retrieve data from the CPU core of isolated partition
+To prof that TEECore can detect different attacks and defend itself against
+those, I implemented multiple attack simulations to test different attack
+vectors. In all tested cases, the attacker is assumed to have privileged rights
+as described in section~\ref{sec:30:tee_attacker_model}.\\
+
+The first test cases test basic functionality to detect attacks that use the
+cache coherency protocols of the inclusive cache as vector. An attacker in this
+case either tries to read or write memory used by TEECore. Because the cache
+coherency protocol ensure that the read sees the correct data, an attacker could
+potentially exfiltrate secrets. By writing to memory used by TEECore, which in
+term would update TEECore's memory, an attacker could inject data into the
+isolated environment. To simulate these kinds of attacks, I implemented a small
+trusted application that allocates memory of the size of 4 KiB, which I call the
+target memory. The trusted application then communicates the physical address of
+the target memory to the normal partition using the shared memory communication
+path. Upon receiving the physical address of the target memory, the kernel
+module maps it into its address space and performs the respective operation.
+After mapping the target memory in the Linux kernel module, the CPU remote to
+TEECore did not yet interact with it and it is therefore not stored in a remote
+cache. Only the cache of the CPU core running TEECore, to which I refer as the
+target core, has the target memory cached and because of the initialization
+phase (see section~\ref{sec:30:tee_kernel}), it is at least in modified state in
+this cache. Upon reading in the target memory, the CPU core running the kernel
+module receives a copy of the data. Both CPU cores maintain their copy in the
+shared state. The level 3 cache is involved as communication path between both
+cores, which leads to the target memory being moved from L2 to L3 cache. The
+expected result of this test is therefore to see L2 cache misses and L3 cache
+hits in the first attempt by TEECore to access the target memory after it has
+been read by the remote core. The attacker in this case does not modify teh
+memory, so therefore the performance counters do not trigger for subsequent
+access by the remote core, as long as the target core did not modify the target
+memory. With respect to the number of L2 misses and L3 hits, I expect to count
+the occurrence of 64 events. This is because the of fixed size of the target
+memory of 4096 Bytes. After running the test, teh results turn out to fully meet
+the expectation. For the first time of the remote core reading the target
+memory, TEECore registers 64 events. After the second read, TEECore does not
+register any more events. This demonstrates the importance of the cache line
+state transition to either exclusive or modified in the initialization phase of
+TEECore. It was this test, that showed a shortcomming of TEECores protection
+capabilities in an early implementation phase, because an attacker that only
+reads could not be detected without the intial write to all memory.\\
+
+Similar in setup but different in its effects is the simulation for an modifying
+attacker, that is an attacker that writes to the target memory. As with the read
+attack, the secure application shares the physical address of the target memory
+with the Linux kernel module. In contrast, the kernel module now writes to the
+target memory. As a result, the cache line which was in modifed state in the
+target CPUs cache now changes to invalid, because the remote CPU has the correct
+copy in its cache. If the target CPU now reads or writes the target memory, it
+has to query the changes from the remote CPU. The cache line changes from
+invalid to shared or modified, dependent on the operation of the target CPU.
+This change is accompanied by changes in the L3 cache, which triggers the
+\gls{pmc} events. Subsequent, I should measure one event per effected cache
+line, which will total in 64 events counted. In contrast to the reading attack,
+performing writes on the remote side and reads on the target side should yield
+events because of the involved cache line state modifications for each
+operation. TEECore shows exactly this behavior. It therefore is able to detect
+the attacker described.\\
+
+Another aspect is the number of false positive of events that TEECore detect.
+For this, I used another modification of the attack described before. Once
+again, the secure application allocates the target memory and transmits the
+physical address of its page frame to the kernel module. The kernel module then
+does nothing more then to map the target memory and returns control back to
+TEECore. As a result, TEECore should measure neither L2 cache misses, nor L3
+cache hits. Repeating this test in 10 iterations showed, that TEECore did not
+measure any false positives. All \glspl{pmc} measured zero occurences.\\
+
+As an additional attack vector I identified interrupts. For Interrupts such as
+the default vectors, \glspl{nmi} and \glspl{pmi}, which are routed through the
+\gls{idt}, the counter measures described in\todo{there seems to be now comment
+    on interrutps in design?} are taken. This means, that the \gls{idt}
+configuration of TEECore ultimately leads to a triple fault and thus to a
+platform reset. Sending an \gls{nmi} from the kernel module to the target core
+resulted in the expected behavior. As described in \todo{WO?!?!?} \glspl{ipi}
+such as INIT are not routed through the \gls{idt}. Instead, the \gls{lapic}
+sends these directly to the CPU. As a result, TEECore is not able to reset the
+platform upon receiving an INIT \gls{ipi} and the target CPU. Instead, the CPU
+handles the INIT as described in the Intel SDM. The target CPU therefore changes
+into a state which stops program execution. It furthermore ignores all
+interrupts but STARTUP \gls{ipi} messages. Malicous system software running on
+any remote core can therefore effectively starve TEECore and prevent its
+execution. The remaining question on this part is, if the target core still
+participates in the cache coherency protocol. If so, a remote can could retrieve
+memory content from the secure partition without the chance for TEECore to
+detect this exfiltration. To test this, I used the same setupt as in the other
+tests on the side of TEECore. The trusted application therefore allocates
+memory, writes a predefined value to it and then transmits the physical address
+to the kernel module. Before the kernel module reads the target memory, it sends
+a INIT \gls{ipi} to the target core. Comparing the read value with the one
+written by the trusted application before allows me to conclude if the attack
+was successful. The test indeed showed, that TEECore is vulnarable to this kind
+of attack. Because the target core is halted, TEECore can neither detect nor
+prevent such kind of attacks.
 
 \section{Memory constraints}
-- Ping application to measure minimum size
-- Trusted application that does the mere minimum an service
-- Trusted application in secure partition and normal application in normal partition share a counting variable
-- located in first byte of the payload
-- normal partition initiates with ping command
-- places shared memory in known good state, initializes counter
-- secure partition increments counter portion in shared memory
-- secure partition sends message through filling respective fields in shared memory
-- demonstrates simple increments of a variable and communication
-- this is the expected minimum feature set to allow implementation of useful workloads
-- in this, only parts of TEECore required to fulfil communication and execution tasks are present in memory
-\subsection{Memory used by TEECore}
-- invalidate complete caches; measure cache misses on L1 and L2 to conclude the minimum size of TEECore runtime
-- what counter do I use
-\subsection{Remaining Memory on test CPU}
-- additionally, before answering ping message, secure partition iterates over memory array with volatile memory access
-- with increasing size of this memory array I can check how much memory is left for other workloads
-- using the L2 as unified cache; meaning data and code is stored in it
-- because L2 is splitted into sets, not the whole cache might be available to TEECore and it's applications
-- note what counters I use for this
+In this section I want to evaluate what memory constraints to TEECore and its
+secure applications exists. From a theoretical, abstract point of view, TEECore
+should not use more memory then the size of the largest exclusive cache. For my
+test CPU this means, that TEECore should at most use 2 MiB of memory. The
+difference of this cache size and the number of cache lines used by TEECore
+should yield the maximal number of cache lines a payload in the form of a secure
+application could use. In practice, the actual number of usable cache lines for
+TEECore can be restricted by memory alignment. Because the L1 and L2 cache
+associativity in Raptor Cove is 8, not all possible memory addresses can be
+stored in all cache lines.\\
+
+To evaluate memory constraints, I will use a simple trusted application that's
+only purpose is to increase a counting variable stored in shared memory. This
+scenario mimics the minimum working set of a secure application in TEECore. To
+evaluate the memory used by TEECore I used different performance counter events.
+These events are shown in table~\ref{50:tab:events}. I use the event
+\textit{ICACHE\_DATA.STALLS} as an indicator on TEECore usage of the instruction
+cache. Low values indicate that TEECore is fitting the L1 instruction cache and
+thus indicates that if it can fit the 32 KiB of this cache. The event
+\textit{L1D.REPLACEMENT} indicates the number of times a cache lin in the L1
+data cache was replaces. High values indicate, that TEECore uses more then 48
+KiB of cache for data. The event \textit{MEM\_LOAD\_RETIRED.L2\_HIT} indicates
+that TEECore is using more memory then the L1 data and instruction cache can
+provide. Events of type \textit{MEM\_LOAD\_RETIRED.L3\_HIT} indicate that
+TEECore is using more then 2 MiB and therefore more memory the L1 and L2 caches
+can provide. Occurrence of this event furthermore indicate spilling into shared
+resources and therefore indicates that TEECore cannot uphold its security
+guarantees anymore. Therefore I regard any occurrence as unacceptable. In the
+remaining part of this chapter, I will refer to these events by their
+abbreviation.
+
+% I'm sorry for the layout of the code of this table. My autoformat tool does this on save and I'm to lazy to fix this as it's not a real issue
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{ |p{6cm}|p{1.35cm}|p{1.25cm}|p{4cm}|}
+        \hline
+        \makecell[l]{Intel Perfmon Event Name                                                                                                 \\ (abbreviation)} & Selector & UMask & Description                                                                      \\
+        \hline
+        \makecell[l]{ICACHE\_DATA.STALLS                                                                                                      \\(L1I\_STALL)}       & 0x80     & 0x04  & Counts cycles where a code line fetch is stalled due to an L1 instruction cache miss. The decode pipeline works at a 32 Byte granularity. \\
+        \makecell[l]{L1D.REPLACEMENT                                                                                                          \\ (L1D\_REPLACEMENT)} & 0x51 & 0x05 & Counts cache lines replaced into the L0 and L1 d-cache.                          \\
+        MEM\_LOAD\_RETIRED.L2\_HIT (L2\_HIT) & 0xD1 & 0x02 & Counts retired load instructions with L2 cache hits as data sources.             \\
+        MEM\_LOAD\_RETIRED.L3\_HIT (L3\_HIT) & 0xD1 & 0x04 & Counts retired load instructions with at least one uop that hit in the L3 cache. \\
+        \hline
+    \end{tabular}
+    \caption{Performance Monitoring Events for evaluating memory constraints}
+    \label{50:tab:events}
+\end{table}
+
+I measure two scenarios for all test cases. For the first scenario (SC1) I will
+measure all high level code TEECore. This means all code include TEECores high
+level setup routines as well as the test application. This scenario reflects the
+memory usage of the current implementation. For the second scenario (SC2) I will
+measure all code from the beginning of the execution of the test application.
+This test case reflects the minimum required memory to run the application. The
+difference between SC1 and SC2 in memory usage reveals potential for
+optimization. To measure SC2 I invalidate the whole caches through usage of the
+\textit{WBINVD} instruction. \\
+
+My first test case is the baseline. I run the unmodified test application to
+identify the minimal memory consumption for both scenarios.
+Table~\ref{50:tab:ping_base} shows the measurement results. \todo{add values,
+    evaluate}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{ |l||c|c|c| }
+        \hline
+        Event            & SC1  & SC2  & Difference \\
+        \hline
+        L1I\_STALLS      & 0x80 & 0x04 & 0          \\
+        L1D\_REPLACEMENT & 0x51 & 0x05 & 0          \\
+        L2\_HIT          & 0xD1 & 0x02 & 0          \\
+        L3\_HIT          & 0xD1 & 0x04 & 0          \\
+        \hline
+    \end{tabular}
+    \caption{Unmodified Test Case results}
+    \label{50:tab:ping_base}
+\end{table}
+
+
+To evaluate the behavior of TEECore further with respect to cache associativity,
+I chose to modify the test application to contain an static array that increases
+in size. Not, the test application will not only increase the counter in the
+shared memory region but will also iterate over the static memory array. The
+result will be, that the content of this array will fill L1 data and unified L2
+cache resources, leading to eviction of other data. As mentioned before, as soon
+as events of type \textit{MEM\_LOAD\_RETIRED.L3\_HIT} occur, I consider the size
+of the array as too big, as TEECore can't then uphold its security guarantees. I
+measure scenario one for a realistic evaluation of the prototype. This means all
+code of TEECore is measured. Because the L2 cache is a unified cache, result of
+this test reflect the maximum size for code and data for the whole runtime
+combined with the payload. Table~\ref{50:tab:size} shows the measurement result
+for this test.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{ |l||c|c|c|c| }
+        \hline
+        Array Size & L1I\_STALLS & L1D\_REPLACEMENT & L2\_HIT & L3\_HIT \\
+        \hline
+        32 KiB     & 0           & 0                & 0       & 0       \\
+        64 KiB     & 0           & 0                & 0       & 0       \\
+        512 KiB    & 0           & 0                & 0       & 0       \\
+        1024 KiB   & 0           & 0                & 0       & 0       \\
+        1536 KiB   & 0           & 0                & 0       & 0       \\
+        2048 KiB   & 0           & 0                & 0       & 0       \\
+        \hline
+    \end{tabular}
+    \caption{Measurement Result of Scenario 1 with increasing Memory Consumption}
+    \label{50:tab:size}
+\end{table}
+
+Missing things. \todo{add actual evaluation}
+
+\section{Comparison to other TEE Solutions}
+
 \cleardoublepage
 
 %%% Local Variables:
