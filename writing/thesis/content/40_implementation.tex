@@ -145,25 +145,24 @@ memory mapped as uncacheable, I couldn't measure any communciation from and to
 the L3 caches of my test CPU. In contrast, I found after extensive testing, that
 some of the core's local events measured actvity of the L3 cache. This might be
 because... \todo{Add a plausible cause} As a result, I decided to use the events
-listed in table~\ref{tab:events} to implement TEECore's attack detection
-mechanism. Table~\ref{tab:events} contains information about performance
+listed in table~\ref{40:tab:events} to implement TEECore's attack detection
+mechanism. Table~\ref{40:tab:events} contains information about performance
 monitoring events as found at Intels
-database\footnote{\url{https://perfmon-events.intel.com/}} for Arrow Lake
+database\footnote{\url{https://perfmon-events.intel.com/}} for Raptor Lake
 processors.
 
 \begin{table}[!h]
-    \begin{center}
-        \begin{tabular}{ |p{7cm}|p{1.35cm}|p{1.25cm}|p{3cm}| }
-            \hline
-            Event Name                  & Selector & UMask & Description                                                        \\
-            \hline
-            MEM\_LOAD\_RETIRED.L2\_MISS & 0xD1     & 0x10  & Counts retired load instructions missed L2 cache as data sources.. \\
-            MEM\_LOAD\_RETIRED.L2\_MISS & 0xD2     & 0x08  &                                                                    \\
-            \hline
-        \end{tabular}
-    \end{center}
-    \label{tab:events}
+    \centering
+    \begin{tabular}{ |p{7cm}|p{1.35cm}|p{1.25cm}|p{3cm}| }
+        \hline
+        Event Name                  & Selector & UMask & Description                                                        \\
+        \hline
+        MEM\_LOAD\_RETIRED.L2\_MISS & 0xD1     & 0x10  & Counts retired load instructions missed L2 cache as data sources.. \\
+        MEM\_LOAD\_RETIRED.L2\_MISS & 0xD2     & 0x08  &                                                                    \\
+        \hline
+    \end{tabular}
     \caption{Performance Counter Events used by TEECore}
+    \label{40:tab:events}
 \end{table}
 
 To enable counting of the chosen events, I programmed the respective \gls{pmc}
