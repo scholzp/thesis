@@ -13,6 +13,7 @@ texlive.combine {
     lastpage
     latexmk
     mfirstuc
+    makecell
     siunitx
     standalone
     todonotes
