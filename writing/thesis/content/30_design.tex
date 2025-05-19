@@ -117,7 +117,7 @@ the respective events. TEECore, therefore, must ensure the use of local CPU
 resources only. On Intel platforms, I use events that measure interaction with
 the so-called offcore. Offcore events result from the core interacting with
 resources that are not local. These events include readings/writings to shared
-caches , RAM, or other components. From the fact that TEECore allows only usage
+caches, RAM, or other components. From the fact that TEECore allows only usage
 of core local resources, a memory constraint results, which confines the size of
 usable memory to that of CPU local caches.\\
 
@@ -149,7 +149,7 @@ The payload of TEECore is called a trusted application. In the proof of concept,
 implementation tasks are implemented as functions and are thus statically
 embedded into the TEECore binary. A trusted application is allowed to access the
 shared memory communication channel. TEECore monitors this access and makes it
-part of its measurements. After a trusted application run, the \gls{tee} kernel
+part of its measurements. After a trusted application run, TEECore
 creates a Snapshot from the \gls{pmc} registers and a report based on this
 information.
 
@@ -344,24 +344,26 @@ that are assumed to be safe.
 
 \section{Attacker model}
 \label{sec:30:tee_attacker_model}
-The design of TEECore aims mainly to prevent any covert
-side channel that uses architectural components to form the side channel. In
-particular, I aim to detect cache-based side channels and actively defend
-against attacks such as Spectre and Meltdown. The main defense mechanism is the
-configuration of the \gls{pmc} and the \gls{idt} that lead to a system reset
-upon registering an attack. Because TEECore does not prevent the attack,
-information leakage is still possible in the time frame between detection and
-taking consequences. How big this time frame is and how an attacker could abuse
-it is an open question I will investigate in chapter~\ref{eval}\todo{correct
-    reference}. TEECore also protects against interrupt-based single-stepping
-attacks like SGX-Step (\todo{verwies auf attacks}). With the special
-configuration of the \gls{idt}, all interrupts received by TEECore lead to the
-same result: a platform reset. To summarize, TEECore can defend against an
-attacker who reads and writes to memory addresses contained in the cache of the
-isolated core, as these actions result in MESI state changes. This attacker can
-have arbitrary privileges if the attack is not executed from within the
-\gls{smm}. Likewise, I/O ports are not considered an attack vector by me, as the
-application model of TEECore forbids access to I/O devices. \\
+The design of TEECore aims mainly to prevent any covert side channel that uses
+architectural components to form the side channel. In particular, I aim to
+detect cache-based side channels and actively defend against attacks such as
+Spectre and Meltdown. The main defense mechanism is the configuration of the
+\gls{pmc} and the \gls{idt} that lead to a system reset upon registering an
+attack. Because TEECore does not prevent the attack, information leakage is
+still possible in the time frame between detection and taking consequences. How
+big this time frame is and how an attacker could abuse it is an open question I
+will investigate in chapter~\ref{eval}\todo{correct reference}. TEECore also
+protects against interrupt-based single-stepping attacks like SGX-Step
+(\todo{verwies auf attacks}). With the special configuration of the \gls{idt},
+all interrupts received by TEECore lead to the same result: a platform reset. To
+summarize, TEECore can defend against an attacker who reads and writes to memory
+addresses contained in the cache of the isolated core, as these actions result
+in MESI state changes. This attacker can have arbitrary privileges if the attack
+is not executed from within the \gls{smm}. Likewise, I/O ports are not
+considered an attack vector by me, as the application model of TEECore forbids
+access to I/O devices. Moreover, TEECore is designed to run in an environment
+with any form of Simultaneous Multithreading, as it can not defend against
+sibling threads that share resources of a CPU core.\\
 
 The \gls{smm} serves as an exception from the aforementioned security guarantees
 because it can effectively prevent TEECore from reacting to the occurrence of
@@ -398,7 +400,7 @@ platform uses a genuine \gls{tpm}. This would require network access or a
 protocol that allows TEECore network communication through software running in
 the normal partition. Physical attacks that aim at manipulation or taping the
 bus through which the \gls{tpm} is connected to the system can not be prevented
-by TEECore. The \gls{tcb} of TEECore consists comprises software involved in
+by TEECore. The \gls{tcb} of TEECore consists of software involved in
 system initialization. This includes the root of trust for measurement,
 firmware, bootloader, commodity \gls{os}, and TEECore. On the hardware side, the
 \gls{tcb} consists of the \gls{tpm} and the CPU.
