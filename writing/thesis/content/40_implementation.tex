@@ -18,69 +18,72 @@
 % in einer Arbeit nichts zu suchen, auch nicht im Anhang, sondern gehören auf
 % Rechner, auf denen man sie sich ansehen kann.
 
-In the following section, I will explain some technical implementation details.
-In particular, I want to highlight some of the implementation details of
-components explained in chapter~\ref{sec:design}. First, I will refer to Linux,
-which I use as the host kernel in the system. A special configuration was used
-because I will make it run in parallel to the \gls{tee} kernel. Next, in
-section~\ref{sec:implementation:teeKernel}, I will introduce phipsboot, which I
-use as the \gls{tee} kernel, along with the modification I introduced to adapt
-it to my use case. Another component I programmed is the Linux kernel module,
-which I explain in section~\ref{sec:implementation:kmod}. In the last part of
-the implementation chapter, I will explain how I implemented the attack
-simulations.
+In the following sections, I will explain some technical implementation details
+of TEECore and how I implemented features described in chapter~\ref{sec:design}.
+First, I will explain some implementation highlights of TEECore itself, which is
+the kernel used to populate the isolated partition in
+section~\ref{sec:implementation:teeKernel}. To demonstrate the prototype, I used
+Linux as kernel running in the normal partition. The prototype of TEECore
+requires Linux to set it up and prepare memory for it. In
+section~\ref{sec:implementation:hostKernel}, I describe how I configured Linux
+to set uo TEECore. To enable Linux to communicate with TEECore finally, I
+implemented a driver as a Linux kernel module. I describe this kernel in
+section~\ref{sec:implementation:kmod}.\todo{Something something trusted
+    applications} As a target for the prototype implementation of TEECore I used an
+Intel Core i7 14700k processor.
+
 \todo{Implement for Intel, mainly i7 14700k}
 \section{TEECore}
 \label{sec:implementation:teeKernel}
-
 PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}} is a Multiboot 2
-compliant kernel written in the memory-safe programming language Rust, with the
-purpose to serve as a bootloader for 64 bit x86 kernels. A feature of PhipsBoot
-is, that it is relocateable and so supports arbitrary load addreses. It depends
-on a first-stage bootloader\todo{maybe this is not a multi-stage bootloader}
-that brings the system to a state defined in the Multiboot 2 specification. That
-is, the CPU is in 32-bit protected mode with segmentation enabled. After
-handover, PhipsBoot does all initialization steps to bring the CPU into 64-bit
-mode with enabled PEA paging. This part of Phipsboot is written in x86 assembly
-code. It initializes the page tables and sets up huge pages before transfering
-the CPU into 64-bit mode. For later usage, Phipsboot sets up additional page
-tables for execution. PhipsBoot expects to be loaded to a 2 MiB-aligned address
-because of it memory mapping. Its small size, which is less than 2 MiB, allows
-PhipsBoot to set up the page table hierarchy using a single page table that maps
-the kernel. PhipsBoot uses memory statically reserved for dynamic memory
-allocation in the kernel's Elf image. Next to setting up the general run time,
-PhipsBoot does not implement more feature, but offers a great starting point for
-implementation of TEECore. \\
+compliant kernel is written in the memory-safe programming language Rust, to
+serve as a bootloader for 64-bit x86 kernels. A feature of PhipsBoot is that it
+is relocatable and supports arbitrary load addresses. It depends on a
+first-stage bootloader\todo{maybe this is not a multi-stage bootloader} that
+brings the system to a state defined in the Multiboot 2 specification. That is,
+the CPU is in 32-bit protected mode with segmentation enabled. After handover,
+PhipsBoot does all initialization steps to bring the CPU into 64-bit mode with
+enabled PEA paging. This part of Phipsboot is written in x86 assembly code. It
+initializes the page tables and sets up huge pages before transferring the CPU
+into 64-bit mode. For later usage, Phipsboot sets up additional page tables for
+execution. Because of its memory mapping, PhipsBoot expects to be loaded to a 2
+MiB-aligned address . Its small size, less than 2 MiB, allows PhipsBoot to set
+up the page table hierarchy using a single page table that maps the kernel.
+PhipsBoot uses memory statically reserved for dynamic memory allocation in the
+kernel's Elf image. Next to setting up the general run time, PhipsBoot does not
+implement more features but offers a great starting point for the implementation
+of TEECore. \\
 
 For the intent of my implementation, I forked PhipsBoot to begin developing
-TEECore. The first feature I introduced was the ability to modify page tables,
-because Phipsboot did not support mapping of arbitrary memory. Instead, the
-setup assembly routine of Phipsboot maps the entire memory of the loaded binary.
-The page tables are mapped in this process as read only. Moreover the address of
-the last level page tabel is not known by the Rust high level code. To allow
+TEECore. The first feature I introduced was the ability to modify page tables
+because Phipsboot did not support mapping arbitrary memory. Instead, the setup
+assembly routine of Phipsboot maps the entire memory of the loaded binary. The
+page tables are mapped in this process as read-only. Moreover, the Rust
+high-level code does not know the address of the last level page table. To allow
 mapping of arbitrary memory, I modified the page table setup routine and changed
-the last page table to be writable instead of read-only and made it accessible
-in the Rust high level code by propagating its address. Note that TEECore is
-aligned to a 2 MiB bounadry. Mappping of addresses of TEECore therefore start in
-the first at the first entry of the last level page table until index $n$.
-Through observation, I found that not more than the first 128 entries in the
-page table are used to map all memory used by the kernel binary. This reflects
-the fact, that TEECore is around 300 KiB in size. For dynamic mapping of memory
-that is not contained in TEECore's binary, I, therefore, reserved the last 128
-entries of the last level page table. This enables TEECore to map up to 512 KiB
-of arbitrary memory that was not contained in the binary, while it allows for
+the last page table to be writable instead of read-only, and made it accessible
+in the Rust high-level code by propagating its address. Note that TEECore is
+aligned to a 2 MiB boundary because of the initial huge page mapping. Therefore,
+The mappping of TEECore addresses starts in the first entries of the last level
+page table until index $n$. Through observation, I found that not more than the
+first 128 entries in the page table are used to map all memory used by the
+kernel binary. The number of initially mapped pages reflects that TEECore's ELF
+image is around 300 KiB in size. For dynamic mapping of memory that TEECore's
+binary does not contain, I, therefore, reserved the last 128 entries of the last
+level page table. These 128 page table entries enable  TEECore to map up to 512
+KiB of arbitrary memory that was not contained in the binary while allowing for
 the binary to grow to a size of 1536 KiB. Overall, the total maximal size of 2
 MiB can fit in most L2 caches of Intels x86\_64 processors performance cluster
 cores produced since 2022.\\
 
 For mapping arbitrary memory, TEECore uses addresses derived from the virtual
-address of the last level page table. The upper most 43 bits are the same as in
-the lest level page's virutal address. Bit 21 to 9 are the index into the the
-last level page table, which is 384 for the first page to map and increases
-statically for every additional page that is mapped. It as at this index, at
-which the page frane address is stored in the last level page table. The last 9
-bits are the index into the page frame. Listing~\ref{code:map_external} shows
-pseudocode of the mapping algorithm explained.
+address of the last level page table. The uppermost 43 bits are the same as in
+the last level page's virtual address. Bits 21 to 9 are the index into the last
+level page table, which is 384 for the first page to map and increments by one
+for every additional mapped page. At this index, the page frame address is
+stored in the last level of the page table. The last 9 bits are the index into
+the page frame. Listing~\ref{code:map_external} shows the pseudocode of the
+mapping algorithm explained.
 
 \begin{lstlisting}[language=Rust, caption=Mapping of external memory, label=code:map_external]
 pub unsafe fn map_page_frame(phys_addr: u64) -> u64 {
@@ -94,71 +97,73 @@ pub unsafe fn map_page_frame(phys_addr: u64) -> u64 {
     // Set bits 21 to 9, set present bit (0x1)
     virt_addr = upper_bits + (LAST_INDEX << 12) | 0x1;
     // Write physical address to page table
-    ptr::write(pt_entry_ptr, (Into::<u64>::into(phys_addr));
+    ptr::write(pt_entry_ptr, (Into::<u64>::into(phys_addr)));
     LAST_L1_INDEX += 1;
     return virt_addr;
 }
 \end{lstlisting}
 
-Being able to map arbitrary memory is an important feature to implement the
-shared memory communication path. The address is communicated to TEECore through
-the Multiboot 2 Boot Information strcuture, which contains a memory map. To
-access this structure, TEECore needs to be able to map the page containing it.
-The address is derived from boot code, as explained in\todo{hier referenz
-    setzen}. Moreover, the address in the memory map must be mapped by TEECore to
-make the shared memory accessible. Other than the memory owned by the kernel,
-the memory intended to be used by both, TEECore and the host kernel, is mapped
-as uncacheable. This prevents cache pollution and false positives for allowed
-access of a remote core to memory also used by the \gls{tee}.\\
+Mapping arbitrary memory is important in implementing the shared memory
+communication path. TEECore learns the information about the shared memory
+through the Multiboot 2 Boot Information structure, which memory map contains a
+respective entry. To access this structure, TEECore needs to be able to map the
+page containing it. To enable TEECore to access the Multiboot 2 Boot Information
+structures, boot code (c.f. \ref{sec:implementation:kmod}) writes its address
+into register \textit{EBX}. Moreover, TEECore has to map the physical address in
+the memory map to make the shared memory accessible. Other than the memory owned
+by the kernel, the memory intended to be used by TEECore and the host kernel is
+mapped as uncacheable. This prevents cache pollution and false positives for
+allowed access of a remote core to memory also used by the \gls{tee}.\\
 
 To prepare the environment, the TEECore needs to ensure that all memory used by
-it is in the exclusive or modified state so that a remote core must trigger an
-measureable event when it tries to access memory owned by the TEECore. For this,
+it is in the exclusive or modified state so that a remote core must trigger a
+measurable event when it tries to access memory owned by the TEECore. For this,
 I implemented a function that iterates over the page table entries and reads all
-bytes of pages that are set present. The value read by TEECore is written back
-to the same address in the same. This triggers the modified state of the cache
-line, which leads to invalidation of remote cores cache lines that reference the
-same memory item. I discovered this necessity when implementing my attack
-simulations (c.f.~\ref{sec:implementation:attacks:memory})\todo{referenz
-    prüfne}. While the TEECore could detect the active attacker, the passive one
-was undetectable because the reading of cache lines, which are in the shared
-state in both caches, does not trigger any microarchitectural responses. It is,
-therefore, necessary to hold all memory that TEECore should keep secret in
-the exclusive or modified state to detect cache synchronization over the cache
-coherency protocol.\\
+bytes of pages that are set present. This function reads a given address and
+writes back the same value to the same address to trigger the modified state of
+the cache line. This state change leads to invalidating remote core cache lines
+referencing the same memory item. I discovered this necessity when implementing
+my attack simulations
+(c.f.~\ref{sec:implementation:attacks:memory})\todo{referenz prüfne}. While
+TEECore could detect the active attacker, the passive one was undetectable
+because the reading of cache lines in the shared state in both caches does not
+trigger any microarchitectural responses. It is, therefore, necessary to hold
+all memory that TEECore should keep secret in the exclusive or modified state to
+detect cache synchronization over the cache coherency protocol.\\
 
 After ensuring that all attempts to manipulate or access secret memory do not
-result in additional microarchitectural state changes, it is time to make the
+result in additional microarchitectural state changes, it is time to make
 TEECore detect the respective events resulting from access to the remote core
-through monitoring performance counters. For this, TEECore writes the respective
-events to the configuration \glspl{msr}. These events and target regisers are
-implementation specific to the respective processor. Processors manufatured by
-Intel and AMD offer special events dedictaed to monitor behavior of CPU
-components that are external of the actual procesor core. Such components, for
-example, include main memory, shared caches and other shared ressources. In
-Intel processors, such components are reffered to as uncore. Intel processors
-implement so-called offcore-response events to measure the events resulting of a
-processor core's communcition to the uncore. I first tried to use these offcore
-response events to measure communcition of the core exectuing TEECore wth the
-remaining system. While I could events working to count communcition to the
-memory mapped as uncacheable, I couldn't measure any communciation from and to
-the L3 caches of my test CPU. In contrast, I found after extensive testing, that
-some of the core's local events measured actvity of the L3 cache. This might be
-because... \todo{Add a plausible cause} As a result, I decided to use the events
-listed in table~\ref{40:tab:events} to implement TEECore's attack detection
-mechanism. Table~\ref{40:tab:events} contains information about performance
-monitoring events as found at Intels
+through monitoring performance counters. TEECore writes the respective events to
+the configuration \glspl{msr} for this. These events and target registers are
+implementation-specific to the respective processor. Processors manufactured by
+Intel and AMD offer special events dedicated to monitoring the behavior of CPU
+components external to the processor core. Such components, for example, include
+main memory, shared caches, and other shared resources. In Intel processors,
+such components are referred to as uncore. Intel processors implement so-called
+offcore-response events to measure the events resulting from a processor core's
+communication to the uncore. I first tried to use these offcore response events
+to measure the communication of the core executing TEECore with the remaining
+system. While I could see events working to count communication to the memory
+mapped as uncacheable, I could not measure any communication from and to the L3
+caches of my test CPU. In contrast, after extensive testing, I found that some
+of the core's local events measured the activity of the L3 cache. This might be
+because... \todo{Add a plausible cause}. As a result, I decided to use the
+events listed in table~\ref{40:tab:events} to implement TEECore's attack
+detection mechanism. Table~\ref{40:tab:events} contains information about
+performance monitoring events as found at Intels
 database\footnote{\url{https://perfmon-events.intel.com/}} for Raptor Lake
 processors.
 
 \begin{table}[!h]
     \centering
-    \begin{tabular}{ |p{7cm}|p{1.35cm}|p{1.25cm}|p{3cm}| }
+    \begin{tabular}{ |p{6.5cm}|p{1.35cm}|p{1.25cm}|p{3.5cm}| }
         \hline
-        Event Name                  & Selector & UMask & Description                                                        \\
+        Event Name                  & Selector & UMask & Description                                                                            \\
         \hline
-        MEM\_LOAD\_RETIRED.L2\_MISS & 0xD1     & 0x10  & Counts retired load instructions missed L2 cache as data sources.. \\
-        MEM\_LOAD\_RETIRED.L2\_MISS & 0xD2     & 0x08  &                                                                    \\
+        MEM\_LOAD\_RETIRED.L2\_MISS & 0xD1     & 0x10  & Counts retired load instructions missed L2 cache as data sources..                     \\
+        MEM\_LOAD\_RETIRED.L3\_HIT  & 0xD1     & 0x04  & Counts retired load instructions with at least one \mu op that hit in the L3 cache.    \\
+        MEM\_LOAD\_RETIRED.L3\_MISS & 0xD1     & 0x20  & Counts retired load instructions with at least one \mu op that missed in the L3 cache. \\
         \hline
     \end{tabular}
     \caption{Performance Counter Events used by TEECore}
@@ -173,8 +178,8 @@ processor supports at least four of those pairs. The \textit{IA32\_PERFEVTSELx}
 \gls{msr} contains the configuration of the performance counter, including the
 event to measure and information about interrupt generation, as well as
 de-/activation bits of the counter, while \textit{IA32\_PMCx} \glspl{msr}
-contain the measurement value. Althrough all \textit{IA32\_PMCx} \glspl{msr}
-have a size of 64 bits, less bits might be implemented in hardware. For example,
+contain the measurement value. Although all \textit{IA32\_PMCx} \glspl{msr} have
+a size of 64 bits and fewer bits might be implemented in hardware. For example,
 my test CPU implements 48 bits for \textit{IA32\_PMCx}. The Layout of
 \textit{IA32\_PERFEVTSELx} \glspl{msr} is shown by
 figure~\ref{fig:state:technical:perfsel}.
@@ -189,60 +194,61 @@ figure~\ref{fig:state:technical:perfsel}.
 \end{center}
 
 To set up \gls{pmc} for a specific event, TEECore sets the \textit{Events
-    Select} and \textit{UMASK} field in the respective
-\textit{IA32\_PERFEVTSELx} \textit{OS} bits, to instruct hardware to count
-events for user mode and priveldged software. To enable interrupt delivery
-on counter overflow, TEECore furthermore sets the \textit{INT} bit. Because
-the interrupt is delivered through the \gls{lapic} on overflow of the
-corresponding \textit{IA32\_PMCx}, TEECore has to additionally write all
-ones to this \gls{msr}. This ensure that the counter overflows on the first
-occurence of the respective event and triggers the delivery of a \gls{pmi}.
+    Select} and \textit{UMASK} field in the respective \textit{IA32\_PERFEVTSELx}
+\textit{OS} bits to instruct hardware to count events for user mode and
+privileged software. TEECore furthermore sets the \textit{INT} bit to enable
+interrupt delivery on counter overflow. Because the \gls{lapic} delivers the
+interrupt through the \gls{lapic} on an overflow of the corresponding
+\textit{IA32\_PMCx}, TEECore has to additionally write all ones to this
+\gls{msr}. This write ensures that the counter overflows on the first
+occurrence of the respective event and triggers the delivery of a \gls{pmi}.
 After setting up \textit{IA32\_PMCx}, TEECore enables the counter by setting
-the \textit{EN} bit in the respecitve \textit{IA32\_PERFEVTSELx} \gls{msr}
+the \textit{EN} bit in the respective \textit{IA32\_PERFEVTSELx} \gls{msr}
 after finishing its preparation phase. From this point on, writes to
 \textit{IA32\_PMCx} are forbidden.
 
-One of the first actions TEECore does, it to make sure that the \gls{idt} is
-setup accordingly. In doing so, it writes zero to the \gls{idtr}, which leads to
-triple faulting once an interrupt is delivered to TEECore. Because TEECore is
-designed to work without interrupts, every interrupt received by TEECore is
-considered an attack. From this point on, TEECore can not be interrupt and thus
-not single stepped. In a second step, TEECore configures the \gls{lapic} to
-enable the delivery of \gls{pmi}. As described in section~\ref{}\todo{}, TEECore
-uses \glspl{pmi} to signal it self that it has been attacked. First, it uses the
-aforementioned functionality to map the \gls{lapic} register space. \gls{lapic}
-registers are memory mapped CPU exclusive registers of 32 bit width. Relevant
-for my use case are the \textit{spurious-interrupt vector} register and the
-\textit{\gls{lvt}}. The spurious-interrupt vector register is important to
-software activate the \gls{lapic} because after reset the \gls{lapic} might not
-be software enabled, althrough it responds to \gls{ipi} messages. To software
-activate the \gls{lapic}, TEECore writes to the \textit{APIC Software
-    Enable/Disable} bit. After enabling the \gls{lapic}, TEECore has to configure it
-accordingly to active delivery of \glspl{pmi}. For this, TEECore configures the
-Performance Monitoring Register of the \gls{lvt} to deliver \glspl{pmi} as
-\glspl{nmi}. As a last step, TEECore clears the mask bit in the Performance
-Monitoring Register of the \gls{lvt}. After this, the \gls{lapic} is ready to
-deliver \glspl{pmi} to TEECore.\\
+One of the first actions TEECore is to set up the \gls{idt} accordingly. In
+doing so, it writes zero to the \gls{idtr}, which leads to triple faulting once
+the \gls{lapic} deliveres an interrupt to TEECore. Because I desgined TEECore to
+work without interrupts, every interrupt TEECore receives is considered an
+attack by it. From then on, TEECore can not be interrupted and thus is not prone
+to single-step attacks. In a second step, TEECore configures the \gls{lapic} to
+enable the delivery of \gls{pmi}. As described in
+section~\ref{sec:30:tee_kernel}, TEECore uses \glspl{pmi} to signal itself that
+it has been attacked. First, it uses the aforementioned functionality to map the
+\gls{lapic} register space. \gls{lapic} registers are memory-mapped
+CPU-exclusive registers with 32-bit widths. Relevant to my use case is the
+\textit{spurious-interrupt vector} register and the \textit{\gls{lvt}}. The
+spurious-interrupt vector register is important for software activating the
+\gls{lapic} because, after reset, the \gls{lapic} might not be software enabled.
+However, it responds to \gls{ipi} messages. To software activate the
+\gls{lapic}, TEECore writes to the \textit{APIC Software Enable/Disable} bit.
+After enabling the \gls{lapic}, TEECore has to configure it accordingly to
+active delivery of \glspl{pmi}. For this, TEECore configures the Performance
+Monitoring Register of the \gls{lvt} to deliver \glspl{pmi} as \glspl{nmi}. As a
+last step, TEECore clears the mask bit in the Performance Monitoring Register of
+the \gls{lvt}. After this, the \gls{lapic} is ready to deliver \glspl{pmi} to
+TEECore.\\
 
 \begin{center}
     \begin{figure}
         \centering
         \includestandalone{images/shared_mem_layout.tex}
         \caption{Illustration of the Layout of the Shared Memory used For Communication}
-        \label{fig:state:technical:paging}
+        \label{fig:impl:shared_mem_layout}
     \end{figure}
 \end{center}
 
 I implemented a structure to manage the memory in question to enable
 communication through the shared memory channel. Access to the shared memory
 follows a simple protocol that splits the memory, as shown in
-figure~\ref{fig:shared-mem}. The first byte denotes the sender, the second
-denotes the task identifier, and the remaining part is used for a payload that
-can be sent along with the other tags. I assume there are only two communication
-parties in the current prototype: the \gls{tee} kernel and the host kernel. A
-message is sent by writing the first byte. To receive a message, the respective
-party polls the first byte of the shared memory and waits until the signal is
-written by the other party, \\
+figure~\ref{fig:impl:shared_mem_layout}. The first byte denotes the sender, the
+second denotes the task identifier, and the remaining part is used for a payload
+that can be sent along with the other tags. I assume there are only two
+communication parties in the current prototype: the \gls{tee} kernel and the
+host kernel. A message is sent by writing the first byte. To receive a message,
+the respective party polls the first byte of the shared memory and waits until
+the signal is written by the other party, \\
 
 After initialization, the \gls{tee} environment starts a state machine that
 controls the execution of tasks. In the first state, the \gls{tee} polls the
@@ -252,12 +258,12 @@ the task as commended. While the task runs, it can access the shared memory for
 multiple reasons. The first reason is that the task can access the payload
 section of the memory to receive additional input data from the party outside of
 the \gls{tee}. The second reason is that the task can prepare an answer to the
-third-party request. For this, the task can write to the sender information, the
-command, and the payload fields as it wishes. It is the task's responsibility to
-write to the shared memory data needed to create a response to the request once
-it is done.
+third-party request. For this, the task can write to fields dedicated to the
+sender information, the command, and the payload. It is the task's
+responsibility to write to the shared memory data needed to create a response to
+the request once it is done.
 
-\section{Host Kernel: Linux}
+\section{Normal Partition Kernel: Linux}
 \label{sec:implementation:hostKernel}
 
 As a highly configurable open-source general-purpose operating system, Linux is
@@ -269,9 +275,10 @@ limit the resources Linux uses. \\
 To isolate the CPU core, I used the command line option \textit{nr\_cpus=n},
 where $n$ is an arbitrary number that limits Linux from using a maximum core
 count of $n$. I used $n=3$ to limit Linux to 3 cores. While Linux supports CPU
-hotplugging\todo{ref}, which would allow enabling core to be turned off through
-the same feature, \textit{nr\_cpu} introduces a hard limit. Thus, cores excluded
-from initialization by this parameter are inaccessible for Linux and can't be
+hotplugging\footnote{\url{https://docs.kernel.org/core-api/cpu_hotplug.html}},
+which would allow enabling cores to be turned off through the same feature,
+\textit{nr\_cpu} introduces a hard limit. Thus, cores excluded from
+initialization by this parameter are inaccessible for Linux and can not be
 hotplugged later. \\
 
 Another useful parameter is \textit{memmap}, which I used to add custom entries
@@ -284,12 +291,13 @@ mode and, therefore, can only access memory with addresses lower than the 1 MiB
 boundary. Linux does not offer any procedure to allocate memory in this address
 region, so this is the only possible way. \\
 
-Other preparation steps are done by the Linux kernel module explained in
-section~\ref{sec:implementation:kmod}. Linux Neverthelss serves is the first
-software to be run in my prototype. All other components, namely the \gls{tee}
-kernel as an Elf-file image and the Linux kernel module, are embedded in its
-initial RAM disk image, which allows, in theory, to sign a single image for
-secure boot and thus ensure the integrity of all components on startup.\\
+The driver for TEECore, implemented as Linux kernel moudle performs addtional
+initilization steps, that I explain in section~\ref{sec:implementation:kmod}.
+Linux, nevertheless, is the first software to be run in my prototype. All other
+components, namely the \gls{tee} kernel as an ELF-file image and the Linux
+kernel module is embedded in its initial RAM disk image, which allows, in
+theory, the signing of a single image for secure boot and thus ensures the
+integrity of all components on startup.\\
 
 \section{Linux kernel module}
 \label{sec:implementation:kmod}
@@ -299,14 +307,18 @@ kernel on the isolated core but also the component that initializes the isolated
 core and loads the \gls{tee} kernel into memory.\\
 
 For this, the kernel module claims the memory reserved through the Linux command
-line argument and copies the startup code. The startup code is written by me in
-assembly and transfers the processor from real mode into 32-bit mode with
-segmentation and places the addresses of Multiboot 2 Boot Information structure
-into the expected registers. The resulting state is the one expected by TEECore.
-The startup code is compiled before the kernel module and included as an array
-of bytes. This allows of easier modification. Because the address of the
-Multiboot Boot Information is not known at compile time, the kernel module
-modifies the startup code on runtime to contain the respective address.\\
+line argument and copies the startup code to the reserved memory. I wrote the
+startup code in assembly. It transfers the processor from real mode into the
+32-bit mode with segmentation and places the addresses of the Multiboot 2 Boot
+Information structure into the EBX register. The resulting state is the one
+expected by TEECore. The startup code is compiled before the kernel module and
+included as an array of bytes. This allows for easier modification, as
+otherwise, the need to edit a binary would arise. The Multiboot 2 Information
+structure, which TEECore expects, is created by the kernel module at run time.
+Because of this, the address of the Multiboot 2 Boot Information is not known at
+compile time. After allocating the memory, the kernel module modifies the
+startup code at runtime by replacing a placeholder with the actual MBI2
+address.\\
 
 In the next step, the kernel module locates the \gls{elf} binary of the TEECore
 and places it in memory. For this, the module allocates memory through the Linux
@@ -315,14 +327,17 @@ Once allocated, the kernel module does not deallocate the pages to prevent Linux
 from reusing the memory and possibly overwriting the TEECore. Once the required
 memory is allocated and mapped in the kernel address space, the kernel module
 begins to parse the \gls{tee} kernel's \gls{elf} image and copies all necessary
-parts to memory. For this, the kernel module brings its own \gls{elf} loader.
-The kernel module does not use the Linux \gls{elf} file loader, because it does
-not allow to easily obtain the physical address to which the \gls{elf} image is
-loaded. The kernel module then sets up the shared memory region by allocating a
-amount of memory specified before. It then creates a multiboot 2 boot
+parts to memory. The kernel module brings its own \gls{elf} loader for this. The
+kernel module does not use the Linux' \gls{elf} file loader because it does not
+allow to easily obtain the physical address to which the \gls{elf} image is
+loaded. The kernel module requires the TEECore binary's physical address to
+calculate the TEECore code entry address. This address is the second important
+address generated at runtime of the kernel module with which the boot code is
+updated. The kernel module then sets up the shared memory region by allocating
+the amount of memory specified before. It then creates a Multiboot 2 Boot
 Information structure containing the physical address of the shared region with
-a custom-defined memory type. TEECore later parses the MBI to find the physcial
-memory backing the shared memory communcation channel.\\
+a custom-defined memory type. TEECore later parses the MBI structure to find the
+physical memory backing the shared memory communication channel.\\
 
 Once all parts necessary to run the \gls{tee} kernel are placed in memory, the
 kernel module prepares to start the isolated core. At this point, Linux does not
@@ -336,11 +351,11 @@ one for each CPU core. To come by this, I queried the APIC IDs of the cores
 mapped by Linux and calculated the offset for each core. I used this offset to
 calculate the APIC ID of the target core by adding the offset to the ID of the
 last core mapped by Linux. After sending the \gls{ipi} sequence to the remote
-core, the startup code will be executed, and a far jump to the \gls{tee}
-kernel's code will be performed by the remote CPU.\\
+core, the startup code will be executed, and a far jump to TEECore's code will
+be performed by the remote CPU.\\
 
 After initializing the remote core, the kernel module manages communication with
-the \gls{tee} kernel. It therefore implements the protocol described in
+the \gls{tee} kernel. It, therefore, implements the protocol described in
 \ref{sec:implementation:teeKernel}. To receive messages, the kernel module
 installs a timer, which it uses to poll the shared memory periodically for new
 messages. The kernel module also implements the remote part of tasks in the
@@ -361,52 +376,53 @@ subsection I want to show some implementationt details of the attacks and the
 
 \subsection{Ping Task}
 \label{sec:implementation:attacks:ping}
-This simple task does nothing more than to increment a value shared between the
-\gls{tee} and the host OS. It can be viewed as the minimal working set of the
-\gls{tee} to run tasks. Therefore, the result for memory usage is the minimum to
-expect for any other task. Measuring the resource usage with appropriate
-\gls{pmc} allows me to make assumptions about the resources a future payload can
-use. I collected data with the following events:
-\begin{itemize}
-    \item L1 replacements
-    \item L1 Miss (any)
-    \item Offcore events \todo{umask and so angeben um reproduzierbarkeit zu
-              wahren}
-\end{itemize}
-Between each ping cycle I used used the \textit{wbinvd} instruction of x86, that
-results in the core writing back all it's cache entries to memory and
-invalidating each cache line. Executing the following ping cycle until reading
-the \gls{pmc} again yields the number of cache lines filled with data necessary
-to execute a complete cycle. From the cache line size I can then conclude the
-total memory requirements of the runtime part of the \gls{tee}.
+WIP\todo{Describe some details of secure applications}
+% This simple task does nothing more than to increment a value shared between the
+% \gls{tee} and the host OS. It can be viewed as the minimal working set of the
+% \gls{tee} to run tasks. Therefore, the result for memory usage is the minimum to
+% expect for any other task. Measuring the resource usage with appropriate
+% \gls{pmc} allows me to make assumptions about the resources a future payload can
+% use. I collected data with the following events:
+% \begin{itemize}
+%     \item L1 replacements
+%     \item L1 Miss (any)
+%     \item Offcore events \todo{umask and so angeben um reproduzierbarkeit zu
+%               wahren}
+% \end{itemize}
+% Between each ping cycle I used used the \textit{wbinvd} instruction of x86, that
+% results in the core writing back all it's cache entries to memory and
+% invalidating each cache line. Executing the following ping cycle until reading
+% the \gls{pmc} again yields the number of cache lines filled with data necessary
+% to execute a complete cycle. From the cache line size I can then conclude the
+% total memory requirements of the runtime part of the \gls{tee}.
 
-\subsection{Stalling Attack}
-The denial of service attack floods the \gls{tee} with \glspl{nmi}. It is
-intended to prove that the \gls{tee} can defend against interrupts that the
-\gls{tee} cannot mask.
-\todo{maybe move this into the chapter intro}
+% \subsection{Stalling Attack}
+% The denial of service attack floods the \gls{tee} with \glspl{nmi}. It is
+% intended to prove that the \gls{tee} can defend against interrupts that the
+% \gls{tee} cannot mask.
+% \todo{maybe move this into the chapter intro}
 
-\subsection{Memory Attacks}
-\label{sec:implementation:attacks:memory}
-In theory, an attacker is able to leak data through the microarchitectural
-behavior of the CPU cache's implementation. The first attacker is passive and
-only interested in spying unobserved on the secrets of the \gls{tee}. The
-attacker would use their access to read the \gls{tee} memory. If the \gls{tee}
-cannot observe this, then secrets could be leaked through this channel upon
-writing. The second attacker is an active one who tries to write the \gls{tee}
-memory to influence its control flow. Both attacks follow the same workflow.\\
+% \subsection{Memory Attacks}
+% \label{sec:implementation:attacks:memory}
+% In theory, an attacker is able to leak data through the microarchitectural
+% behavior of the CPU cache's implementation. The first attacker is passive and
+% only interested in spying unobserved on the secrets of the \gls{tee}. The
+% attacker would use their access to read the \gls{tee} memory. If the \gls{tee}
+% cannot observe this, then secrets could be leaked through this channel upon
+% writing. The second attacker is an active one who tries to write the \gls{tee}
+% memory to influence its control flow. Both attacks follow the same workflow.\\
 
-To simulate these attacks, the \gls{tee} first initializes a memory area of the
-size of 4KiB and finds its physical location. Because I want to observe the side
-effects of the attack, this memory is not mapped as uncacheable on the \gls{tee}
-side but instead like any other memory in the \gls{tee}. The \gls{tee} then
-communicates the address through the shared memory channel to the Linux kernel
-module in which the respective attack implementations reside. The remote side
-now maps the physical address space into its address space and either reads or
-writes to the memory. When finished, the remote kernel module creates the
-respective answer and transfers control over the memory area on this way back to
-the \gls{tee}. The \gls{tee} now reports on the state of the performance
-counters.\todo{maybe add some code examples?}\\
+% To simulate these attacks, the \gls{tee} first initializes a memory area of the
+% size of 4KiB and finds its physical location. Because I want to observe the side
+% effects of the attack, this memory is not mapped as uncacheable on the \gls{tee}
+% side but instead like any other memory in the \gls{tee}. The \gls{tee} then
+% communicates the address through the shared memory channel to the Linux kernel
+% module in which the respective attack implementations reside. The remote side
+% now maps the physical address space into its address space and either reads or
+% writes to the memory. When finished, the remote kernel module creates the
+% respective answer and transfers control over the memory area on this way back to
+% the \gls{tee}. The \gls{tee} now reports on the state of the performance
+% counters.\todo{maybe add some code examples?}\\
 
 % \section{Attacks}
 % \label{sec:30:attack}
