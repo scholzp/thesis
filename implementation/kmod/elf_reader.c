@@ -125,9 +125,16 @@ u64 load_elf32_segments(elf32_file_t *elf) {
 	);
 	// map the section memory so we can write to it
 	u8 *target = kmap(section_mem);
+	pr_info("Virtual address of dest memmory: %016llx", (u64) target);
 	while (NULL != entry) {
 		elf32_program_header_t *header = entry->header;
 		if (PT_LOAD == header->p_type) {
+			pr_info("p_offset: %u, p_filesz: %u, p_addr: %x", header->p_offset, header->p_filesz, header->p_paddr);
+			pr_info("dst=%016llx src=%016llx size=%016x", 
+				(u64) (target + header->p_paddr - elf->relocate_offset),
+				(u64) (elf->data + header->p_offset),
+				header->p_filesz
+			);
 			memcpy((target + header->p_paddr - elf->relocate_offset), (elf->data + header->p_offset), header->p_filesz);
 		}
 		entry = entry->next;

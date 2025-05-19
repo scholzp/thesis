@@ -73,7 +73,7 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 }
 
 int init_mgmt_module(u8 *shared_mem_ptr, int target_id, u64 entry_phys) {
-	pr_info("%s: Install NMI handler\n", __FUNCTION__);
+	pr_info("%s: Install POLL timer handler\n", __FUNCTION__);
 	SHARED_MEM_PTR = (struct shared_mem*) shared_mem_ptr;
 	timer_setup(&POLL_TIMER, tee_poll_timer_handler, 0);
 	mod_timer(&POLL_TIMER, jiffies + msecs_to_jiffies(750));
@@ -133,7 +133,7 @@ void ipi_attack(void) {
 }
 
 void ping_app(void) {
-	const u8 number_of_pings = 1;
+	const u8 number_of_pings = 10;
 	// We simply use the first byte of the payload to count the pings
 	if (number_of_pings > SHARED_MEM_PTR->memory[0]) {
 		pr_info("Ping count = %u\n", SHARED_MEM_PTR->memory[0]++);

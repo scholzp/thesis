@@ -135,11 +135,12 @@ int init_module(void)
 	pr_info("Total number of CPUS: %d", nr_cpu_ids);
 	pr_info("CPU physical ID diff: %d", id_diff);
 	pr_info("Boot CPU with APIC ID: %d", id_diff * (nr_cpu_ids));
-
+	
 	init_mgmt_module(shared_virt, id_diff * (nr_cpu_ids), entry_addr);
 	// setup character device for communication
 	init_tee_chardev();
 	// Activate the AP
+	pr_info("Send startup sequence\n");
 	start_ap(id_diff * (nr_cpu_ids));
 	// Wait for AP to output it's text
 	udelay(10000);
