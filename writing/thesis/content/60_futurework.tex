@@ -1,21 +1,74 @@
 \chapter{Future Work}
 \label{sec:futurework}
 
-\ldots future work \ldots
+\section{Missing Features}
+The prototype of TEECore is missing several features described in
+chapter~\ref{sec:design}, that would need to be implemented to use it to it is
+full potential.
 
-\todo{write future work}
-\begin{itemize}
-    \item Other CPU / AMD support
-    \item Find way to include more/richer tasks
-    \item At some point implement ELF loader so we don't have to touch the whole memory
-    \item SMI handler, what is the actual interaction with PMI and PMCs?
-    \item What about Intel Cache Allocation Technology (CAT)?
-\end{itemize}
-- find a way to prevent init IPI
-- test on other microarchitecture
--> other cache implementations might prevent init IPI attack
-- combine with other technology's
-- MISSING FEATURES!!111!
+The first feature missing is domain separation between the secure applications
+and the TEECore kernel. Currently, secure applications are run with the same
+privileges as TEECore, which is a potential security issue. Because TEECore is
+designed to operate in an interrupt-free environment, the transition between
+different privilege levels would need to be implemented using the x86\_64
+specific \textit{syscall} and \textit{sysret} instructions.
+
+Second, a secure channel would need to be established to exchange data between
+secure applications and applications in the normal partition. The shared memory
+communication path can be used for such a channel as a medium. To allow secure
+communication via this channel, TEECore would need to implement some asymmetric
+key exchange algorithm for key exchange with a remote party and consequent
+encryption of the shared memory.
+
+Third, TEECore currently only works with tasks that are directly embedded as a
+function into TEECore's code. This makes it complicated to adopt TEECore to new
+tasks. To support easier adoption, TEECore should be able to load tasks from
+binaries, such as \gls{elf} files. Such functionality would require the
+implementation of a binary loader together with infrastructure to support
+dynamic binary loading.
+
+Moreover, the prototype only allows communication with one remote party, as it
+does not enforce exclusive usage of the shared communication path. To allow
+multiple applications to use TEECore's features, a more complex communication
+protocol would need to be implemented.
+
+Lastly, TEECore lacks any remote attestation feature. I sketched the general
+design in chapter~\ref{sec:30:tee_ra_scheme}. TEECore must implement a \gls{tpm}
+driver and measurement facilities to implement this feature. The required
+measurement facilities include those for measuring the secure applications code,
+the secure application communication, and the general state of TEECore.
+
+\section{Other Platform Support}
+Currently, TEECore is only implemented for one Intel platform. This platform
+implements inclusive caches. An open question at this point is how TEECore
+behaves on architectures implementing a (partly) exclusive or non-inclusive
+cache hierarchy with additional states of the implemented coherency protocols.
+In general, AMD processors implement such a non-inclusive cache policy, which
+would allow for a comparison of how TEECore's approach performs in such an ache
+architecture. To support an AMD platform, a programmer must find the right
+events and implement the programming of the \gls{pmc} facility as required by
+the architecture. Evaluating TEECore on such a platform would give valuable
+insight into its general security and if such a difference can influence its
+security properties. For example, a study on the behavior of the isolated core
+receiving an INIT \gls{ipi} could yield information about what cache
+implementation TEECore is better suited for and what changes TEECore would
+require to achieve the same protection level, if there are any differences.
+
+\section{Additional Features}
+As mentioned in chapter~\ref{eval:compare:security}, the TEECore prototype
+implementation has the flaw of being vulnerable against \glspl{ipi}. Combining
+TEECore with other \gls{tee} technologies could help mitigate this flaw and
+increase the security of these other technologies. So, as a possible research
+area, TEECore could be combined with one of these technologies to increase
+overall security. Moreover, other processor features could be used to further
+increase isolation. For example, Intel offers a technology called cache
+allocation technology, which can be used to partition L3 caches via quality of
+service. Such a technology could increase resources available to TEECore by
+disallowing other cores or applications to access cache lines allocated to
+TEECore. Some AMD processors implement a similar feature that allows for the
+specification of quality of service constraints for cache usage. Further,
+TEECore could use undocumented features such as cache-as-ram (CAR).
+
 \cleardoublepage
 %%% Local Variables:
 %%% TeX-master: "diplom"
