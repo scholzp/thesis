@@ -44,6 +44,7 @@ inclusive, meaning they contain all data of the lower cache levels
 size in this CPU is 64 bytes.
 
 \section{Security Properties}
+\label{eval:sec}
 To prove that TEECore can detect and defend against different attacks, I
 implemented multiple attack simulations to test different attack vectors. In all
 tested cases, I assume the attacker to have privileged rights as described in
@@ -138,7 +139,8 @@ before allows me to conclude if the attack was successful. The test indeed
 showed that TEECore is vulnerable to this kind of attack. Because the target
 core is halted, TEECore can neither detect nor prevent such attacks.
 
-\section{Memory constraints}
+\section{Memory Constraints}
+\label{eval:mem_constraints}
 In this section, I want to evaluate what memory constraints exist for TEECore
 and its secure applications. From a theoretical, abstract point of view, TEECore
 should not use more memory than the size of the largest exclusive cache. For my
@@ -249,49 +251,119 @@ the payload. Table~\ref{50:tab:size} shows the measurement result for this test.
     \label{50:tab:size}
 \end{table}
 
-Missing things. \todo{add actual evaluation}
+Missing things. \todo{add actual evaluation, numbers}
 
 \section{Comparison to other TEE Solutions}
-In this section I want to compare TEECore with other \gls{tee} solutions
+\label{eval:compare}
+In this section, I want to compare TEECore with other \gls{tee} solutions
 mentioned in chapter~\ref{chap:related} regarding different properties, such as
-portability, protection goals, actual security offered.
+portability, protection goals, and actual security offered.
 
 \subsection{Portability}
-
-- PMC indertaces not vendor but even architecture specific
-- event, counting facilities can change
-- means not even same for same product line, see Intel's most recent hybrid architectures
--> two different cores in the same SoC
--> different arches, therefore differences in supported events and facilities
-- in the worst case this means, that Tee core needs to be adopted for each processor that is to be supported
-- Hughe implementation Aufwand for TeeCore to support wide variety of processors
-- with vendor special extensions implementation must be done only once for CPUs of specific vendor
-- nevertheless, different versions of extension can increase implementation effort for these solutions the same way
-- real advantage at application level
-- application do not need to be modified to run on different platforms, because TEECore is abstraction layer
-- no Os specifics because interface stays the same
-- open question: similar compatibility might could be reached with hardware extensions and abstraction layer
--> could be an extension to TeeCore too
+\label{eval:compare:portability}
+One goal of TEECore was to implement a \gls{tee} solution that programmers can
+use without concerning the underlying hardware. In the end, this goal must be
+evaluated from two points of view. While TEECore can serve as an abstraction
+layer between hardware and software that wants to use \gls{tee} functionality,
+Some components of TEECore remain hardware-dependent. This dependency comes from
+the fact that \gls{pmc} facilities are highly dependent on the microarchitecture
+implemented by a CPU. This means that even CPUs of the same vendor that
+implement the same \gls{isa} and are part of the same product line can differ in
+their \gls{pmc} facility implementation. An example of such processors is
+Intel's most recent hybrid architectures that even employ CPU cores of two
+different microarchitectures on the same integrated circuit. An example of such
+a processor is the Intel Core i7 14700k I used to evaluate TEECore. For a more
+detailed comparison of both microarchitectures, refer to
+section~\ref{sec:evaluation}. While I targeted P-Cores for my prototype
+implementation, full support for this Processor would also mean implementing
+TEECore support for E-Cores. This means that supporting many CPUs of different
+vendors and architectures would mean a huge implementation effort in TEECore. On
+the other hand, \gls{isa} extensions such as \gls{sgx} or \gls{sev} also come in
+different versions that support different features that might need adaption from
+software. \gls{sgx}, for example, can support different memory sizes.
+Furthermore, without an abstraction layer like TEECore, an application must
+adapt to the different vendor-specific \gls{isa} extensions anyway. To conclude,
+the portability advantage is mainly on the application side, for applications
+receive a consistent interface to support processors for which TEECore is
+implemented. On the other hand, with the usage of \glspl{pmc}, TEECore uses a
+mechanism to detect side-channel attacks present in most modern processors. To
+adopt TEECore's detection primitives to other processors boils down to finding
+the right events and programming the \glspl{pmc} the right way. Except for
+\gls{isa} specific extensions, the only hardware requirements of TEECore are the
+presence of core exclusive resources such as a private cache and \gls{pmc}
+facilities that can signal to TEECore that data spilled from private resources
+to shared ones. Such facilities are present not only in x86 processors but also
+in ARM is an optional but recommended extension. Compared to Enma, TEECore is
+independent of operating systems, allowing it to be ported to other operating
+systems, while Enma is restricted to L4Re.
 
 \subsection{Security}
+\label{eval:compare:security}
+TEECore can defend against most attacks described in
+chapter~\ref{sec:30:tee_attacker_model}. In contrast to other \gls{tee}
+implementations, TEECore can detect and react to cache-based side-channel
+attacks. This class of attacks is explicitly stated by Intel \gls{sgx}, AMD
+\gls{sev}, and Enma to be not part of the attacker model, as these solutions can
+neither detect nor defend against these attacks. On the other hand, TEECore
+lacks mechanisms to defend against two attack vectors on x86 processors that
+\gls{sgx} and \gls{sev} can defend against. First, TEECore depends on the
+platform firmware to be not malicious. This dependency comes from the fact that
+parts of the firmware have to be trusted by TEECore as it serves as a root of
+trust for measurement for Secure Boot. As described in
+chapter~\ref{sec:30:tee_boot_chain}, TEECore's \gls{tee} functionality is
+dependent on Secure Boot. Aside from Secure Boot, the firmware also controls the
+\gls{smm}. With \gls{smi} possibly transferring control at any point to
+firmware, TEECore is without any chance against the firmware. All other x86
+solutions can work around the firmware, as they implement protection mechanisms
+that forbid direct control transfer to \gls{smm} from within their \glspl{tee}
+and implement memory encryption so that once the processor changes from
+\gls{tee} mode to the \gls{smm}, firmware is unable to decrypt the memory in
+use. Memory encryption does not help TEECore defend against malicious \gls{smm}
+because \gls{smm} could even read the content of the isolated core's registers
+as soon as it manages to interrupt TEECore at the right moment. Furthermore,
+other solutions require memory encryption to protect against memory-taping
+attacks. TEECore is immune to such attacks as its memory contents never leave
+the core and are not sent over the memory bus. If this happens, TEECore regards
+this as an attack. Furthermore, other \gls{tee} solutions are not vulnerable
+against IPI attacks described in section~\ref{eval:sec}, as they implement
+mechanisms to gracefully exit a \gls{tee} before handling any interrupt. Memory
+encryption could also help TEECore defend against this kind of attack, but it
+would require encrypting values as soon as they are moved from registers to the
+cache. To conclude, TEECore solves other problems such as \gls{sgx}, \gls{tdx},
+and \gls{sev}. \\
 
-- fundamentally different
-- other solution try ot protect, TEECore fan only detect
-- it can therefore not reliably prevent data breaches
-- but can react to attacks
-- evaluation shows, that it can safely detect breaches
-- because TEeCore can react to attacks upon detection, damage can be reduced to a minimum
-- with Spectre an meltdown attacks reaching 1,7 to 17 KiB per second in bandwidth, TEECore can prevent the extraction of RSA keys with size of 3 KIb
-- however detection only works if the effected memory is accessed by code running inside of TEECore to trigger events
-- irregularly accessed data might be exfiltrated without noticing
-- TEECorr lacks protection mechanisms provided by other solutions, e.g no memory encryption, no dedicated CPU mode for access control
-- not alternative but might compliment existing solutions
-- cannot combine with sgx, sgx doesn't support PMCs for enclaves
-- can this complement confidential VM s?
--> certainly as component in the hypervisor
-- arm fully open
-- problem: init up
-- because if this can't fulfill protection goals
+As a result, the idea of combining different approaches might sound appealing as
+TEECore allows the detection of side-channel attacks, while other solutions are
+not vulnerable to \gls{ipi}-based attacks. In practice, for x86 solutions, this
+idea might be complicated to achieve, and additional evaluation would be
+required. Intel \gls{sgx}, for example, does not allow measuring events during
+enclave execution to prevent them from being profiled. Nevertheless, one
+possibility would be for TEECore to host secure applications in enclaves and
+implement the remote attestation feature in an additional enclave. Because
+enclave memory is encrypted, this could solve the problem of INIT IPIs.
+Conversely, \gls{sgx} could profit from the additional isolation TEECore
+provides to prevent interrupt-based side channels and make cache-side
+channel-based attacks visible. Similarly, TEECore could provide a means for
+detecting cache-based side channels to \gls{tdx} and \gls{sev}. For confidential
+\glspl{vm} TEECore could implement hypervisor capabilities and execute secure
+applications as \glspl{vm}. Again, memory would be encrypted when receiving an
+interrupt and returning from \gls{vm} execution. \\
+
+Regarding \gls{tcb}, TEECore is most similar to Enma. The \gls{tcb} of both
+solutions include the hardware, firmware, and bootloader and the \gls{tpm}. In
+contrast to Enma, TEECore's \gls{tcb} does not include the \gls{os}. Compared to
+hardware solutions, only the \gls{tcb} of ARM TrustZone includes the bootloader
+too. Other x86 solutions do not require the bootloader to be part of their
+\gls{tcb}. Because x86 processors are more like SoCs and do not implement their
+\gls{tee} functionality in hardware but software running on dedicated resources
+on the processor, e.g., as code running on a dedicated security processor, it is
+hard to argue that their \gls{tcb} does not contain any firmware. At this point,
+one has to differ between the processor and the platform firmware. A user must
+trust at least the processor manufacturer and the software installed on these
+SoCs. This allows x86 hardware extensions to exclude platform software that does
+not originate from the processor vendor and is excluded from firmware. To
+summarize, the \gls{tcb} of TEECore is larger than those of the hardware
+solutions but smaller than the \gls{tcb} of Enma.
 
 \cleardoublepage
 
