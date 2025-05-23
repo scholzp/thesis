@@ -115,7 +115,8 @@ u64 load_elf32_segments(elf32_file_t *elf) {
 	}
 	// We currently use huge pages (2 MiB) and this ensures the right alignment.
 	// TODO: We should read the respective multiboot 2 header entry
-	pages_order = pages_order < 9 ? 9 : pages_order;
+	pages_order = pages_order < 9 ? 10 : pages_order;
+	// Print in KiB, we have 4 KiB pages, so we add 2 to pages_order
 	pr_info("Allocate 2^%u pages = %ld KiB\n", pages_order, 1ul << (pages_order + 2));
 	// We never free this on purpose: The program is assumed to live as long as the whole system
 	struct page *section_mem = alloc_pages(GFP_KERNEL, pages_order);
@@ -125,16 +126,17 @@ u64 load_elf32_segments(elf32_file_t *elf) {
 	);
 	// map the section memory so we can write to it
 	u8 *target = kmap(section_mem);
+	memset(target, 0, 4096 << (pages_order));
 	pr_info("Virtual address of dest memmory: %016llx", (u64) target);
 	while (NULL != entry) {
 		elf32_program_header_t *header = entry->header;
 		if (PT_LOAD == header->p_type) {
-			pr_info("p_offset: %u, p_filesz: %u, p_addr: %x", header->p_offset, header->p_filesz, header->p_paddr);
-			pr_info("dst=%016llx src=%016llx size=%016x", 
+			pr_info("dst=0x%016llx src=0x%016llx size=0x%016x", 
 				(u64) (target + header->p_paddr - elf->relocate_offset),
 				(u64) (elf->data + header->p_offset),
 				header->p_filesz
 			);
+			pr_info("p_offset: 0x%x, p_filesz: 0x%x, p_addr: 0x%x", header->p_offset, header->p_filesz, header->p_paddr);
 			memcpy((target + header->p_paddr - elf->relocate_offset), (elf->data + header->p_offset), header->p_filesz);
 		}
 		entry = entry->next;
