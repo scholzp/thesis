@@ -49,11 +49,11 @@ protected:
 
     // Disable hardware prefetching
     /*
+    */
     mov $15, %eax
     mov $0, %edx
     mov $0x1a4, %ecx
     wrmsr
-    */
     // print the ready string, we are still alive
     movl $ready_txt, %ebx
     movl $ready_txt_end, %edi
