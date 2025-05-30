@@ -1,1 +1,16 @@
-*.pdf
+25_sgx_attestation.pdf
+30_bootflow.pdf
+30_remote_attestation.pdf
+30_system copy.pdf
+30_system.pdf
+lapic copy.pdf
+lapic.pdf
+mesi.pdf
+perfsel_msr.pdf
+pki.pdf
+pte_rights copy.pdf
+pte_rights.pdf
+sgx_attestation.pdf
+sgx_attestation copy.pdf
+shared_mem_layout.pdf
+shared_mem_layout copy.pdf
