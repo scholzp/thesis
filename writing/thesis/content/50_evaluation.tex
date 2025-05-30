@@ -152,16 +152,34 @@ number of usable cache lines for TEECore. Because Raptor Cove's L1 and L2 cache
 associativity is 8, not all possible memory addresses can be stored in all cache
 lines.\\
 
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{ |l||c|c|c|c| }
+        \hline
+        Array Size & Size   & Associativity & Line Size & Number of Lines \\
+        \hline
+        L1I Cache  & 32 KiB & 8             & 64 Bytes  & 512             \\
+        L1D Cache  & 48 KiB & 8             & 64 Bytes  & 768             \\
+        L2 Cache   & 2 MiB  & 8             & 64 Bytes  & 32,768          \\
+        L3 Cache   & 3 MiB  & 8             & 64 Bytes  & 49,152          \\
+        \hline
+    \end{tabular}
+    \caption{Cache Parameters of Intel Raptor Cove Microarchitecture}
+    \label{50:tab:cache_size}
+\end{table}
+
 To evaluate memory constraints, I will use a simple, trusted application whose
 only purpose is to increase a counting variable stored in shared memory. This
 scenario mimics the minimum working set of a secure application in TEECore. I
 used different performance counter events to evaluate the memory used by
 TEECore. These events are shown in table~\ref{50:tab:events}. I use the event
-\textit{ICACHE\_DATA.STALLS} as an indicator of TEECore usage of the instruction
-cache. Low values indicate that TEECore fits the L1 instruction cache and thus
-can fit the 32 KiB of this cache. The event \textit{L1D.REPLACEMENT} indicates
-the number of times a cache line in the L1 data cache was replaced. High values
-indicate that TEECore uses more than 48 KiB of cache for data. The event
+\textit{FRONTEND\_RETIRED.L1I\_MISS} as an indicator of TEECore usage of the
+instruction cache. Low values indicate that TEECore fits the L1 instruction
+cache and thus can fit the 32 KiB of this cache. This event only counts one miss
+per cache line and required me to additionally program a PEBS \gls{msr}
+register. The event \textit{L1D.REPLACEMENT} indicates the number of times a
+cache line in the L1 data cache was replaced. High values indicate that TEECore
+uses more than 48 KiB of cache for data. The event
 \textit{MEM\_LOAD\_RETIRED.L2\_HIT} indicates that TEECore is using more memory
 than the L1 data and instruction cache can provide. Events of type
 \textit{MEM\_LOAD\_RETIRED.L3\_HIT} indicate that TEECore is using more than 2
@@ -178,8 +196,8 @@ this chapter, I will refer to these events by their abbreviation.
         \hline
         \makecell[l]{Intel Perfmon Event Name                                                                                                 \\ (abbreviation)} & Selector & UMask & Description                                                                      \\
         \hline
-        \makecell[l]{ICACHE\_DATA.STALLS                                                                                                      \\(L1I\_STALL)}       & 0x80     & 0x04  & Counts cycles where a code line fetch is stalled due to an L1 instruction cache miss. The decode pipeline works at a 32 Byte granularity. \\
-        \makecell[l]{L1D.REPLACEMENT                                                                                                          \\ (L1D\_REPLACEMENT)} & 0x51 & 0x05 & Counts cache lines replaced into the L0 and L1 d-cache.                          \\
+        \makecell[l]{FRONTEND\_RETIRED.L1I\_MISS                                                                                              \\ (L1I\_MISS)}       & 0x80     & 0x04  & Counts cycles where a code line fetch is stalled due to an L1 instruction cache miss. The decode pipeline works at a 32 Byte granularity. \\
+        \makecell[l]{L1D.REPLACEMENT                                                                                                          \\ (L1D\_REPLACEMENT)} & 0x51 & 0x01 & Counts cache lines replaced into the L0 and L1 d-cache.                          \\
         MEM\_LOAD\_RETIRED.L2\_HIT (L2\_HIT) & 0xD1 & 0x02 & Counts retired load instructions with L2 cache hits as data sources.             \\
         MEM\_LOAD\_RETIRED.L3\_HIT (L3\_HIT) & 0xD1 & 0x04 & Counts retired load instructions with at least one uop that hit in the L3 cache. \\
         \hline
@@ -207,49 +225,103 @@ Table~\ref{50:tab:ping_base} shows the measurement results. \todo{add values,
     \centering
     \begin{tabular}{ |l||c|c|c| }
         \hline
-        Event            & SC1  & SC2  & Difference \\
+        Event            & SC1 & SC2 & Difference \\
         \hline
-        L1I\_STALLS      & 0x80 & 0x04 & 0          \\
-        L1D\_REPLACEMENT & 0x51 & 0x05 & 0          \\
-        L2\_HIT          & 0xD1 & 0x02 & 0          \\
-        L3\_HIT          & 0xD1 & 0x04 & 0          \\
+        L1I\_MISS        & 29  & 9   & 20         \\
+        L1D\_REPLACEMENT & 66  & 32  & 34         \\
+        L2\_HIT          & 44  & 22  & 22         \\
+        L3\_HIT          & 0   & 0   & 0          \\
         \hline
     \end{tabular}
     \caption{Unmodified Test Case results}
     \label{50:tab:ping_base}
 \end{table}
 
+For the unmodified test case, we can see a clear difference between measuring
+the application together with TEECore initialization (SC1) and the application
+alone (SC2). All measured values stay consistent after the first test run. This
+indicates, that after bringing the values first to the L1 cache, no further
+replacements are required. It is therefore save to asume, that TEECore together
+with this example application fits the L1 cache. We can see that the difference
+between SC1 and SC2 in L1 misses is nearly equal to the number of L2 cache hits.
+This comes from the fact, that the code resides in the L2 cache after
+initialization. Because it was not yet run, it was not loaded by the CPU to its
+L1 instruction cache. With the first time running the code, the CPU misses in
+its L1I cache and loads it from L2 cache to L1. Furthermore, we can see that
+L1D\_Replacements do not indicate missing data from the L1 cache, as L2 hits do
+not increase in a similar manner as the L1D replacements. A possible cause for
+this can be, that the CPU modifies data resident in L1D cache and store it in
+its bill buffer. In subsequent access, The CPU does not hit in the L1D cache but
+in the fill buffer, triggering a replacement of the line in L1D cache. No hit's
+in the L3 cache signal that the whole environment's memory consumption is below
+2 MiB. TEECore alone has a memory consumption of around 2,600 bytes, while a
+trusted application requires a minimum of 1,400 bytes of memory. This makes up
+around of 5\% of available resources, so it's save to assume that more complex
+workloads can be run within TEECore.\\
 
 To evaluate the behavior of TEECore further concerning cache associativity, I
-chose to modify the test application to contain a static array that increases in
-size. The test application will increase the counter in the shared memory region
-and iterate over the static memory array. The result will be that the content of
-this array will fill L1 data and unified L2 cache resources, leading to the
-eviction of other data. As mentioned before, as soon as events of type
-\textit{MEM\_LOAD\_RETIRED.L3\_HIT} occur, I consider the array size too big, as
-TEECore can't then uphold its security guarantees. I measure scenario one for a
-realistic evaluation of the prototype. This means that all TEECore codes are
-measured. Because the L2 cache is a unified cache, the result of this test
-reflects the maximum size for code and data for the whole runtime combined with
-the payload. Table~\ref{50:tab:size} shows the measurement result for this test.
+chose to modify the test application to allocate memory of a chosen size once at
+the first invocation for an array of 8 byte sized integers. In all subsequent
+iterations, the test application will increase the counter in the shared memory
+region as well as each field in the allocated array. The result will be that the
+content of this array will fill L1 data and unified L2 cache resources, leading
+to the eviction of other data. On it's way, each access of the array will
+perform at least one read and one write operation per increment. Each operation
+can either result in a miss or hit in the respective caches. As mentioned
+before, as soon as events of type \textit{MEM\_LOAD\_RETIRED.L3\_HIT} occur, I
+consider the array size too big, as TEECore can't then uphold its security
+guarantees. I measure scenario one for a realistic evaluation of the prototype.
+This means that all TEECore codes are measured. Because the L2 cache is a
+unified cache, the result of this test reflects the maximum size for code and
+data for the whole runtime combined with the payload. Table~\ref{50:tab:size}
+shows the measurement result for this test.
 
 \begin{table}[ht]
     \centering
     \begin{tabular}{ |l||c|c|c|c| }
         \hline
-        Array Size & L1I\_STALLS & L1D\_REPLACEMENT & L2\_HIT & L3\_HIT \\
+        Array Size & L1I\_MISS & L1D\_REPLACEMENT & L2\_HIT & L3\_HIT \\
         \hline
-        32 KiB     & 0           & 0                & 0       & 0       \\
-        64 KiB     & 0           & 0                & 0       & 0       \\
-        512 KiB    & 0           & 0                & 0       & 0       \\
-        1024 KiB   & 0           & 0                & 0       & 0       \\
-        1536 KiB   & 0           & 0                & 0       & 0       \\
-        2048 KiB   & 0           & 0                & 0       & 0       \\
+        16 KiB     & 25        & 62               & 42      & 0       \\
+        32 KiB     & 26        & 115              & 63      & 0       \\
+        48 KiB     & 26        & 2314             & 1377    & 0       \\
+        64 KiB     & 28        & 288e             & 22f1    & 0       \\
+        256 KiB    & 27        & a09a             & 8d0e    & 0       \\
+        512 KiB    & 33        & 14093            & 11a8b   & 20      \\
+        1024 KiB   & 25        & 28099            & 235a7   & 14      \\
+        1536 KiB   & 23        & 3c099            & 34920   & 7d4     \\
         \hline
     \end{tabular}
     \caption{Measurement Result of Scenario 1 with increasing Memory Consumption}
     \label{50:tab:size}
 \end{table}
+
+As can bee seen in the first row of table~\ref{50:tab:size}, the number of
+L1I\_STALLS is comparable in all run of the benchmark. The counter's value
+increases only in the first iteration, when the code is first run and therefore
+the L1 instruction cache is first filled. This is not surprising, as the
+instructions executed for each benchmark are the same. The only difference is
+the amount of them being executed by the processor, as with an increasing size
+of the array, more read and write operations are performed. The counter result
+for an array size of 16 KiB are similar to those of SC1 in
+table~\ref{50:tab:ping_base} and thus to that of the base line. 16 KiB of memory
+therefore are without concern and can fit the L1 cache. When increasing the
+array size to 32 KiB, the count of L1D replacement nearly doubles. If the
+processor could use the whole L1 cache capacity of 48 KiB to store the 32 Kib of
+data, events would be similiar to those of the 16KiB run. Together with the
+increased number of L2\_Hit events, this indicates that cache lines are evicted
+from L1 to L2 cache because of conflicts. The amount of conflicts increases
+further when increasing the arrays size to 48KiB. While the array should fit the
+L1 data cache, the performance counter events indicate increasing communication
+effort between L1 and L2 cache. With 48KiB of data, this is the first time that
+L1D replacements exceed the available number of lines of the L1 cache.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.7\textwidth]{images/plots/l2-hits.pdf}
+    \caption{Number of L2 Cache Hits with Increasing Test Array Size}
+    \label{fig:eval:l2_hits}
+\end{figure}
 
 Missing things. \todo{add actual evaluation, numbers}
 
