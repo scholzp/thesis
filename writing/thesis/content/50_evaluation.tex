@@ -89,6 +89,21 @@ the initialization phase of TEECore. This test showed a shortcoming of TEECores
 protection capabilities in an early implementation phase because an attacker
 that only reads could not be detected without the initial write to all memory.\\
 
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{ |l||c|c| }
+    \hline
+    Event            & Reading Attacker & Writing Attacker \\
+    \hline
+    L1D\_REPLACEMENT & 120              & 123  \\
+    L2\_MISS         & 62               & 63  \\
+    L3\_HITS         & 62               & 62  \\
+    \hline
+  \end{tabular}
+  \caption{Counter Values for Different Attack Scenarios}
+  \label{50:tab:attacks}
+\end{table}
+
 The simulation for an attacker that writes to the target memory is similar in
 setup but different in its effects. As with the read attack, the secure
 application shares the physical address of the target memory with the Linux
@@ -153,20 +168,24 @@ associativity is 8, not all possible memory addresses can be stored in all cache
 lines.\\
 
 \begin{table}[ht]
-    \centering
-    \begin{tabular}{ |l||c|c|c|c| }
-        \hline
-        Array Size & Size   & Associativity & Line Size & Number of Lines \\
-        \hline
-        L1I Cache  & 32 KiB & 8             & 64 Bytes  & 512             \\
-        L1D Cache  & 48 KiB & 8             & 64 Bytes  & 768             \\
-        L2 Cache   & 2 MiB  & 8             & 64 Bytes  & 32,768          \\
-        L3 Cache   & 3 MiB  & 8             & 64 Bytes  & 49,152          \\
-        \hline
-    \end{tabular}
-    \caption{Cache Parameters of Intel Raptor Cove Microarchitecture}
-    \label{50:tab:cache_size}
+  \centering
+  \begin{tabular}{ |l||c|c|c|c| }
+    \hline
+    Array Size & Size   & Associativity   & Line Size & Number of Lines \\
+    \hline
+    L1I Cache  & 32 KiB & 8               & 64 Bytes  & 512             \\
+    L1D Cache  & 48 KiB & 12\footnotemark & 64 Bytes  & 768             \\
+    L2 Cache   & 2 MiB  & 8               & 64 Bytes  & 32,768          \\
+    L3 Cache   & 3 MiB  & 8               & 64 Bytes  & 49,152          \\
+    \hline
+  \end{tabular}
+  \caption{Cache Parameters of Intel Raptor Cove Microarchitecture}
+  \label{50:tab:cache_size}
 \end{table}
+\footnotetext{Intel's specification sheet states a associativity of 8, while
+  the CPUID instruction reports one of 12. The CPUID result is most likely
+  correct, as an associativity of 8 would yield a number of sets of 96, which is
+not a power of two.}
 
 To evaluate memory constraints, I will use a simple, trusted application whose
 only purpose is to increase a counting variable stored in shared memory. This
@@ -189,21 +208,20 @@ therefore, indicates that TEECore can no longer uphold its security guarantees.
 Therefore, I regard any occurrence as unacceptable. In the remaining part of
 this chapter, I will refer to these events by their abbreviation.
 
-% I'm sorry for the layout of the code of this table. My autoformat tool does this on save and I'm to lazy to fix this as it's not a real issue
 \begin{table}[ht]
-    \centering
-    \begin{tabular}{ |p{6cm}|p{1.35cm}|p{1.25cm}|p{4cm}|}
-        \hline
-        \makecell[l]{Intel Perfmon Event Name                                                                                                 \\ (abbreviation)} & Selector & UMask & Description                                                                      \\
-        \hline
-        \makecell[l]{FRONTEND\_RETIRED.L1I\_MISS                                                                                              \\ (L1I\_MISS)}       & 0x80     & 0x04  & Counts cycles where a code line fetch is stalled due to an L1 instruction cache miss. The decode pipeline works at a 32 Byte granularity. \\
-        \makecell[l]{L1D.REPLACEMENT                                                                                                          \\ (L1D\_REPLACEMENT)} & 0x51 & 0x01 & Counts cache lines replaced into the L0 and L1 d-cache.                          \\
-        MEM\_LOAD\_RETIRED.L2\_HIT (L2\_HIT) & 0xD1 & 0x02 & Counts retired load instructions with L2 cache hits as data sources.             \\
-        MEM\_LOAD\_RETIRED.L3\_HIT (L3\_HIT) & 0xD1 & 0x04 & Counts retired load instructions with at least one uop that hit in the L3 cache. \\
-        \hline
-    \end{tabular}
-    \caption{Performance Monitoring Events for evaluating memory constraints}
-    \label{50:tab:events}
+  \centering
+  \begin{tabular}{ |p{6cm}|p{1.35cm}|p{1.25cm}|p{4cm}|}
+    \hline
+    \makecell[l]{Intel Perfmon Event Name \\ (abbreviation)} & Selector & UMask & Description                                                                      \\
+    \hline
+    \makecell[l]{FRONTEND\_RETIRED.L1I\_MISS\\ (L1I\_MISS)}  & 0x80     & 0x04  & Counts cycles where a code line fetch is stalled due to an L1 instruction cache miss. The decode pipeline works at a 32 Byte granularity. \\
+    \makecell[l]{L1D.REPLACEMENT \\ (L1D\_REPLACEMENT)}      & 0x51     & 0x01  & Counts cache lines replaced into the L0 and L1 d-cache.                          \\
+    MEM\_LOAD\_RETIRED.L2\_HIT (L2\_HIT)                     & 0xD1     & 0x02  & Counts retired load instructions with L2 cache hits as data sources.             \\
+    MEM\_LOAD\_RETIRED.L2\_MISS (L2\_MISS)                   & 0xD1     & 0x10  & Counts retired load instructions with at least one uop that hit in the L3 cache. \\
+    \hline
+  \end{tabular}
+  \caption{Performance Monitoring Events for evaluating memory constraints}
+  \label{50:tab:events}
 \end{table}
 
 I measure two scenarios for all test cases. For the first scenario (SC1), I will
@@ -219,22 +237,22 @@ using the \textit{WBINVD} instruction. \\
 My first test case is the baseline. I run the unmodified test application to
 identify the minimal memory consumption for both scenarios.
 Table~\ref{50:tab:ping_base} shows the measurement results. \todo{add values,
-    evaluate}
+evaluate}
 
 \begin{table}[ht]
-    \centering
-    \begin{tabular}{ |l||c|c|c| }
-        \hline
-        Event            & SC1 & SC2 & Difference \\
-        \hline
-        L1I\_MISS        & 29  & 9   & 20         \\
-        L1D\_REPLACEMENT & 66  & 32  & 34         \\
-        L2\_HIT          & 44  & 22  & 22         \\
-        L3\_HIT          & 0   & 0   & 0          \\
-        \hline
-    \end{tabular}
-    \caption{Unmodified Test Case results}
-    \label{50:tab:ping_base}
+  \centering
+  \begin{tabular}{ |l||c|c|c| }
+    \hline
+    Event            & SC1 & SC2 & Difference \\
+    \hline
+    L1I\_MISS        & 29  & 9   & 20         \\
+    L1D\_REPLACEMENT & 66  & 32  & 34         \\
+    L2\_HIT          & 44  & 22  & 22         \\
+    L2\_MISS         & 0   & 0   & 0          \\
+    \hline
+  \end{tabular}
+  \caption{Unmodified Test Case results}
+  \label{50:tab:ping_base}
 \end{table}
 
 For the unmodified test case, we can see a clear difference between measuring
@@ -276,54 +294,67 @@ unified cache, the result of this test reflects the maximum size for code and
 data for the whole runtime combined with the payload. Table~\ref{50:tab:size}
 shows the measurement result for this test.
 
+Placeholder\todo{Table entries for 48KiB missing}
 \begin{table}[ht]
-    \centering
-    \begin{tabular}{ |l||c|c|c|c| }
-        \hline
-        Array Size & L1I\_MISS & L1D\_REPLACEMENT & L2\_HIT & L3\_HIT \\
-        \hline
-        16 KiB     & 25        & 62               & 42      & 0       \\
-        32 KiB     & 26        & 115              & 63      & 0       \\
-        48 KiB     & 26        & 2314             & 1377    & 0       \\
-        64 KiB     & 28        & 288e             & 22f1    & 0       \\
-        256 KiB    & 27        & a09a             & 8d0e    & 0       \\
-        512 KiB    & 33        & 14093            & 11a8b   & 20      \\
-        1024 KiB   & 25        & 28099            & 235a7   & 14      \\
-        1536 KiB   & 23        & 3c099            & 34920   & 7d4     \\
-        \hline
-    \end{tabular}
-    \caption{Measurement Result of Scenario 1 with increasing Memory Consumption}
-    \label{50:tab:size}
+  \centering
+  \begin{tabular}{ |l||c|c|c|c| }
+    \hline
+    Array Size & L1I\_MISS & L1D\_REPLACEMENT & L2\_HIT & L2\_MISS \\
+    \hline
+    16 KiB     & 1a        & 34                & 26       & 0        \\
+    32 KiB     & 1c        & 45               & 34       & 0        \\
+    48 KiB     & tba        & tba             & tba    & 0        \\
+    64 KiB     & 1a        & 423            & 3e0    & 0        \\
+    128 KiB     & 19        & 825            & 7d4    & 0        \\
+    256 KiB    & 1a        & 1025            & fba   & 0        \\
+    512 KiB    & 23        & 2025            & 1940   & 63b       \\
+    1024 KiB   & 17        & 4025            & 13b7   & 202b       \\
+    1536 KiB   & 16        & 6024           & 2714  & 37ac    \\
+    1832 KiB   & 19        & 7565           & 2b7a  & 4833    \\
+    \hline
+  \end{tabular}
+  \caption{Measurement Result of Scenario 1 with increasing Memory Consumption}
+  \label{50:tab:size}
 \end{table}
 
-As can bee seen in the first row of table~\ref{50:tab:size}, the number of
-L1I\_STALLS is comparable in all run of the benchmark. The counter's value
-increases only in the first iteration, when the code is first run and therefore
-the L1 instruction cache is first filled. This is not surprising, as the
-instructions executed for each benchmark are the same. The only difference is
-the amount of them being executed by the processor, as with an increasing size
-of the array, more read and write operations are performed. The counter result
-for an array size of 16 KiB are similar to those of SC1 in
-table~\ref{50:tab:ping_base} and thus to that of the base line. 16 KiB of memory
-therefore are without concern and can fit the L1 cache. When increasing the
-array size to 32 KiB, the count of L1D replacement nearly doubles. If the
-processor could use the whole L1 cache capacity of 48 KiB to store the 32 Kib of
-data, events would be similiar to those of the 16KiB run. Together with the
-increased number of L2\_Hit events, this indicates that cache lines are evicted
-from L1 to L2 cache because of conflicts. The amount of conflicts increases
-further when increasing the arrays size to 48KiB. While the array should fit the
-L1 data cache, the performance counter events indicate increasing communication
-effort between L1 and L2 cache. With 48KiB of data, this is the first time that
-L1D replacements exceed the available number of lines of the L1 cache.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=.7\textwidth]{images/plots/l2-hits.pdf}
-    \caption{Number of L2 Cache Hits with Increasing Test Array Size}
-    \label{fig:eval:l2_hits}
-\end{figure}
-
-Missing things. \todo{add actual evaluation, numbers}
+As can be seen in the first row of table~\ref{50:tab:size}, the number of
+L1I\_MISSES is comparable in all runs of the benchmark. This is not surprising,
+as the instructions executed for each benchmark are the same. The only
+difference is the amount of them being executed by the processor, as with an
+increasing size of the array, more read and write operations are performed. This
+difference does not affect the instruction cache. As a side note, the
+measurement results might be subject to over or undercounting, as I expected
+them to be identical in all runs. \\
+When it comes to the data cache events, the counter results in an array size of
+16 KiB are similar to those of SC1 in table~\ref{50:tab:ping_base} and thus to
+that of the base line. 16 KiB of memory, therefore, is without concern and can
+fit the L1 cache. When increasing the array size to 32 KiB, the count of L1D
+replacement increases but does not double. The cause could be that the cache
+still contains some of the memory from the initialization process. Because since
+then, no larger data structures were loaded by the application, these lines were
+not evicted until I ran the benchmark. After all, I conclude from the
+measurement values that most of the memory access is done with an array size of
+32 KiB hit the L1 data cache. It is only when allocating a 48 KiB-sized array
+that the number of L1D\_Replacements and L2\_HITS increase significantly.
+Because the cache is not only filled with data from the array but also from data
+necessary for program execution, cache lines are evicted from the L1D cache. As
+a consequence, the CPU hits the L2 cache when accessing lines evicted from L1
+cache. The number of occurrences counted for this event increased rapidly. In a
+similar fashion, L1 replacements increase as cache lines loaded from the L2
+cache replace conflicting lines from the L1 cache. As these accesses all use the
+private cache of the isolated core, none of them are alarming.\\
+This changes with the occurrence of L2 cache misses, as they result in access to
+shared resources. The first of these misses occur as early as after allocating
+an array size of 512 KiB, yet this is only a fourth of the size of the L2 cache.
+The cause for these might be conflict misses. Conflict misses occur when all
+available cache lines in a set are filled, and another line targeting the same set
+is loaded to the cache. Because the cache can store the incoming line only in a
+free line of a fitting set, a cache line is evicted. For the cache parameters
+listed in table~\ref{50:tab:cache_size}, conflict misses can theoretically occur
+for data distributed in 256 KiB step sizes in memory. With increasing array
+sizes, the probability of accessing data with this distribution increases. The
+results therefore indicate that TEECore can only safely use 256 KiB of data.
+\todo{Das ist wahrscheinlich eher ein Bug, weil hier keine Confict misses auftreten sollten bei einer 2 MiB aligned addresse}
 
 \section{Comparison to other TEE Solutions}
 \label{eval:compare}
