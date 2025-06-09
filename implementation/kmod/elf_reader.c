@@ -126,7 +126,7 @@ u64 load_elf32_segments(elf32_file_t *elf) {
 	);
 	// map the section memory so we can write to it
 	u8 *target = kmap(section_mem);
-	memset(target, 0, 4096 << (pages_order));
+	memset(target, 0xc, 4096 << (pages_order));
 	pr_info("Virtual address of dest memmory: %016llx", (u64) target);
 	while (NULL != entry) {
 		elf32_program_header_t *header = entry->header;
