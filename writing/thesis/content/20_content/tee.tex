@@ -31,15 +31,14 @@ Digital signatures use asymmetric cryptography. Given that Alice wants to sign a
 message so that Bob can verify that Alice is the sender, both proceed as follows
 to fulfill their goal. First, Alice creates a pair of keys, a public and a
 private one. Alice uses their private key to sign a message and distributes
-their public key so others can use it to verify Alice's signature. To create
-their signature, Alice first generates a pair of keys. Alice then published
-their public key to make it available to Bob. When sending a message to Bob,
-Alice uses a signing function that takes the message and the private key as
-input and produces a signature, which Alice sends along the message to Bob.
-Knowing Alice's public key, Bob can now check the validity of the signature with
-the help of a signature validation function. This function takes the message,
-the signature, and Alice's public key as input and generates the answer to
-whether the message was signed with the signature.\\
+their public key so others can use it to verify Alice's signature.  Alice then
+publishes their public key to make it available to Bob. When sending a message
+to Bob, Alice uses a signing function that takes the message and Alice's private
+key as input and produces a signature, which Alice sends along the message to
+Bob. Knowing Alice's public key, Bob can now check the validity of the signature
+with the help of a signature validation function. This function takes the
+message, the signature, and Alice's public key as input and generates the answer
+to whether the message was signed with the signature.\\
 
 Another problem arises when the network increases and Bob does not have the
 chance to receive Alice's key in person. To prevent man-in-the-middle attacks,
@@ -64,11 +63,11 @@ man-in-the-middle attacks again. Hence, a trusted third party creates the
 certificates.\\
 
 \begin{figure}
-    \begin{center}
-        \includestandalone{images/pki.tex}
-        \caption{Verification in a Public Key Infrastructure}
-        \label{fig:state:technical:chain_of_trust}
-    \end{center}
+  \begin{center}
+    \includestandalone{images/pki.tex}
+    \caption{Verification in a Public Key Infrastructure}
+    \label{fig:state:technical:chain_of_trust}
+  \end{center}
 \end{figure}
 
 Because the single \gls{ca} is trusted by all participants in the network,
@@ -98,16 +97,16 @@ by delivering evidence to an appraiser over a network that supports these
 claims. Before I further proceed to explain remote attestation, I want to
 define the following terms similar to Coker et. al.\cite{coker_principles_2011}
 \begin{itemize}
-    \item \textbf{Appraiser}: Member of a network. Makes decisions about other
-          parties on the base of delivered evidence.
-    \item \textbf{Target}: Member of a network. Party about which properties the
-          appraiser makes decisions.
-    \item \textbf{Attestation}: Action of making claims about the target and
-          delivering supportive evidence.
-    \item \textbf{Measurement}: Collect evidence through direct and local
-          observation
-    \item \textbf{Attestation protocol}: Cryptographic protocol transmitting
-          evidence about the claim. Trusted by appraiser
+  \item \textbf{Appraiser}: Member of a network. Makes decisions about other
+    parties on the base of delivered evidence.
+  \item \textbf{Target}: Member of a network. Party about which properties the
+    appraiser makes decisions.
+  \item \textbf{Attestation}: Action of making claims about the target and
+    delivering supportive evidence.
+  \item \textbf{Measurement}: Collect evidence through direct and local
+    observation
+  \item \textbf{Attestation protocol}: Cryptographic protocol transmitting
+    evidence about the claim. Trusted by appraiser
 \end{itemize}
 
 The appraiser and the target both follow orthogonal goals. While the appraiser
@@ -126,9 +125,9 @@ fulfills the claims.
 \label{sec:20:hardware_root_of_trust}
 A root of trust is defined by the Trusted Computing Group as follows:
 \begin{quote}
-    \textit{ A minimal set of system elements that have to be trusted because
-        misbehavior is not detectable. \\
-    } \mbox{ -- Trusted Computing Group\cite{tpm_architecture}}
+  \textit{ A minimal set of system elements that have to be trusted because
+    misbehavior is not detectable. \\
+  } \mbox{ -- Trusted Computing Group\cite{tpm_architecture}}
 \end{quote}
 
 The Trusted Computing Group specifies that a hardware root of trust must be
@@ -152,21 +151,21 @@ cards or unique, secure operation modes in CPU hardware. \\
 \label{sec:state:tee}
 GlobalPlatform first used the term trusted execution environment to define a
 solution for mobile trusted computing solutions.\cite{globaltee} Since then,
-many definitions inconsistent and unspecific definitions have been published for
-\glspl{tee} until the first precise definition was proposed by Sabt
+many inconsistent and unspecific definitions have been published for \glspl{tee}
+until the first precise definition was proposed by Sabt
 et.al.\cite{sabt2015trusted}. They define the \gls{tee} in the following way:
 \begin{quote}
-    \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
-        environment that runs on a separation kernel. It guarantees the authenticity of
-        the executed code, the integrity of the runtime states (e.g., CPU registers,
-        memory, and sensitive I/O), and the confidentiality of its code, data, and
-        runtime states are stored on persistent memory. In addition, it shall be able
-        to provide a remote attestation that proves its trustworthiness for third
-        parties. The content of TEE is not static; it can be securely updated. The TEE
-        resists all software attacks as well as physical attacks performed on the
-        system's main memory. Attacks performed by exploiting backdoor security flaws
-        are not possible. \\
-    } \mbox{ -- Sabt et al.\cite{sabt2015trusted}}
+  \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
+    environment that runs on a separation kernel. It guarantees the authenticity of
+    the executed code, the integrity of the runtime states (e.g., CPU registers,
+    memory, and sensitive I/O), and the confidentiality of its code, data, and
+    runtime states are stored on persistent memory. In addition, it shall be able
+    to provide a remote attestation that proves its trustworthiness for third
+    parties. The content of TEE is not static; it can be securely updated. The TEE
+    resists all software attacks as well as physical attacks performed on the
+    system's main memory. Attacks performed by exploiting backdoor security flaws
+    are not possible. \\
+  } \mbox{ -- Sabt et al.\cite{sabt2015trusted}}
 \end{quote}
 
 The first half of the definition describes a secure execution environment. A
