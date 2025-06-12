@@ -13,9 +13,9 @@ Intel \gls{sgx} is an extension in x86\_64 processors manufactured by Intel,
 that allows the creation of trusted execution environments. Intel first shipped
 \gls{sgx} in 2015, with processors implementing the Skylake microarchitecture.
 While server-grade CPUs are still implementing \gls{sgx}, Intel marked \gls{sgx}
-was deprecated in 2021 in consumer-grade CPUs, beginning from CPUs implementing
+as deprecated in 2021 in consumer-grade CPUs, beginning from CPUs implementing
 the Rocket Lake microarchitecture. Costan et al. did an extensive study of
-\gls{sgx} in 2016 and documented in detail how \gls{sgx} works and what it's
+\gls{sgx} in 2016 and documented in detail how \gls{sgx} works and what its
 security properties are.\cite{costan2016intel} \\
 
 Features of \gls{sgx} include the creation of enclaves. Enclaves are especially
@@ -49,8 +49,8 @@ application might want to verify the identity before sharing secrets. For this,
 
 As mentioned, \gls{sgx} implements processor instructions dedicated to managing
 and interacting with enclaves. Furthermore, \gls{sgx} implementations create at
-least a Launch Enclave signed by Intel. Third party enclaves that are not signed
-by Intel require the Launch Enclave for successful initialization. It is
+least a launch enclave signed by Intel. Third party enclaves that are not signed
+by Intel require the launch enclave for their successful initialization. It is
 necessary in all cases when \gls{sgx} is used.\\
 
 An attesting enclave can verify its identity with another enclave in the same
@@ -60,12 +60,12 @@ enclave and generates a report that contains the measurement, the enclave's
 identity, and a message provided by the enclave. The attesting enclave then
 ships the generated report to another enclave for local attestation.
 \begin{center}
-    \begin{figure}
-        \centering
-        \includestandalone{images/25_sgx_attestation.tex}
-        \caption{Software Attestation Scheme of \gls{sgx}}
-        \label{fig:state:tee:sgx_attestation}
-    \end{figure}
+  \begin{figure}
+    \centering
+    \includestandalone{images/25_sgx_attestation.tex}
+    \caption{Software Attestation Scheme of \gls{sgx}}
+    \label{fig:state:tee:sgx_attestation}
+  \end{figure}
 \end{center}
 Figure~\ref{fig:state:tee:sgx_attestation} shows the remote attestation scheme
 implemented by Intel \gls{sgx}. It extends the local attestation scheme so that
@@ -90,7 +90,7 @@ its implementation. Additionally, to interact with a confidential \gls{vm}, the
 CPU must be in the dedicated CPU operation mode called SEAM mode. Memory access
 is only allowed in SEAM mode to protect confidential \glspl{vm}. Once in SEAM
 mode, the CPU uses its Virtual Machine Extensions (VMX) capabilities to host and
-interact with the \gls{vm}. For cryptographical features, such as signing and
+interact with an \gls{vm}. For cryptographical features, such as signing and
 key generation, Intel processors utilize the Intel Management Engine. The Intel
 management Engine is a coprocessor located in the CPU package with special
 firmware and a separate \gls{os} that is isolated from the remaining parts of
@@ -99,26 +99,26 @@ the system\\
 For \gls{sev}, AMD uses the already implemented SEV capabilities and its
 extensions. In its initial version SEV encrypts the memory of a virtual machine
 with a dedicated key per virtual machine. SEV-ES extends the feature set by
-additionally encrypting the system state, e.g. processor register, too. With the
-most recent version, AMD introduced a feature called nested paging, which
+additionally encrypting the system state, e.g. processor registers, too. With
+the most recent version, AMD introduced a feature called nested paging, which
 manages an inverted page table similar to \gls{sgx} to prevent attacks targeting
-the \gls{vm}s page tables.\\
+an \gls{vm}s page tables.\\
 
 Unlike Intel's implementation, AMD processors do not utilize a dedicated CPU
 mode but extend the existing \gls{vm} control structure by fields to enable
 Secure Nested paging. For cryptography, the integrated AMD Platform Security
-Processor, short PSP, is used. Both solutions encrypt the \gls{vm}'s memory to
-protect the \gls{vm} from being manipulated by system software with one key per
+Processor, short PSP, is used. Both solutions encrypt an \gls{vm}'s memory to
+protect an \gls{vm} from being manipulated by system software with one key per
 \gls{vm}.\\
 
-Both solutions use the appraisers knowledge of the initial state of the \gls{vm}
-image. The assumption that the approach follows is that if the \gls{vm} is
+Both solutions use the appraisers knowledge of the initial state of an \gls{vm}
+image. The assumption that the approach follows is that if an \gls{vm} is
 started in a known state and protected from manipulation by the hypervisor or
-other privileged software, then the \gls{vm} can be trusted in the following. To
+other privileged software, then an \gls{vm} can be trusted in the following. To
 follow this approach, a measurement of the initial \gls{vm} image is created and
 cryptographically bound to the respective \gls{vm} instance through a message
-authentication code. Before the trustee interacts with the \gls{vm}, they
-request the \gls{vm} to verify its identity. For this, the \gls{vm} requests the
+authentication code. Before the trustee interacts with an \gls{vm}, they
+request an \gls{vm} to verify its identity. For this, an \gls{vm} requests the
 cryptographic hardware to sign a report. By signing the report, the
 cryptographic hardware attests to its correctness and then hands it to the
 appraiser. The appraiser trusts the implementation in the CPU and verifies the
@@ -183,11 +183,11 @@ supervisor mode. The creator of L4 defined the concept of microkernels as
 follows:
 
 \begin{quote}
-    \textit{ More precisely, a concept is tolerated inside the \mu-kernel only
-        if moving it outside the kernel, i.e., permitting competing
-        implementations, would prevent the implementation of the system's
-        required functionality. \\
-    } \mbox{ -- Liedke\cite{liedtke1995micro}}
+  \textit{ More precisely, a concept is tolerated inside the \mu-kernel only
+    if moving it outside the kernel, i.e., permitting competing
+    implementations, would prevent the implementation of the system's
+    required functionality. \\
+  } \mbox{ -- Liedke\cite{liedtke1995micro}}
 \end{quote}
 
 Following this philosophy, Fiasco.OC only implements the mere minimal services.
@@ -250,8 +250,8 @@ handler. This requirement further reduces the amount of hardware used for this
 approach. Moreover the authors state that practical deployment would require CPU
 and hardware vendors to do extensive security reviews on their firmware and
 \gls{smm} implementations. Additionally, multiple attacks are known targeting
-the \gls{smm} breaking it's isolation.\cite{wojtczuk2014attacking,
-    wojtczuk2009attacking, wojtczuk2009poisining}
+the \gls{smm} breaking its isolation.\cite{wojtczuk2014attacking,
+wojtczuk2009attacking, wojtczuk2009poisining}
 
 \subsection{Defenses Against Interrupt Based Side Channel Attacks}
 \label{sec:20:interrupt_sca}
@@ -287,7 +287,7 @@ kernel port that can run in an \gls{sgx} enclave as a LibraryOS, similar to the
 approach used by SCONE and Haven to mitigate effects of Iago attacks, which I
 just want to name as a side node because these solutions are less relevant for
 my work.\cite{priebe2019sgx,arnautov_scone_2016,baumann_shielding_2015,
-    checkoway2013iago}
+checkoway2013iago}
 
 \subsection{Transient Execution Mitigations}
 \label{sec:20:def_sca}
@@ -378,9 +378,7 @@ vendor specific \gls{isa} extensions to overcome vendor locking, problems
 present in \gls{sgx}, \gls{sev} and \gls{tdx}. How to design such an \gls{tee}
 will be topic in chapter~\ref{sec:design}.
 
-
 \cleardoublepage
-
 
 %%% Local Variables:
 %%% TeX-master: "diplom"
