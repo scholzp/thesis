@@ -19,7 +19,7 @@
 
 In this chapter, I will explain the design of the TEECore and how a system that
 utilizes the TEECore prototype looks. The design tries to mitigate the risk of
-covered side channels by fully excluding them on an architectural base.\\
+covert side channels by fully excluding them on an architectural base.\\
 
 In the first section (c.f.~\ref{sec:30:tee_general}), I will describe the
 general system and usage of the TEECore prototype implementation. The second
@@ -42,21 +42,21 @@ such a system, this section describes how system parts interact with each other.
 
 \label{sec:30:system_overview}
 \begin{figure}
-    \begin{center}
-        \includestandalone{images/30_system.tex}
-        \caption{TEECore running in a System next to a commodity \gls{os}}
-        \label{fig:30:tee_system_design}
-    \end{center}
+  \begin{center}
+    \includestandalone{images/30_system.tex}
+    \caption{TEECore running in a System next to a commodity \gls{os}}
+    \label{fig:30:tee_system_design}
+  \end{center}
 \end{figure}
 
 Figure~\ref{fig:30:tee_system_design} shows an overview of a system integrating
 TEECore next to a commodity \gls{os}. Speaking on a higher level, the bootloader
 is responsible for partitioning the system into two parts: The first is managed
 by TEECore, and the second is running the commodity \gls{os}. Because TEECore is
-designed to run the local CPU cache, the first partition hosting consists of a
-single CPU core. Thus, the remaining system resources, such as I/O ports,
-additional CPU cores, and memory, are part of the second partition running the
-commodity \gls{os}.\\
+designed to run on the local CPU cache, the first partition consists of a single
+CPU core. Thus, the remaining system resources, such as I/O ports, additional
+CPU cores, and memory, are part of the second partition running the commodity
+\gls{os}.\\
 
 The design goal of TEECore is to enable the commodity \gls{os} to run workloads
 in a shielded location so that no information can be leaked to other
@@ -119,16 +119,21 @@ the so-called offcore. Offcore events result from the core interacting with
 resources that are not local. These events include readings/writings to shared
 caches, RAM, or other components. From the fact that TEECore allows only usage
 of core local resources, a memory constraint results, which confines the size of
-usable memory to that of CPU local caches.\\
+usable memory to that of CPU local caches. Moreover, TEECore has to ensure that
+it can detect access to data that is implicitly shared through cache coherency
+in the inclusive L3 cache.\\
 
 Before the TEECore can transfer control to tasks, it must bring the environment
 to a defined state. All memory is stored in the CPU's local cache in the
 exclusive or modified state. To achieve this, TEECore writes to all memory it
 has to protect, invalidating shared cache lines in other cores in this process.
-To protect a task against interrupt-based attacks, TEECore has to set up the
-\gls{idt} correctly so that any occurrence of any interrupt results in a system
-reset. TEECore achieves this by setting the \gls{idtr} to zero, which results in
-a general protection fault once the CPU tries to locate the \gls{idt}. Because
+As a result TEECore can detect whenever a remote CPU accesses data from RAM or
+shared L3 cache, as the remote copies the respective memory items to it's L1
+cache, triggering a MESIF state change in the isolated cores cache. To protect a
+task against interrupt-based attacks, TEECore has to set up the \gls{idt}
+correctly so that any occurrence of any interrupt results in a system reset.
+TEECore achieves this by setting the \gls{idtr} to zero, which results in a
+general protection fault once the CPU tries to locate the \gls{idt}. Because
 this provokes a second fault after the first, the CPU generates a double fault,
 ultimately resulting in a triple fault and, thus, a system reset. Furthermore,
 it programs the \gls{pmc} to detect attacks on itself or its payload as soon as
@@ -182,7 +187,7 @@ result in leakage to a shared part of the memory subsystem, an event considered
 by TEECore as an attack. TEECore then reacts similarly, which results in a reset
 of the whole system. Moreover, the organization of cache structures can
 influence memory usage. I will evaluate such effects in chapter\todo{hier die
-    Kapilnummer nennen}. The last aspect regarding memory is how it is managed.
+Kapilnummer nennen}. The last aspect regarding memory is how it is managed.
 Trusted applications are disallowed for the prototype of TEECore to allocate
 heap memory freely. This is because cache lines must be set to either exclusive
 or modified by TEECore to enable protection, which in turn means that all used
@@ -207,11 +212,11 @@ paths.
 \section{Remote Attestation Scheme of TEECore}
 \label{sec:30:tee_ra_scheme}
 \begin{figure}
-    \begin{center}
-        \includestandalone{images/30_remote_attestation.tex}
-        \caption{Remote Attestation Architecture of TEECore}
-        \label{fig:30:tee_ra}
-    \end{center}
+  \begin{center}
+    \includestandalone{images/30_remote_attestation.tex}
+    \caption{Remote Attestation Architecture of TEECore}
+    \label{fig:30:tee_ra}
+  \end{center}
 \end{figure}
 As described in section~\ref{sec:20:remote_attestation}, remote attestation
 verifies a claim made about the system's state. In the case of TEECore, this
@@ -219,17 +224,17 @@ means that TEECore must provide evidence that it holds its defense properties,
 was set up correctly and that the trusted application was executed as expected.
 To fulfill these tasks, TEECore implements two key components:
 \begin{enumerate}
-    \item An attestation manager: This is a privileged module of
-          TEECore. TEECore implements services an attestation target can use to
-          request an attestation report.
-    \item Measurement tools: Implemented as a privileged function in TEECore.
-          TEECore has insight into a target's memory because of its elevated
-          privileges and can thus measure the target's memory. Moreover, it can
-          monitor communication, which can be part of the measurement.
+  \item An attestation manager: This is a privileged module of
+    TEECore. TEECore implements services an attestation target can use to
+    request an attestation report.
+  \item Measurement tools: Implemented as a privileged function in TEECore.
+    TEECore has insight into a target's memory because of its elevated
+    privileges and can thus measure the target's memory. Moreover, it can
+    monitor communication, which can be part of the measurement.
 \end{enumerate}
 
 To measure a part of the target means to create a hash of it that can be used to
-extend a \gls{pcr} in the \gls{tpm}. TEECore uses the \gls{tpm}'s gls{pcr} to
+extend a \gls{pcr} in the \gls{tpm}. TEECore uses the \gls{tpm}'s \gls{pcr} to
 integrate a hardware root of trust. Additionally, the \gls{tpm} is required to
 act as a hardware token to identify the platform. With its security features,
 the \gls{tpm} forms a trust anchor for external parties by attesting its
@@ -269,13 +274,13 @@ on behalf of the attestation target. The attestation manager uses digests
 generated by the measurement tool as a third data source. The report created by
 the attestation manager contains the following:
 \begin{itemize}
-    \item The \gls{aik} certificate: The appraise can check with this that the
-          \gls{aik} is trusted by the \gls{aikca} and the report data were
-          therefore signed by a genuine \gls{tpm}.
-    \item The measured boot report together with \gls{pcr} contents: This attests
-          to the platform integrity.
-    \item \gls{pcr} content of the target measurement results.
-    \item The \gls{pcr} value of the report itself.
+  \item The \gls{aik} certificate: The appraise can check with this that the
+    \gls{aik} is trusted by the \gls{aikca} and the report data were
+    therefore signed by a genuine \gls{tpm}.
+  \item The measured boot report together with \gls{pcr} contents: This attests
+    to the platform integrity.
+  \item \gls{pcr} content of the target measurement results.
+  \item The \gls{pcr} value of the report itself.
 \end{itemize}
 
 The appraiser is able to verify, based on the attestation report, that the
@@ -286,11 +291,11 @@ violated.
 \section{Boot Chain}
 \label{sec:30:tee_boot_chain}
 \begin{figure}
-    \begin{center}
-        \includestandalone{images/30_bootflow.tex}
-        \caption{Bootchain of TEECore in the Prototype}
-        \label{fig:30:tee_bootchain}
-    \end{center}
+  \begin{center}
+    \includestandalone{images/30_bootflow.tex}
+    \caption{Bootchain of TEECore in the Prototype}
+    \label{fig:30:tee_bootchain}
+  \end{center}
 \end{figure}
 Figure~\ref{fig:30:tee_bootchain} shows the boot chain as implemented in the
 prototype. This boot chain deviates from the boot chain that a standalone
@@ -387,8 +392,8 @@ with 0. In theory, this should lead to a configuration similar to TEECore's.
 Because the \gls{pmc} configuration stays the same, \glspl{pmi} should be
 generated, leading to a system reset upon reading data contained in the
 receiving core. This attack is checked later in \todo{reference and check if
-    this attack leads to a triple fault. Is this even the right spot to think about
-    attacks?}.\\
+  this attack leads to a triple fault. Is this even the right spot to think about
+attacks?}.\\
 
 TEECore is immune to other software that spies on its memory access patterns
 because all memory accesses happen in the cache. Once the setup phase succeeds,
