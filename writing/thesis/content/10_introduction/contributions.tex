@@ -1,29 +1,34 @@
 \section{Contributions}
 \label{sec:10:contributions}
-As described in the motivation (see chapter~\ref{sec:10:motivation}) for this
-thesis, I see a big problem in the general vulnerability by side channel
-attacks on commodity processors. To fully exclude side channels, I propose
-TEECore to tackle the following
-goals:
+As described in the motivation (see chapter~\ref{sec:10:motivation}) chapter of
+this thesis, research shows that side channel attacks impose a big threat to
+current \glspl{tee} implementations. As such, the undermine security guarantees
+of such solutions (c.f. chapter~\ref{sec:20:attacks}). To mitigate the effects
+of side channels, I propose TEECore. TEECore is a software based \gls{tee} that
+achieves isolation through levering core local resources. TEECore tackles the
+following goals:
 
 \begin{enumerate}
-    \item I create an execution environment fully isolated from the remaining
-          system by utilizing features found in all commodity CPUs. The backend
-          implementation might still be vendor-specific because those features
-          might be specific to the respective CPU implementation. The overall
-          concept stays the same on all CPUs. I show, that once running, system
-          software cannot influence my design.
-    \item I propose a \gls{tee} design to detect side-channel attacks and react
-          appropriately.
-    \item My design ensures the usage of only core local resources. This means
-          I implement a policy that is restricted to core local caches.
-    \item I evaluate ways to enable such an execution environment to offer
-          remote attestation features.
-    \item I evaluate my implementation regarding system resources. In detail,
-          I will evaluate what workload fits next to the runtime
-          environment in the core's local caches.
-    \item I evaluate the \gls{tcb} against what attacker model my sole software
-          solution can defend.
+  \item I create an execution environment fully isolated from the remaining
+    system by utilizing features found in all commodity CPUs. It is independent
+    from vendor specific \gls{tee} solutions and the concept is applicable to at
+    least all commodity x86 CPUs
+  \item I show how to isolate a single CPU core from a commodity \gls{os} to
+    host TEECore and that TEECore is able to run next to such an \gls{os} and
+    provide services to it, achieving high isolation in this way from the
+    commodity \gls{os}. I show how to implement a shared memory communication
+    channel for data exchange and communication.
+  \item With TEECore, I propose a \gls{tee} design to detect side-channel
+    attacks and react appropriately.
+  \item My design ensures the usage of only core local resources. This means
+    I implement a policy that is restricting execution to core local caches.
+  \item I evaluate ways to enable such an execution environment to offer
+    remote attestation features.
+  \item I evaluate my implementation regarding system resources. In detail,
+    I will evaluate what workload fits next to the runtime
+    environment in the core's local caches.
+  \item I evaluate against what attacker model TEECore, as a sole software
+    solution, can defend.
 \end{enumerate}
 
 With complete isolation and the exclusion of possible side channels, I aim for a
@@ -35,5 +40,5 @@ the security properties of my design, and I show that the prototype can protect
 itself from being interfered with by the commodity \gls{os}. My solution still
 depends on the commodity \gls{os} to install the environment. Therefore, the
 prototype will not be a standalone solution but a technology demonstrator.
-Designing systems components in a way that makes my implementation a standalone
-component is not the scope of this work and is left for future work.
+Designing system components in a way that makes TEECore a standalone component
+is not the scope of this work and is left for future work.
