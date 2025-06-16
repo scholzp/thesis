@@ -18,7 +18,7 @@ affected all commodity processor architectures. As an example, CPU designs of
 the AMD, Intel, Qualcomm, and ARM were identified to be vulnerable by transient
 execution attacks~\cite{wikner2022retbleed,moghimi_downfall_2023,ragab_ghostrace_2024}.\\
 
-Modern processor often executes instructions without the knowledge that their
+Modern processor often execute instructions without the knowledge that their
 execution preconditions are met to gain performance. As a result, processors
 need to revert all results from executing an instruction from which they later
 learn that its precondition was not satisfied. An instruction executed in this
@@ -54,8 +54,8 @@ and the victim thread to communicate information beyond process boundaries. \\
 
 The class of transient execution attacks is still highly relevant to this day.
 Since 2023, security researchers discovered at least five attacks that use
-microarchitectural effects to exfiltrate data, similar to Spectre and Meltdown.
-\cite{ormandy2023zenbleed,trujillo2023inception, moghimi2023downfall,ragab_ghostrace_2024, wilke2024tdxdown}
+microarchitectural effects to exfiltrate data, similar to Spectre and Meltdown~
+\cite{ormandy2023zenbleed,trujillo2023inception, moghimi2023downfall,ragab_ghostrace_2024, wilke2024tdxdown}.
 Current hardware \gls{tee} solutions are affected, too, because these attacks
 enable attackers to read arbitrary memory. The problem persists, and no solution
 exists to mitigate transient execution attacks in general.\\
@@ -66,11 +66,11 @@ In section~\ref{sec:20:transientattacks}, we have seen that data can be leaked
 from various \gls{tee} implementations over side channels if an attacker can
 interrupt a \gls{tee} in a high temporal resolution. With SGX-step Van et al.
 presented the first framework with which an attacker can mount attacks on
-\gls{sgx} with instruction-level granularity.\cite{van2017sgx} Next to the
+\gls{sgx} with instruction-level granularity~\cite{van2017sgx}. Next to the
 aforementioned covered side channels, this allows the attacker to learn access
 patterns of the \gls{tee} and tightly monitor its control flow. Wilke et al. and
 Kou et al. implemented similar attacks for AMD and ARM
-processors.\cite{wilke2023sev, kou2021load}\\
+processors~\cite{wilke2023sev, kou2021load}.\\
 
 On x86 processors, the attack scheme uses the \gls{lapic}, while on ARM, it uses
 a separate core to send inter-processor interrupts to overcome the boundaries
