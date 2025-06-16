@@ -3,16 +3,16 @@
 As described in the motivation (see chapter~\ref{sec:10:motivation}) chapter of
 this thesis, research shows that side channel attacks impose a big threat to
 current \glspl{tee} implementations. As such, the undermine security guarantees
-of such solutions (c.f. chapter~\ref{sec:20:attacks}). To mitigate the effects
-of side channels, I propose TEECore. TEECore is a software based \gls{tee} that
-achieves isolation through levering core local resources. TEECore tackles the
-following goals:
+of such solutions (c.f. chapter~\ref{sec:20:attacks}). To significantly reduce
+the impact of side channels, I propose TEECore. TEECore is a software based
+\gls{tee} that achieves isolation through levering core local resources. TEECore
+tackles the following goals:
 
 \begin{enumerate}
-  \item I create an execution environment fully isolated from the remaining
-    system by utilizing features found in all commodity CPUs. It is independent
-    from vendor specific \gls{tee} solutions and the concept is applicable to at
-    least all commodity x86 CPUs
+  \item I create an execution environment isolated from the remaining system by
+    utilizing features found in all commodity CPUs. It is independent from
+    vendor specific \gls{tee} solutions and the concept is applicable to at
+    least all commodity x86 CPUs.
   \item I show how to isolate a single CPU core from a commodity \gls{os} to
     host TEECore and that TEECore is able to run next to such an \gls{os} and
     provide services to it, achieving high isolation in this way from the
@@ -20,13 +20,13 @@ following goals:
     channel for data exchange and communication.
   \item With TEECore, I propose a \gls{tee} design to detect side-channel
     attacks and react appropriately.
-  \item My design ensures the usage of only core local resources. This means
-    I implement a policy that is restricting execution to core local caches.
+  \item My design ensures the usage of only core local resources. This means I
+    implement a policy that is restricting execution to core local caches.
   \item I evaluate ways to enable such an execution environment to offer
     remote attestation features.
-  \item I evaluate my implementation regarding system resources. In detail,
-    I will evaluate what workload fits next to the runtime
-    environment in the core's local caches.
+  \item I evaluate my implementation regarding system resources. In detail, I
+    will evaluate what workload fits next to the runtime environment in the
+    core's local caches.
   \item I evaluate against what attacker model TEECore, as a sole software
     solution, can defend.
 \end{enumerate}
