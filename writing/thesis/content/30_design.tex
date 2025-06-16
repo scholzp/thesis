@@ -44,7 +44,7 @@ such a system, this section describes how system parts interact with each other.
 \begin{figure}
   \begin{center}
     \includestandalone{images/30_system.tex}
-    \caption{TEECore running in a System next to a commodity \gls{os}}
+    \caption{TEECore running in a system next to a commodity \gls{os}}
     \label{fig:30:tee_system_design}
   \end{center}
 \end{figure}
@@ -128,7 +128,7 @@ to a defined state. All memory is stored in the CPU's local cache in the
 exclusive or modified state. To achieve this, TEECore writes to all memory it
 has to protect, invalidating shared cache lines in other cores in this process.
 As a result TEECore can detect whenever a remote CPU accesses data from RAM or
-shared L3 cache, as the remote copies the respective memory items to it's L1
+shared L3 cache, as the remote copies the respective memory items to its L1
 cache, triggering a MESIF state change in the isolated cores cache. To protect a
 task against interrupt-based attacks, TEECore has to set up the \gls{idt}
 correctly so that any occurrence of any interrupt results in a system reset.
@@ -264,7 +264,7 @@ role. The appraiser and TEECore trust it, and it serves as a proxy to issue a
 certificate for TEECore that the \gls{tpm} it uses is genuine and that the
 \gls{aik} used by it for attestation of its \glspl{pcr} belongs to its \gls{ek}.
 The \gls{aikca} in this process learns the identity of the \gls{tpm} through
-it's \gls{ek}'s certificate. On the other hand, the appraiser does not, as it
+its \gls{ek}'s certificate. On the other hand, the appraiser does not, as it
 only knows that the \gls{aikca} issued the certificate. It can, therefore, prove
 the correctness of the \gls{aik}'s certificate by proving that it was issued by
 the \gls{aikca}.\\
@@ -376,7 +376,7 @@ measurement events. The main reason for this is that \gls{smm} can deny TEECore
 from executing and thus reacting to performance monitoring events. Additionally,
 Intel allows for freezing debug features while \gls{smm} code is executed. This
 feature allows system software for masking events originating from
-\gls{smm}.\cite{intel_sdm} Moreover, malicious \gls{smm} software could modify
+\gls{smm}~\cite{intel_sdm}. Moreover, malicious \gls{smm} software could modify
 the \gls{pmc} configuration. To summarize, \gls{smm} could be used to mount an
 attack from different vectors. How the actual interaction with \gls{smm} would
 look like is, at the point of writing this, not clear. Evaluating such attacks
