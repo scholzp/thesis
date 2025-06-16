@@ -164,7 +164,7 @@ difference between this cache size and the number of cache lines used by TEECore
 should yield the maximum number of cache lines a payload could use in the form
 of a secure application. In practice, memory alignment can restrict the actual
 number of usable cache lines for TEECore. Because Raptor Cove's L1 and L2 cache
-associativity is 8, not all possible memory addresses can be stored in all cache
+associativity is eight, not all possible memory addresses can be stored in all cache
 lines.\\
 
 \begin{table}[ht]
@@ -270,11 +270,11 @@ L1D\_Replacements do not indicate missing data from the L1 cache, as L2 hits do
 not increase in a similar manner as the L1D replacements. A possible cause for
 this can be, that the CPU modifies data resident in L1D cache and store it in
 its bill buffer. In subsequent access, The CPU does not hit in the L1D cache but
-in the fill buffer, triggering a replacement of the line in L1D cache. No hit's
+in the fill buffer, triggering a replacement of the line in L1D cache. No hits
 in the L3 cache signal that the whole environment's memory consumption is below
 2 MiB. TEECore alone has a memory consumption of around 2,600 bytes, while a
 trusted application requires a minimum of 1,400 bytes of memory. This makes up
-around of 5\% of available resources, so it's save to assume that more complex
+around of 5\% of available resources, so it is save to assume that more complex
 workloads can be run within TEECore.\\
 
 To evaluate the behavior of TEECore further concerning cache associativity, I
@@ -283,7 +283,7 @@ the first invocation for an array of 8 byte sized integers. In all subsequent
 iterations, the test application will increase the counter in the shared memory
 region as well as each field in the allocated array. The result will be that the
 content of this array will fill L1 data and unified L2 cache resources, leading
-to the eviction of other data. On it's way, each access of the array will
+to the eviction of other data. On its way, each access of the array will
 perform at least one read and one write operation per increment. Each operation
 can either result in a miss or hit in the respective caches. As mentioned
 before, as soon as events of type \textit{MEM\_LOAD\_RETIRED.L3\_HIT} occur, I
