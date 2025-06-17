@@ -18,21 +18,20 @@
 % in einer Arbeit nichts zu suchen, auch nicht im Anhang, sondern gehören auf
 % Rechner, auf denen man sie sich ansehen kann.
 
-In the following sections, I will explain some technical implementation details
+In the following sections, I will explain technical implementation details
 of TEECore and how I implemented features described in chapter~\ref{sec:design}.
-First, I will explain some implementation highlights of TEECore itself, which is
+First, I will explain implementation highlights of TEECore itself, which is
 the kernel used to populate the isolated partition in
-section~\ref{sec:implementation:teeKernel}. To demonstrate the prototype, I used
+section~\ref{sec:implementation:teeKernel}. To demonstrate the prototype, I use
 Linux as kernel running in the normal partition. The prototype of TEECore
 requires Linux to set it up and prepare memory for it. In
 section~\ref{sec:implementation:hostKernel}, I describe how I configured Linux
 to set uo TEECore. To enable Linux to communicate with TEECore finally, I
 implemented a driver as a Linux kernel module. I describe this kernel in
 section~\ref{sec:implementation:kmod}.\todo{Something something trusted
-applications} As a target for the prototype implementation of TEECore I used an
+applications} As a target for the prototype implementation of TEECore I use an
 Intel Core i7 14700k processor.
 
-\todo{Implement for Intel, mainly i7 14700k}
 \section{TEECore}
 \label{sec:implementation:teeKernel}
 PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}} is a Multiboot 2
@@ -47,10 +46,10 @@ enabled PEA paging. This part of Phipsboot is written in x86 assembly code. It
 initializes the page tables and sets up huge pages before transferring the CPU
 into 64-bit mode. For later usage, Phipsboot sets up additional page tables for
 execution. Because of its memory mapping, PhipsBoot expects to be loaded to a 2
-MiB-aligned address . Its small size, less than 2 MiB, allows PhipsBoot to set
+MiB-aligned address. Its small size, less than 2 MiB, allows PhipsBoot to set
 up the page table hierarchy using a single page table that maps the kernel.
 PhipsBoot uses memory statically reserved for dynamic memory allocation in the
-kernel's Elf image. Next to setting up the general run time, PhipsBoot does not
+kernel's Elf image. Besides setting up the general run time, PhipsBoot does not
 implement more features but offers a great starting point for the implementation
 of TEECore. \\
 
@@ -161,7 +160,7 @@ processors.
     \hline
     Event Name                  & Selector & UMask & Description                                                                            \\
     \hline
-    MEM\_LOAD\_RETIRED.L2\_MISS & 0xD1     & 0x10  & Counts retired load instructions missed L2 cache as data sources..                     \\
+    MEM\_LOAD\_RETIRED.L2\_MISS & 0xD1     & 0x10  & Counts retired load instructions missed L2 cache as data sources.                     \\
     MEM\_LOAD\_RETIRED.L3\_HIT  & 0xD1     & 0x04  & Counts retired load instructions with at least one \mu op that hit in the L3 cache.    \\
     MEM\_LOAD\_RETIRED.L3\_MISS & 0xD1     & 0x20  & Counts retired load instructions with at least one \mu op that missed in the L3 cache. \\
     \hline
@@ -171,7 +170,7 @@ processors.
 \end{table}
 
 To enable counting of the chosen events, I programmed the respective \gls{pmc}
-\glspl{msr}. The performance monitoring facilities of x86 CPUs I used  consist
+\glspl{msr}. The performance monitoring facilities of x86 CPUs I use consist
 of a pair of two \glspl{msr}, one \textit{IA32\_PERFEVTSELx} and
 \textit{IA32\_PMCx} each, where $x$ is the index of the pair. A physical
 processor supports at least four of those pairs. The \textit{IA32\_PERFEVTSELx}
@@ -207,12 +206,12 @@ the \textit{EN} bit in the respective \textit{IA32\_PERFEVTSELx} \gls{msr}
 after finishing its preparation phase. From this point on, writes to
 \textit{IA32\_PMCx} are forbidden.
 
-One of the first actions TEECore is to set up the \gls{idt} accordingly. In
+One of the first actions by TEECore is to set up the \gls{idt} accordingly. In
 doing so, it writes zero to the \gls{idtr}, which leads to triple faulting once
-the \gls{lapic} deliveres an interrupt to TEECore. Because I desgined TEECore to
+the \gls{lapic} deliveres an interrupt to TEECore. Because I designed TEECore to
 work without interrupts, every interrupt TEECore receives is considered an
-attack by it. From then on, TEECore can not be interrupted and thus is not prone
-to single-step attacks. In a second step, TEECore configures the \gls{lapic} to
+attack. From then on, TEECore cannot be interrupted and thus is not prone to
+single-step attacks. In a second step, TEECore configures the \gls{lapic} to
 enable the delivery of \gls{pmi}. As described in
 section~\ref{sec:30:tee_kernel}, TEECore uses \glspl{pmi} to signal itself that
 it has been attacked. First, it uses the aforementioned functionality to map the
@@ -221,14 +220,13 @@ CPU-exclusive registers with 32-bit widths. Relevant to my use case is the
 \textit{spurious-interrupt vector} register and the \textit{\gls{lvt}}. The
 spurious-interrupt vector register is important for software activating the
 \gls{lapic} because, after reset, the \gls{lapic} might not be software enabled.
-However, it responds to \gls{ipi} messages. To software activate the
-\gls{lapic}, TEECore writes to the \textit{APIC Software Enable/Disable} bit.
-After enabling the \gls{lapic}, TEECore has to configure it accordingly to
-active delivery of \glspl{pmi}. For this, TEECore configures the Performance
-Monitoring Register of the \gls{lvt} to deliver \glspl{pmi} as \glspl{nmi}. As a
-last step, TEECore clears the mask bit in the Performance Monitoring Register of
-the \gls{lvt}. After this, the \gls{lapic} is ready to deliver \glspl{pmi} to
-TEECore.\\
+However, it responds to \gls{ipi} messages. To activate the \gls{lapic}, TEECore
+writes to the \textit{APIC Software Enable/Disable} bit. After enabling the
+\gls{lapic}, TEECore has to configure it accordingly to active delivery of
+\glspl{pmi}. For this, TEECore configures the Performance Monitoring Register of
+the \gls{lvt} to deliver \glspl{pmi} as \glspl{nmi}. As a last step, TEECore
+clears the mask bit in the Performance Monitoring Register of the \gls{lvt}.
+After this, the \gls{lapic} is ready to deliver \glspl{pmi} to TEECore.\\
 
 \begin{center}
   \begin{figure}
@@ -248,20 +246,29 @@ that can be sent along with the other tags. I assume there are only two
 communication parties in the current prototype: the \gls{tee} kernel and the
 host kernel. A message is sent by writing the first byte. To receive a message,
 the respective party polls the first byte of the shared memory and waits until
-the signal is written by the other party, \\
+the signal is written by the other party. In the current prototype only one
+communcation buffer for both directions exist. In the prototype, both parties
+first write the payload bytes before writing the first byte of the buffer and
+only do so, as long as the first bytes indicates a message from the other party.
+As a side note, this can lead to race conditions between TEECore and the other
+communication party, if both don't adhere to the same protocol. These race
+conditions are not of concern for my prototype implementations but should be
+mitigated if TEECore is employed in real world scenarios.\\
 
 After initialization, the \gls{tee} environment starts a state machine that
 controls the execution of tasks. In the first state, the \gls{tee} polls the
 shared memory until it receives a message containing the command to execute one
 of the predefined tasks. Once this message is received, the \gls{tee} executes
-the task as commended. While the task runs, it can access the shared memory for
+the task as commanded. While the task runs, it can access the shared memory for
 multiple reasons. The first reason is that the task can access the payload
 section of the memory to receive additional input data from the party outside of
 the \gls{tee}. The second reason is that the task can prepare an answer to the
-third-party request. For this, the task can write to fields dedicated to the
+outside party's request. For this, the task can write to fields dedicated to the
 sender information, the command, and the payload. It is the task's
 responsibility to write to the shared memory data needed to create a response to
-the request once it is done.
+the request once it is done. Currently, TEECore does not do any integrity checks
+of the input. Before employing TEECore in real world scenarios such checks
+should be implemented.
 
 \section{Normal Partition Kernel: Linux}
 \label{sec:implementation:hostKernel}
@@ -278,26 +285,26 @@ count of $n$. I used $n=3$ to limit Linux to 3 cores. While Linux supports CPU
 hotplugging\footnote{\url{https://docs.kernel.org/core-api/cpu_hotplug.html}},
 which would allow enabling cores to be turned off through the same feature,
 \textit{nr\_cpu} introduces a hard limit. Thus, cores excluded from
-initialization by this parameter are inaccessible for Linux and can not be
+initialization by this parameter are inaccessible for Linux and cannot be
 hotplugged later. \\
 
 Another useful parameter is \textit{memmap}, which I used to add custom entries
 to the BIOS memory map that Linux uses to set up its memory map. With this, I
-added an entry with type \textit{persistent} of 4KiB size starting at the
-address $0x9000$ is within the first MiB of system memory and not marked free in
-the BIOS specification\todo{cite}. I reserve this memory in order to use it
-later for booting one of the excluded CPUs, as x86 CPUs initialize in 16-bit
-mode and, therefore, can only access memory with addresses lower than the 1 MiB
-boundary. Linux does not offer any procedure to allocate memory in this address
-region, so this is the only possible way. \\
+add an entry with type \textit{persistent} of 4KiB size starting at the
+address $0x9000$, which is within the first MiB of system memory and free for
+use. I reserve this memory in order to use it later for booting one of the
+excluded CPUs, as x86 CPUs initialize in 16-bit mode and, therefore, can only
+access memory with addresses lower than the 1 MiB boundary. Linux does not offer
+any procedure to allocate memory in this address region, so this is the only
+possible way. \\
 
-The driver for TEECore, implemented as Linux kernel moudle performs addtional
-initilization steps, that I explain in section~\ref{sec:implementation:kmod}.
-Linux, nevertheless, is the first software to be run in my prototype. All other
-components, namely the \gls{tee} kernel as an ELF-file image and the Linux
-kernel module is embedded in its initial RAM disk image, which allows, in
-theory, the signing of a single image for secure boot and thus ensures the
-integrity of all components on startup.\\
+The driver for TEECore, implemented as a Linux kernel module, performs
+additional initialization steps that I explain in
+section~\ref{sec:implementation:kmod}. Linux, nevertheless, is the first
+software to be run in my prototype. All other components, namely the \gls{tee}
+kernel as an ELF-file image and the Linux kernel module embedded in its initial
+RAM disk image, which allows in theory, the signing of a single image for a
+secure boot thus ensures the integrity of all components on startup.\\
 
 \section{Linux kernel module}
 \label{sec:implementation:kmod}
