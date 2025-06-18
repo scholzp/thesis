@@ -34,24 +34,25 @@ Intel Core i7 14700k processor.
 
 \section{TEECore}
 \label{sec:implementation:teeKernel}
-PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}} is a Multiboot 2
-compliant kernel is written in the memory-safe programming language Rust, to
-serve as a bootloader for 64-bit x86 kernels. A feature of PhipsBoot is that it
-is relocatable and supports arbitrary load addresses. It depends on a
-first-stage bootloader\todo{maybe this is not a multi-stage bootloader} that
-brings the system to a state defined in the Multiboot 2 specification. That is,
-the CPU is in 32-bit protected mode with segmentation enabled. After handover,
+PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}} is a Multiboot
+2\footnote{\url{https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html}}
+compliant kernel written in the memory-safe programming language Rust, to serve
+as a bootloader for 64-bit x86 kernels. A feature of PhipsBoot is that it is
+relocatable and supports arbitrary load addresses. It depends on a first-stage
+bootloader\todo{maybe this is not a multi-stage bootloader} that brings the
+system to a state defined in the Multiboot 2 specification. That is, the CPU is
+in 32-bit protected mode with segmentation enabled~\cite{mb2}. After handover,
 PhipsBoot does all initialization steps to bring the CPU into 64-bit mode with
 enabled PEA paging. This part of Phipsboot is written in x86 assembly code. It
 initializes the page tables and sets up huge pages before transferring the CPU
 into 64-bit mode. For later usage, Phipsboot sets up additional page tables for
 execution. Because of its memory mapping, PhipsBoot expects to be loaded to a 2
-MiB-aligned address. Its small size, less than 2 MiB, allows PhipsBoot to set
-up the page table hierarchy using a single page table that maps the kernel.
+MiB-aligned address. Its small size, less than 2 MiB, allows PhipsBoot to set up
+the page table hierarchy using a single page table that maps the kernel.
 PhipsBoot uses memory statically reserved for dynamic memory allocation in the
 kernel's Elf image. Besides setting up the general run time, PhipsBoot does not
 implement more features but offers a great starting point for the implementation
-of TEECore. \\
+of TEECore.\\
 
 For the intent of my implementation, I forked PhipsBoot to begin developing
 TEECore. The first feature I introduced was the ability to modify page tables
@@ -72,8 +73,8 @@ binary does not contain, I, therefore, reserved the last 128 entries of the last
 level page table. These 128 page table entries enable  TEECore to map up to 512
 KiB of arbitrary memory that was not contained in the binary while allowing for
 the binary to grow to a size of 1536 KiB. Overall, the total maximal size of 2
-MiB can fit in most L2 caches of Intels x86\_64 processors performance cluster
-cores produced since 2022.\\
+MiB can fit in most L2 caches of Intel x86\_64 performance cores produced since
+2022. The L2 cache is a core exclusive resource in these processors.\\
 
 For mapping arbitrary memory, TEECore uses addresses derived from the virtual
 address of the last level page table. The uppermost 43 bits are the same as in
@@ -104,9 +105,9 @@ pub unsafe fn map_page_frame(phys_addr: u64) -> u64 {
 
 Mapping arbitrary memory is important in implementing the shared memory
 communication path. TEECore learns the information about the shared memory
-through the Multiboot 2 Boot Information structure, which memory map contains a
+through the \gls{mbi} structure, which memory map contains a
 respective entry. To access this structure, TEECore needs to be able to map the
-page containing it. To enable TEECore to access the Multiboot 2 Boot Information
+page containing it. To enable TEECore to access the \gls{mbi}
 structures, boot code (c.f. \ref{sec:implementation:kmod}) writes its address
 into register \textit{EBX}. Moreover, TEECore has to map the physical address in
 the memory map to make the shared memory accessible. Other than the memory owned
@@ -122,13 +123,12 @@ bytes of pages that are set present. This function reads a given address and
 writes back the same value to the same address to trigger the modified state of
 the cache line. This state change leads to invalidating remote core cache lines
 referencing the same memory item. I discovered this necessity when implementing
-my attack simulations
-(c.f.~\ref{sec:implementation:attacks:memory})\todo{referenz prüfne}. While
-TEECore could detect the active attacker, the passive one was undetectable
-because the reading of cache lines in the shared state in both caches does not
-trigger any microarchitectural responses. It is, therefore, necessary to hold
-all memory that TEECore should keep secret in the exclusive or modified state to
-detect cache synchronization over the cache coherency protocol.\\
+my attack simulations (c.f.~\ref{eval:sec}). While TEECore could detect the
+active attacker, the passive one was undetectable because the reading of cache
+lines in the shared state in both caches does not trigger any microarchitectural
+responses. It is, therefore, necessary to hold all memory that TEECore should
+keep secret in the exclusive or modified state to detect cache synchronization
+over the cache coherency protocol.\\
 
 After ensuring that all attempts to manipulate or access secret memory do not
 result in additional microarchitectural state changes, it is time to make
@@ -275,28 +275,30 @@ should be implemented.
 
 As a highly configurable open-source general-purpose operating system, Linux is
 an example of the implementation of the host kernel. The Linux kernel I used for
-my prototype is version 6.13. Linux allows the configuration at runtime by
-passing command line arguments to the kernel on boot. This makes it able to
-limit the resources Linux uses. \\
+my prototype is version 6.13. Linux allows its configuration by passing command
+line arguments to the kernel on boot. This makes it able to limit the resources
+Linux uses. \\
 
-To isolate the CPU core, I used the command line option \textit{nr\_cpus=n},
-where $n$ is an arbitrary number that limits Linux from using a maximum core
-count of $n$. I used $n=3$ to limit Linux to 3 cores. While Linux supports CPU
+To isolate the CPU core, I use the command line option \textit{nr\_cpus=n},
+where $n$ is an arbitrary number that limits Linux to using a maximum core
+count of $n$. I use $n=3$ to limit Linux to 3 cores. While Linux supports CPU
 hotplugging\footnote{\url{https://docs.kernel.org/core-api/cpu_hotplug.html}},
 which would allow enabling cores to be turned off through the same feature,
-\textit{nr\_cpu} introduces a hard limit. Thus, cores excluded from
-initialization by this parameter are inaccessible for Linux and cannot be
-hotplugged later. \\
+\textit{nr\_cpu} introduces a hard limit. This limit originates from the fact
+that managemant data structures for late CPU hotplugging need to be
+preallocated. The \textit{nr\_cpu} limits the number of preallocated structures,
+thus, cores excluded from initialization by this parameter are inaccessible for
+Linux and cannot be hotplugged later~\cite{kernel-parameters}. \\
 
-Another useful parameter is \textit{memmap}, which I used to add custom entries
+Another useful parameter is \textit{memmap}, which I use to add custom entries
 to the BIOS memory map that Linux uses to set up its memory map. With this, I
-add an entry with type \textit{persistent} of 4KiB size starting at the
-address $0x9000$, which is within the first MiB of system memory and free for
-use. I reserve this memory in order to use it later for booting one of the
-excluded CPUs, as x86 CPUs initialize in 16-bit mode and, therefore, can only
-access memory with addresses lower than the 1 MiB boundary. Linux does not offer
-any procedure to allocate memory in this address region, so this is the only
-possible way. \\
+add an entry with type \textit{persistent} of 4KiB size starting at the address
+$0x9000$, which is within the first MiB of system memory and free for use. I
+reserve this memory in order to use it later for booting one of the excluded
+CPUs, as x86 CPUs initialize in 16-bit mode and, therefore, can only access
+memory with addresses lower than the 1 MiB boundary. Linux does not offer any
+procedure to kernel modules to allocate memory in this address region, so this
+is the only possible way.\\
 
 The driver for TEECore, implemented as a Linux kernel module, performs
 additional initialization steps that I explain in
@@ -316,16 +318,15 @@ core and loads the \gls{tee} kernel into memory.\\
 For this, the kernel module claims the memory reserved through the Linux command
 line argument and copies the startup code to the reserved memory. I wrote the
 startup code in assembly. It transfers the processor from real mode into the
-32-bit mode with segmentation and places the addresses of the Multiboot 2 Boot
-Information structure into the EBX register. The resulting state is the one
-expected by TEECore. The startup code is compiled before the kernel module and
-included as an array of bytes. This allows for easier modification, as
-otherwise, the need to edit a binary would arise. The Multiboot 2 Information
-structure, which TEECore expects, is created by the kernel module at run time.
-Because of this, the address of the Multiboot 2 Boot Information is not known at
-compile time. After allocating the memory, the kernel module modifies the
-startup code at runtime by replacing a placeholder with the actual MBI2
-address.\\
+32-bit mode with segmentation and places the addresses of the \gls{mbi}
+structure into the EBX register. The resulting state is the one expected by
+TEECore. The startup code is compiled before the kernel module and included as
+an array of bytes. This allows for easier modification, as otherwise, the need
+to edit a binary would arise. The \gls{mbi}, which TEECore expects, is created
+by the kernel module at run time. Because of this, the address of the \gls{mbi}
+is not known at compile time. After allocating the memory, the kernel module
+modifies the startup code at runtime by replacing a placeholder with the actual
+\gls{mbi} address.\\
 
 In the next step, the kernel module locates the \gls{elf} binary of the TEECore
 and places it in memory. For this, the module allocates memory through the Linux
@@ -336,15 +337,15 @@ memory is allocated and mapped in the kernel address space, the kernel module
 begins to parse the \gls{tee} kernel's \gls{elf} image and copies all necessary
 parts to memory. The kernel module brings its own \gls{elf} loader for this. The
 kernel module does not use the Linux' \gls{elf} file loader because it does not
-allow to easily obtain the physical address to which the \gls{elf} image is
+allow me to obtain the physical address to which the \gls{elf} image is
 loaded. The kernel module requires the TEECore binary's physical address to
 calculate the TEECore code entry address. This address is the second important
 address generated at runtime of the kernel module with which the boot code is
 updated. The kernel module then sets up the shared memory region by allocating
-the amount of memory specified before. It then creates a Multiboot 2 Boot
-Information structure containing the physical address of the shared region with
-a custom-defined memory type. TEECore later parses the MBI structure to find the
-physical memory backing the shared memory communication channel.\\
+the amount of memory specified before. It then creates a \gls{mbi} structure
+containing the physical address of the shared region with a custom-defined
+memory type. TEECore later parses the \gls{mbi} structure to find the physical
+memory backing the shared memory communication channel.\\
 
 Once all parts necessary to run the \gls{tee} kernel are placed in memory, the
 kernel module prepares to start the isolated core. At this point, Linux does not
@@ -369,9 +370,9 @@ messages. The kernel module also implements the remote part of tasks in the
 prototype. To start a specific task, the kernel module sends a message
 containing the task's ID and evaluates messages from the \gls{tee} to delegate
 them to the respective tasks routine. Lastly, the kernel module creates a
-character device to allow user space application to use TEECore. Writes and
+character device to allow user space applications to use TEECore. Writes and
 reads to this device are implemented by the kernel module and used to form
-messages for TEECore.
+messages send to TEECore.
 
 % \section{Applications}
 % \label{sec:implementation:attacks}
