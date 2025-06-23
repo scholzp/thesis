@@ -65,7 +65,7 @@ the last page table to be writable instead of read-only, and made it accessible
 in the Rust high-level code by propagating its address. Note that TEECore is
 aligned to a 2 MiB boundary because of the initial huge page mapping. Therefore,
 The mappping of TEECore addresses starts in the first entries of the last level
-page table until index $n$. Through observation, I found that not more than the
+page table until index $n$. Through observation, I found that no more than the
 first 128 entries in the page table are used to map all memory used by the
 kernel binary. The number of initially mapped pages reflects that TEECore's ELF
 image is around 300 KiB in size. For dynamic mapping of memory that TEECore's
