@@ -347,9 +347,9 @@ results therefore indicate that TEECore can only safely use 256 KiB of data.
 
 \section{Comparison to other TEE Solutions}
 \label{eval:compare}
-In this section, I want to compare TEECore with other \gls{tee} solutions
-mentioned in chapter~\ref{chap:related} regarding different properties, such as
-portability, protection goals, and actual security offered.
+In this section, I compare TEECore with other \gls{tee} solutions mentioned in
+chapter~\ref{chap:related} regarding different properties, such as portability,
+protection goals, and actual security offered.
 
 \subsection{Portability}
 \label{eval:compare:portability}
@@ -396,11 +396,11 @@ TEECore can defend against most attacks described in
 chapter~\ref{sec:30:tee_attacker_model}. In contrast to other \gls{tee}
 implementations, TEECore can detect and react to cache-based side-channel
 attacks. This class of attacks is explicitly stated by Intel \gls{sgx}, AMD
-\gls{sev}, and Enma to be not part of the attacker model, as these solutions can
+\gls{sev}, and Enma not to be part of the attacker model, as these solutions can
 neither detect nor defend against these attacks. On the other hand, TEECore
 lacks mechanisms to defend against two attack vectors on x86 processors that
 \gls{sgx} and \gls{sev} can defend against. First, TEECore depends on the
-platform firmware to be not malicious. This dependency comes from the fact that
+platform firmware not to be malicious. This dependency comes from the fact that
 parts of the firmware have to be trusted by TEECore as it serves as a root of
 trust for measurement for Secure Boot. As described in
 chapter~\ref{sec:30:tee_boot_chain}, TEECore's \gls{tee} functionality is
@@ -408,22 +408,25 @@ dependent on Secure Boot. Aside from Secure Boot, the firmware also controls the
 \gls{smm}. With \gls{smi} possibly transferring control at any point to
 firmware, TEECore is without any chance against the firmware. All other x86
 solutions can work around the firmware, as they implement protection mechanisms
-that forbid direct control transfer to \gls{smm} from within their \glspl{tee}
-and implement memory encryption so that once the processor changes from
-\gls{tee} mode to the \gls{smm}, firmware is unable to decrypt the memory in
-use. Memory encryption does not help TEECore defend against malicious \gls{smm}
-because \gls{smm} could even read the content of the isolated core's registers
-as soon as it manages to interrupt TEECore at the right moment. Furthermore,
-other solutions require memory encryption to protect against memory-taping
-attacks. TEECore is immune to such attacks as its memory contents never leave
-the core and are not sent over the memory bus. If this happens, TEECore regards
-this as an attack. Furthermore, other \gls{tee} solutions are not vulnerable
+that forbid direct control transfer to \gls{smm} from within their \glspl{tee}.
+Additionally, they implement memory encryption so that once the processor
+changes from \gls{tee} mode to the \gls{smm}, firmware is unable to decrypt the
+memory in use. Memory encryption does not help TEECore defend against malicious
+\gls{smm} because \gls{smm} could even read the content of the isolated core's
+registers as soon as it manages to interrupt TEECore at the right moment.
+Furthermore, other solutions require memory encryption to protect against
+memory-tapping attacks. TEECore itself is immune to such attacks as its memory
+contents never leave the core and are not sent over the memory bus. If this
+happens, TEECore regards this as an attack. Nevertheless, the shared memory
+communication path can be tapped. It is therefore the responsibility of the
+secure application and the normal partition's applications to secure this
+communication channel. Furthermore, other \gls{tee} solutions are not vulnerable
 against IPI attacks described in section~\ref{eval:sec}, as they implement
 mechanisms to gracefully exit a \gls{tee} before handling any interrupt. Memory
 encryption could also help TEECore defend against this kind of attack, but it
 would require encrypting values as soon as they are moved from registers to the
-cache. To conclude, TEECore solves other problems such as \gls{sgx}, \gls{tdx},
-and \gls{sev}. \\
+cache. To conclude, TEECore solves other problems than \gls{sgx}, \gls{tdx}, and
+\gls{sev}. \\
 
 As a result, the idea of combining different approaches might sound appealing as
 TEECore allows the detection of side-channel attacks, while other solutions are
@@ -433,8 +436,8 @@ required. Intel \gls{sgx}, for example, does not allow measuring events during
 enclave execution to prevent them from being profiled. Nevertheless, one
 possibility would be for TEECore to host secure applications in enclaves and
 implement the remote attestation feature in an additional enclave. Because
-enclave memory is encrypted, this could solve the problem of INIT IPIs.
-Conversely, \gls{sgx} could profit from the additional isolation TEECore
+enclave memory is encrypted, this could solve the problem of INIT \glspl{ipi}.
+Conversely, \gls{sgx} could benefit from the additional isolation TEECore
 provides to prevent interrupt-based side channels and make cache-side
 channel-based attacks visible. Similarly, TEECore could provide a means for
 detecting cache-based side channels to \gls{tdx} and \gls{sev}. For confidential
@@ -442,21 +445,23 @@ detecting cache-based side channels to \gls{tdx} and \gls{sev}. For confidential
 applications as \glspl{vm}. Again, memory would be encrypted when receiving an
 interrupt and returning from \gls{vm} execution. \\
 
-Regarding \gls{tcb}, TEECore is most similar to Enma. The \gls{tcb} of both
+Regarding the \gls{tcb}, TEECore is most similar to Enma. The \gls{tcb} of both
 solutions include the hardware, firmware, and bootloader and the \gls{tpm}. In
-contrast to Enma, TEECore's \gls{tcb} does not include the \gls{os}. Compared to
-hardware solutions, only the \gls{tcb} of ARM TrustZone includes the bootloader
-too. Other x86 solutions do not require the bootloader to be part of their
-\gls{tcb}. Because x86 processors are more like SoCs and do not implement their
-\gls{tee} functionality in hardware but software running on dedicated resources
-on the processor, e.g., as code running on a dedicated security processor, it is
-hard to argue that their \gls{tcb} does not contain any firmware. At this point,
-one has to differ between the processor and the platform firmware. A user must
-trust at least the processor manufacturer and the software installed on these
-SoCs. This allows x86 hardware extensions to exclude platform software that does
-not originate from the processor vendor and is excluded from firmware. To
-summarize, the \gls{tcb} of TEECore is larger than those of the hardware
-solutions but smaller than the \gls{tcb} of Enma.
+contrast to Enma, TEECore's \gls{tcb} does not include the \gls{os}.
+Nevertheless, TEECore requires all other privileged software to be benign, as
+the can mount denial of service attacks against TEECore. Compared to hardware
+solutions, only the \gls{tcb} of ARM TrustZone includes the bootloader too.
+Other x86 solutions do not require the bootloader to be part of their \gls{tcb}.
+Because x86 processors are more like SoCs and do not implement their \gls{tee}
+functionality in hardware but software running on dedicated resources on the
+processor, e.g., as code running on a dedicated security processor, it is hard
+to argue that their \gls{tcb} does not contain any firmware. At this point, one
+has to differ between the processor and the platform firmware. A user must trust
+at least the processor manufacturer and the software installed on these SoCs.
+This allows x86 hardware extensions to exclude platform software that does not
+originate from the processor vendor and is excluded from firmware. To summarize,
+the \gls{tcb} of TEECore is larger than those of the hardware solutions but
+comparable to the \gls{tcb} of Enma.
 
 \cleardoublepage
 
