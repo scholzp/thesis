@@ -1,0 +1,50 @@
+\chapter{Source Code}
+% \ļabel{sec:appendix}
+
+The source code and building instructions for Linux are publicly available at
+GitHub. For reasons of reproducibility, I also provide the source code I used to
+create measurements presented in chapter~\ref{sec:evaluation}. Each test
+scenario can be found on a dedicated branch.\\
+\todo{Räume mal die Repo URL auf}
+Additionally, the source code of the Linux kernel module can be found as listed
+below. With the help of the build scripts in this repository any person
+interested can setup a Qemu based test environment, as well as images for
+running a Linux kernel next to TEECore on bare metal.
+
+\subsubsection{Main Branch of TEECore}
+\begin{quote}
+  \url{https://github.com/scholzp/phipsboot/tree/main}
+\end{quote}
+
+\noindent
+This repository contains all Code of TEECore. The main branch contains code that
+implements the reset procedure described in
+chapter~\ref{sec:implementation:teeKernel}.
+
+\subsubsection{SC1 Branch of TEECore}
+\begin{quote}
+  \url{https://github.com/scholzp/phipsboot/tree/mem_eval_sc1}
+\end{quote}
+
+\noindent
+This branch contains all Code of TEECore used for SC1 in
+chapter~\ref{sec:evaluation}.
+
+\subsubsection{SC2 Branch of TEECore}
+\begin{quote}
+  \url{https://github.com/scholzp/phipsboot/tree/mem_eval_sc2}
+\end{quote}
+
+\noindent
+This branch contains all Code of TEECore used for SC2 in
+chapter~\ref{sec:evaluation}.
+
+\subsubsection{Linux Kernel Module and Test Environment}
+\begin{quote}
+  \url{https://github.com/scholzp/thesis/tree/impl}
+\end{quote}
+
+\noindent
+This branch contains all Code to build a Qemu based test environment, as well as
+scripts to create images bootable on bare metal. In the test environment,
+TEECore is run next to Linux, as described in~\ref{sec:30:tee_general}.
