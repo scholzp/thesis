@@ -4,19 +4,19 @@
 % A ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_aik}
 {
-  name=attestation identity key,
+  name=Attestation Identity Key (AIK),
   description={Pseudo identity key of a TPM created form it's EK}
 }
 \newglossaryentry{g_aikca}
 {
-  name=attestation identity key,
+  name=Attestation Identity Key Certification Authority (AIKCA),
   description={Trusted third party that issues certificates for AIKs of a TPM in TEECore}
 }
 %
 % C ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_ca}
 {
-  name=certification authority,
+  name=Certification Authority (CA),
   description={Trusted third party that issues certificates in a cryptographic system}
 }
 \newglossaryentry{g_cpuid}
@@ -28,24 +28,24 @@
 % E ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_ek}
 {
-  name=endorsement key,
+  name=Endorsement Key (EK),
   description={Key burned to a security device by the manufacturer by which the security device can be identified}
 }
 \newglossaryentry{g_elf}
 {
-  name=Executable and Linking Format,
+  name=Executable and Linking Format (ELF),
   description={Binary format of executeable and linkable files in many UNIX systems}
 }
 \newglossaryentry{g_eoi}
 {
-  name=end of interrupt,
+  name=End of Interrupt (EOI),
   description={Signal send to the interrupt controller by the CPU to signal the of an interrupt serving routine}
 }
 %
 % G ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_gdt}
 {
-  name=global descriptor table,
+  name=Global Descriptor Table (GDT),
   description={Data structure of x86 and x86\_64 ISAs pointed to by global descriptor table register.
   Holds information about memory segments}
 }
@@ -53,28 +53,28 @@
 % I ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_ica}
 {
-  name=intermediate certification authority,
+  name=Intermediate Certification Authority (ICA),
   description={Certification authority that is not the root certification authority}
 }
 \newglossaryentry{g_idt}
 {
-  name=interrupt descriptor table,
+  name=Interrupt Descriptor Table (IDT),
   description={x86 data structure that holds a table of interrupt handlers. The interrupt vector is used by the CPU to
   call the respective interrupt handler routine.}
 }
 \newglossaryentry{g_idtr}
 {
-  name=interrupt descriptor table register,
+  name=Interrupt Descriptor Table Register (IDTR),
   description={Register in x86 processors that holds the address of the IDT}
 }
 \newglossaryentry{g_ipi}
 {
-  name=inter-processor interrupt,
+  name=Inter-processor Interrupt (IPI),
   description={Interrupt send from one processor in a multiprocessor system to another}
 }
 \newglossaryentry{g_isa}
 {
-  name=instruction set architecture,
+  name=Instruction Set Architecture (ISA),
   description={Architecture of a processor as observable from the outside. Serves as the interface between hard- and
   software and thus describes the instructions supported to program a processor}
 }
@@ -82,91 +82,91 @@
 % L ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_lapic}
 {
-  name=local advanced programmable interrupt controller,
+  name=Local Advanced Programmable Interrupt Controller (LAPIC),
   description={The advanced programmable interrupt controller (APIC) is the successor of the legacy programmable
     interrupt controller (PIC) in x86 and x86\_64 systems. In systems with multiple CPU cores the LAPIC is the
   APIC local to the respective core}
 }
 \newglossaryentry{g_llc}
 {
-  name=last level cache,
+  name=Last Level Cache (LLC),
   description={Last level of the cache hierarchy. E.g in a three-level hierarchy, the level 3 (L3) cache is the LLC}
 }
 \newglossaryentry{g_lmode}
 {
-  name=long mode,
+  name=Long Mode,
   description={64 bit operation mode of x86\_64 introduced by AMD with the name AMD64}
 }
 \newglossaryentry{g_lvt}
 {
-  name=Local Vector Table,
+  name=Local Vector Table (LVT),
   description={Register in the LAPIC used to configure how local interrupt are delivered to the processor core}
 }
 %
 % M ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_mbi}
 {
-  name=Multiboot2 boot information,
+  name=Multiboot2 Information (MBI),
   description={Data structure in the Multiboot2 standard used to by the bootloader to communicate vital information to
   the operating system.}
 }
 \newglossaryentry{g_mmu}
 {
-  name=memory management unit,
+  name=Memory Management Unit (MMU),
   description={Coprocessor that translates virtual memory addresses to physical memory addresses}
 }
 \newglossaryentry{g_msr}
 {
-  name=model specific register,
-  description={Non-architectural register which's implementation is specific to the respective processor}
+  name=Model Specific Register (MSR),
+  description={Non-architectural register which implementation is specific to the respective processor}
 }
 %
 % N ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_nmi}
 {
-  name=non-maskable interrupt,
-  description={Interrupt that can not be masked. That means, delivering of non-maskable interrupts can not be
+  name=Non-maskable Interrupt (NMI),
+  description={Interrupt that cannot be masked. That means, delivering of non-maskable interrupts cannot be
   deactivated}
 }
 %
 % O ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_os}
 {
-  name=operating system,
+  name=Operating System (OS),
   description={Privileged system software that manages resources and allows execution of user space applications}
 }
 %
 % P ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_pcr}
 {
-  name=platform configuration register,
+  name=Platform Configuration Register (PCR),
   description={Register of a TPM available to (system) software to store the results of a measurement in shielded
   memory}
 }
 \newglossaryentry{g_pf}
 {
-  name=page fault,
+  name=Page Fault (\#PF),
   description={Fault resulting from erroneous memory access. This can be for example a missing page table entry or
   rights violation}
 }
 \newglossaryentry{g_pki}
 {
-  name=public key infrastructure,
+  name=Public Key Infrastructure (PKI),
   description={Infrastructure to manage public encryption keys and bind them to identities}
 }
 \newglossaryentry{g_pmc}
 {
-  name=performance monitoring counter,
+  name=Performance Monitoring Counter (PMC),
   description={MSR that counts the occurrence of a specific event in a processor}
 }
 \newglossaryentry{g_pmi}
 {
-  name=performance monitoring interrupt,
+  name=Performance Monitoring Interrupt (PMI),
   description={Interrupt issued upon reaching a threshold of specific event occurrences}
 }
 \newglossaryentry{g_pmode}
 {
-  name=protected mode,
+  name=Protected Mode,
   description={Operation mode of x86 and x86\_64 processors. Makes features such as memory protection, virtual memory.
   Introduced with Intel 80286. 32-bit on Intel 80386 and later}
 }
@@ -174,7 +174,7 @@
 % R ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_rmode}
 {
-  name=real mode,
+  name=Real Mode,
   description={Operation mode of x86 and x86\_64 processors. Compatibility mode to the 16-bit Intel 8086, allowing to
   address roughly 1 MiB of memory without protection}
 }
@@ -188,75 +188,75 @@
 }
 \newglossaryentry{g_sgx}
 {
-  name=Intel SGX,
+  name=Intel Software Guard Extensions (SGX),
   description={Hardware extension in supported Intel processors able to create isolated execution environments and
   prove integrity and identity of the running program through remote attestation}
 }
 \newglossaryentry{g_simd}
 {
-  name={single instruction multiple data},
+  name=Single Instruction Multiple Data (SIMD),
   description={Form of parallel processing in which multiple processor elements perform the same instruction on
   multiple input data}
 }
 \newglossaryentry{g_smi}
 {
-  name=system management mode interrupt,
+  name=System Management Interrupt (SMI),
   description={Interrupt in the x86 and x86\_64 ISA. Results in changing to SMM}
 }
 \newglossaryentry{g_smm}
 {
-  name=system management mode,
+  name=System Management Mode (SMM),
   description={High privileged operation mode of x86 and x86\_64 processors. Intended to execute firmware tasks, such
   as power management, transparently to system software. Can only be entered through SMI}
 }
 \newglossaryentry{g_smram}
 {
-  name=system management mode RAM,
+  name=System Management RAM (SMRAM),
   description={Hardware protected area of main memory to store SMM data and code, such as the
   SMI handler}
 }
 \newglossaryentry{g_soc}
 {
-  name=system on chip,
+  name=System on Chip (SoC),
   description={Integrated circuit that houses components that all realize different functions}
 }
 %
 % T ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_tcb}
 {
-  name=trusted computing base,
-  description={Components in a computer system which compromisation can not be detected}
+  name=Trusted Computing Base (TCB),
+  description={A small amount of software and hardware that security depends on}
 }
 \newglossaryentry{g_tcg}
 {
-  name=Trusted Computing Group,
+  name=Trusted Computing Group (TCG),
   description={Consortium that manages and developes open standards for trusted computing platforms}
 }
 \newglossaryentry{g_tdx}
 {
-  name=Trust Domain Extensions,
+  name=Intel Trust Domain Extensions (TDX),
   description={Intel specific extension to the x86 ISA that allows creation of confidential virtual machines}
 }
 \newglossaryentry{g_tee}
 {
-  name=trusted execution environment,
+  name=Trusted Execution Environment (TEE),
   description={An execution environment that is eligible to run applications isolated and protected from the rest of
   the system. Offers the ability to prove these features through remote attestation}
 }
 \newglossaryentry{g_tlb}
 {
-  name=translation lookaside buffer,
+  name=Translation Lookaside Buffer (TLB),
   description={Cache structure that stores translations from virtual to physical addresses}
 }
 \newglossaryentry{g_tpm}
 {
-  name=trusted platform module,
-  description={Isolated cryptographic coprocessor that is able to measure the state of a platform and attest to it's measurements}
+  name=Trusted Platform Module (TPM),
+  description={Isolated cryptographic coprocessor that is able to measure the state of a platform and attest to its measurements}
 }
 %
-% V ----------------------------------------------------------------------------------------------------------------\newglossaryentry{g_tpm}
+% V ----------------------------------------------------------------------------------------------------------------
 \newglossaryentry{g_vm}
 {
-  name=virtual machine,
+  name=Virtual Machine (VM),
   description={Software encapsulated computing system}
 }

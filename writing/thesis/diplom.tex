@@ -17,15 +17,15 @@
 \usepackage{fontspec}
 
 \usepackage[citebordercolor={0.75 0.75 1},
-filebordercolor={0.75 0.75 1},
-linkbordercolor={0.75 0.75 1},
-% pagebordercolor={0.75 0.75 1},
-urlbordercolor={0.75 0.75 1},
-pdfborder={0.75 0.75 1},
-hidelinks,
+  filebordercolor={0.75 0.75 1},
+  linkbordercolor={0.75 0.75 1},
+  % pagebordercolor={0.75 0.75 1},
+  urlbordercolor={0.75 0.75 1},
+  pdfborder={0.75 0.75 1},
+  hidelinks,
 plainpages=false,pdfpagelabels=true]{hyperref}
 \hypersetup{%
-  pdftitle={Leveraging core-local Resources to Prevent Side Channels in Trusted Execution Environments},
+  pdftitle={Leveraging Core-local Resources to Prevent Side Channels in Trusted Execution Environments},
   pdfauthor={Pascal Scholz},
   pdfkeywords={TEE, confidential computing},
 }
@@ -40,7 +40,7 @@ plainpages=false,pdfpagelabels=true]{hyperref}
 \input{preamble/newcommands.tex}
 
 % If you know when you will hand in your thesis, enter the date here.
-\date{24. April 2025}
+\date{16. Juli 2025}
 \newcommand{\printdate}{\@date}
 
 \begin{document}
@@ -59,7 +59,7 @@ plainpages=false,pdfpagelabels=true]{hyperref}
 \selectlanguage{english}
 
 \begin{abstract}
-    \input{content/02_abstract.tex}
+  \input{content/02_abstract.tex}
 \end{abstract}
 
 \cleardoublepage
@@ -92,13 +92,14 @@ plainpages=false,pdfpagelabels=true]{hyperref}
 \include{content/70_conclusion}
 
 \appendix
+\include{content/80_appendix}
 
 \printglossary[style=altlist]
 \printglossary[type=\acronymtype,style=long]
 
 \iffalse
-    % an aid for Kile autocompletion
-    \bibliography{own.bib}
+% an aid for Kile autocompletion
+\bibliography{own.bib}
 \fi
 \printbibliography
 
