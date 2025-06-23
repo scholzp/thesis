@@ -154,12 +154,11 @@ by DRAM are allowed for these types of memory, while the same operations being
 served by other CPUs are not allowed.\\
 
 The payload of TEECore is called a trusted application. In the proof of concept,
-implementation tasks are implemented as functions and are thus statically
-embedded into the TEECore binary. A trusted application is allowed to access the
-shared memory communication channel. TEECore monitors this access and makes it
-part of its measurements. After a trusted application run, TEECore
-creates a Snapshot from the \gls{pmc} registers and a report based on this
-information.
+tasks are implemented as functions and are thus statically embedded into the
+TEECore binary. A trusted application is allowed to access the shared memory
+communication channel. TEECore monitors this access and makes it part of its
+measurements. After a trusted application run, TEECore creates a Snapshot from
+the \gls{pmc} registers and a report based on this information.
 
 \section{Trusted Applications}
 \label{sec:30:tee_apps}
@@ -370,17 +369,18 @@ attack.
 % frame is and how an attacker could abuse it.
 TEECore also protects against interrupt-based single-stepping attacks like
 SGX-Step (\ref{sec:20:interrupt_sca}). With the special configuration of the
-\gls{idt}, all interrupts received by TEECore lead to the same result: a
-platform reset. To summarize, TEECore can defend against an attacker who reads
-and writes to memory addresses contained in the cache of the isolated core, as
-these actions result in MESI state changes. This attacker can have arbitrary
-privileges if the attack is not executed from within the \gls{smm}. Likewise,
-I/O ports are not considered an attack vector by me, as the application model of
-TEECore forbids access to I/O devices. Moreover, TEECore is designed to run in
-an environment with any form of simultaneous multithreading, as it cannot defend
-against sibling threads that share resources of a CPU core. A mitigation to
-employ against this shortcoming is disabling any sibling threads, so that the
-CPU can only execute one hardware thread per CPU core.\\
+\gls{idt}, all interrupts received by TEECore, including including \glspl{nmi},
+lead to the same result: a platform reset. To summarize, TEECore can defend
+against an attacker who reads and writes to memory addresses contained in the
+cache of the isolated core, as these actions result in MESI state changes. This
+attacker can have arbitrary privileges if the attack is not executed from within
+the \gls{smm}. Likewise, I/O ports are not considered an attack vector by me, as
+the application model of TEECore forbids access to I/O devices. Moreover,
+TEECore is designed to run in an environment with any form of simultaneous
+multithreading, as it cannot defend against sibling threads that share resources
+of a CPU core. A mitigation to employ against this shortcoming is disabling any
+sibling threads, so that the CPU can only execute one hardware thread per CPU
+core.\\
 
 The \gls{smm} serves as an exception from the aforementioned security guarantees
 because it can effectively prevent TEECore from reacting to the occurrence of
