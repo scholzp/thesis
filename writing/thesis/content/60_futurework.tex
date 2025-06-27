@@ -16,8 +16,8 @@ specific \textit{syscall} and \textit{sysret} instructions.
 Second, a secure channel would need to be established to exchange data between
 secure applications and applications in the normal partition. The shared memory
 communication path can be used for such a channel as a medium. To allow secure
-communication via this channel, TEECore would need to implement some asymmetric
-key exchange algorithm for key exchange with a remote party and consequent
+communication via this channel, TEECore would need to implement some key
+exchange algorithm for key exchange with a remote party and consequent
 encryption of the shared memory.
 
 Third, TEECore currently only works with tasks that are directly embedded as a
@@ -69,7 +69,6 @@ TEECore. Some AMD processors implement a similar feature that allows for the
 specification of quality of service constraints for cache usage. Further,
 TEECore could use undocumented features such as cache-as-ram (CAR).
 
-\cleardoublepage
 %%% Local Variables:
 %%% TeX-master: "diplom"
 %%% End:
