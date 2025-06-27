@@ -169,15 +169,15 @@ et.al~\cite{sabt2015trusted}. They define the \gls{tee} in the following way:
   } \mbox{ -- Sabt et al.~\cite{sabt2015trusted}}
 \end{quote}
 
-The first half of the definition describes a secure execution environment. A
-secure execution environment can protect the integrity, authenticity, and
-confidentiality of the application hosted by the SEE. Malicious privileged
-software is thus neither able to modify the code, tamper with the runtime state,
-nor observe code and data through the runtime. Contrary to \glspl{tee}, a SEE
-cannot prove these claims against an appraiser, and much less to a third party
-outside the system. This is because it does not require a root of trust to be
-present in the system. To prove its trustworthiness, \glspl{tee} employ remote
-attestation, which is the second important aspect of the definition.\\
+The first half of the definition describes a \gls{see}. A \gls{see} can protect
+the integrity, authenticity, and confidentiality of the application hosted by
+the \gls{see}. Malicious privileged software is thus neither able to modify the
+code, tamper with the runtime state, nor observe code and data through the
+runtime. Contrary to \glspl{tee}, a \gls{see} cannot prove these claims against
+an appraiser, and much less to a third party outside the system. This is because
+it does not require a root of trust to be present in the system. To prove its
+trustworthiness, \glspl{tee} employ remote attestation, which is the second
+important aspect of the definition.\\
 
 Trusted execution environment consists of several building blocks. The first
 building block Sabt et al. propose is a secure boot. This building block allows
