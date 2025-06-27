@@ -21,21 +21,18 @@ side-channel-free. TEECore prevents side channels by utilizing only CPU core
 exclusive resources of multi-core CPUs. This approach ensures no communication
 paths to other cores of the same CPU exist. I have shown that in a carefully
 crafted environment, \glspl{pmc} can be used to detect side channels reliably.
-By sending interrupts on information breaches, TEECore can react to attacks. At
-this point, it is important to differentiate between preventing and reacting to
-side channels. TEECore does not protect from side-channel attacks. As I have
-shown, this comes from the cache coherency algorithms implemented by the Intel
-Core i7 14700k I used for testing, which makes it possible for carefully crafted
-attacks to retrieve data. Furthermore, I demonstrated that TEECore, while able
-to detect side channels and create a widely free interrupt environment, is still
-vulnerable to x86 INIT \gls{ipi}. This \gls{ipi} transfers the CPU running
-TEECore to a state that makes it impossible for TEECore to respond to any
-attack. On its own, TEECore, therefore, is not suitable to protect data.
-Nevertheless, as I argued in chapter~\ref{eval:compare:security}, TEECore could
-assist in protecting other \gls{tee} solutions and make them detect side-channel
-attacks.
-
-\cleardoublepage
+TEEcore can react to attacks by programming the performance counting facility to
+send \glspl{pmi} on occurrence of such events. At this point, it is important to
+differentiate between preventing and reacting to side channels. TEECore does not
+protect from side-channel attacks. As I have shown, this comes from the cache
+coherency algorithms implemented by the Intel Core i7 14700k I used for testing,
+which makes it possible for carefully crafted attacks to retrieve data. As such,
+the INIT-\gls{ipi} attack demonstrates TEECore's shortcommings.
+This \gls{ipi} transfers the CPU running TEECore to a state that makes it
+impossible for TEECore to respond to any attack. On its own, TEECore, therefore,
+is not suitable to protect data. Nevertheless, as I argued in
+chapter~\ref{eval:compare:security}, TEECore could assist in protecting other
+\gls{tee} solutions and make them detect side-channel attacks.
 
 %%% Local Variables:
 %%% TeX-master: "diplom"
