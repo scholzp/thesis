@@ -6,17 +6,17 @@ addresses, and names on over 855 websites~\cite{haveibeenpawned}. Criminals can
 use disclosed personal data, for example, for fraud, social engineering, and
 identity theft. Furthermore, even without criminals, protecting privacy can be
 of great value. After all, privacy also concerns how data is collected and
-processed, as single pieces of information about an individual, that do not tell
-much on their own, can be linked together to form a more comprehensive picture
-of said individual~\cite{solove2007ve}. In an ideal world, the user would not
-only be able to transmit encrypted data to a service but also to verify how the
-provider processes their data. To increase privacy even further, a user can
-request a proof that the server's operator does not spy on the processing
-routine. A technology allowing these verification forms is called a \gls{tee}.
-Trusted execution environments have an isolation mechanism to defend against
-spying and modifying attacks. Moreover, they implement protocols to verify those
-isolation properties towards an relying party over the network, a technology
-referred to as remote attestation. \\
+processed. While single pieces of information about an individual might not tell
+much on their own, these pieces can be linked together to form a more
+comprehensive picture of said individual~\cite{solove2007ve}. In an ideal world,
+the user would not only be able to transmit encrypted data to a service but also
+to verify how the provider processes their data. To increase privacy even
+further, a user can request a proof that the server's operator does not spy on
+the processing routine. A technology allowing these verification forms is called
+a \gls{tee}. Trusted execution environments have an isolation mechanism to
+defend against spying and modifying attacks. Moreover, they implement protocols
+to verify those isolation properties towards an relying party over the network,
+a technology referred to as remote attestation. \\
 
 A tangible example of how remote attestation can help solve real-world problems
 is the implementation of Signal's automatic contact discovery service. The
@@ -30,11 +30,14 @@ Signal also aims to provide a good user experience. To do so, the developers of
 Signal saw themself confronted by the problem of implementing a
 privacy-preserving way for automatic contact discovery~\cite{SignalCd}.\\
 
-Consequently, Signal does not store phone numbers to identify their users' in
-their databases. Instead, phone numbers are used as input to a hash function to
-generate user identifiers. The Signal client on the users' device generates
-these hashes, truncates them, and transmits the results to the server. In this
-way, Signal does not learn the phone numbers of its users.\\
+Consequently, Signal does not store phone numbers on their servers to identify
+their users. Instead, users' phone numbers are processed by their devices to
+create pseudonyms. These pseudonyms are the result of a hash function, called
+hashes. The Signal client on the users' device generates these hashes, truncates
+them, and transmits the results to the server. The sever can then compare these
+pseudonyms with its database of registered users to connect the right contacts.
+In this way, Signal does not learn the phone numbers of its users, but is able
+to connect registered users with each other.\\
 
 When creating the contact discovery service, the implementers faced multiple
 problems. The first major problem was the requirement for a social graph. A
@@ -108,14 +111,14 @@ These technologies theoretically solve many problems around \glspl{tee}, but are
 known to be insecure because respective CPU implementations contain bugs that
 make it possible for attackers to circumvent hardware-assisted isolation
 mechanisms and leak secrets through side
-channels~\cite{kocher_spectre_2020,lipp_meltdown_2020,nilsson_survey_2020}. While
-software updates could mitigate specific side-channel attacks, the source of the
-information leaks is still persistent in hardware, with researchers still
+channels~\cite{kocher_spectre_2020,lipp_meltdown_2020,nilsson_survey_2020}.
+While software updates could mitigate specific side-channel attacks, the source
+of the information leaks is still persistent in hardware, with researchers still
 finding new side-channel attacks each
-year~\cite{wikner2022retbleed,moghimi_downfall_2023,ragab_ghostrace_2024}. On the
-other hand, the example of Signal elucidates that proper working \glspl{tee} are
-important because they might process critical data. In this thesis, I am going
-to explore how to guarantee side-channel free execution of software in a
+year~\cite{wikner2022retbleed,moghimi_downfall_2023,ragab_ghostrace_2024}. On
+the other hand, the example of Signal elucidates that proper working \glspl{tee}
+are important because they might process critical data. In this thesis, I am
+going to explore how to guarantee side-channel free execution of software in a
 \gls{tee} by restricting the run time environment to core local resources.
 Furthermore, I am going to explore a mechanism that leverages performance
 measurement counters to monitor any information breaches.
