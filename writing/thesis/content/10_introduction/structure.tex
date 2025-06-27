@@ -1,59 +1,18 @@
 \section{Structure}
 \label{sec:10_structure}
-\todo{rework this chapter entirely}
-In the following section, I give an overview of the content of this work
-and how it is structured.\\
 
-In chapter~\ref{sec:state}, I give some background information and
-introduce concepts to help understand the remaining parts of my
-thesis. First, in section~\ref{sec:20:technical}, I explain some
-technical details about the x86 \gls{isa}, which are important to understand the
-design decisions and implementation from a technical background. This includes
-the different operation modes of x86\_64 processors, information on how
-interrupt delivery works, how memory is managed using paging, and how caches
-work. Moreover, I will give insight into how \glspl{pmc} work and how they are
-programmed, as they form the technical backbone of my detection routine.
-
-Following the technical background of the x86\_64 \gls{isa} I want to explain
-some building block for \glspl{tee} (section~\ref{sec:20:chain_of_trust}) before
-we review selected \gls{tee} implementations in section~\ref{sec:state:tee},
-which serve as inspiration for my work.
-
-These solutions have shortcomings, so it is important to see under
-what conditions they fail to uphold their security promises. For this, I want
-to explain selected attacks on \glspl{tee} in section~\ref{sec:20:attacks} and
-in section~\ref{sec:20:mitigations} approaches to mitigate them or detect them.
-
-After this, I summarize chapter~\ref{sec:state} in
-section~\ref{sec:20:summary}.\\
-
-Chapter~\ref{sec:design} will give insights into my design decisions for
-the prototype implementation. Because the prototype is no standalone solution, I
-will first explain the environment in which the prototype will operate and how
-it interacts with other system components (c.f.
-section~\ref{sec:30:environment}). Section~\ref{sec:30:tee_kernel} will then
-describe the \gls{tee} component and its design in more detail before we
-see how different attacks could mounted against the design in
-section~\ref{sec:30:attack}.\\
-
-Once we learn about the design, chapter~\ref{sec:40} will give
-details about the implementation and some of its highlights. First, the kernel
-used in the implementation and what modifications were made will be
-explained in section~\ref{sec:implementation:teeKernel}. Next, in
-section~\ref{sec:implementation:hostKernel}, I explain how Linux is used in the
-system as the host kernel. Because Linux cannot communicate
-out-of-the-box with my prototype, I programmed a kernel module that serves as a
-driver. Implementation details on this module will be explained in
-section~\ref{sec:implementation:kmod}. The last part of chapter~\ref{sec:40}
-consists of details about applications and attacks that I use to demonstrate the
-security properties of my prototype and benchmark different characteristics.
-Those can be found in section~\ref{sec:implementation:attacks}. \\
-
-In the evaluation chapter~\ref{sec:evaluation}, I will evaluate the prototype
-regarding its defense probability against the attacks implemented in
-section~\ref{sec:implementation:attacks}. Moreover, I measure the memory
-requirements of the \gls{tee} runtime component of the prototype to conclude
-what resources are left for payload tasks. \todo{add more about evluation}
-
-\todo{add more about furuture work}
-\todo{add more about conclusion}
+In this section, I give an overview of the content of this work and how it is
+structured. First, in chapter~\ref{sec:state}, I will provide an introduction to
+the topic in general. In this chapter, the reader will learn about technical
+details relevant later in this thesis, as well as attacks against which I
+provide a solution. Chapter~\ref{chap:related} discusses related work, including
+already existing solutions for trusted execution environments. After learning
+about these solutions and their vulnerabilities, I propose a design of a
+mitigating solution in chapter~\ref{sec:design} before I highlight the technical
+details of my prototype implementation of this design in
+chapter~\ref{sec:implementation}. The implementation chapter is followed by
+chapter~\ref{sec:evaluation}, in which I reflect on the security properties of
+my prototype, as well as evaluating different other technical aspects of my
+solution. In chapter~\ref{sec:futurework}, I give an overview of future work,
+including missing features and possibilities for future evaluation of the
+prototype. Finally, I conclude my work in chapter~\ref{sec:conclusion}.
