@@ -20,7 +20,8 @@ handling routines ensure that TEECore becomes unresponsive after receiving an
 interrupt, by executing an endless loop. To further evaluate the content of
 \glspl{pmc}, I configure them to not yield any \gls{pmi}. This configuration
 allows me to investigate the behavior of the CPU cache in more detail. TEECore
-prints this information through a serial connection.\\
+prints this information through a serial connection.\todo{If this worked out:
+Write about serilazing instructions}\\
 
 The test environment I used for the following evaluation consists of an Intel
 Core i7 14700k processor. It is part of the Intel Raptor Lake hybrid
@@ -152,50 +153,56 @@ this means that TEECore should, at most, use 2 MiB of memory. The difference
 between this cache size and the number of cache lines used by TEECore should
 yield the maximum number of cache lines a payload could use in the form of a
 secure application. In practice, memory alignment can restrict the actual number
-of usable cache lines for TEECore. Because Raptor Cove's L1 and L2 cache
-associativity is 12, respectively 8, not all possible memory addresses can be
-stored in all cache lines.\\
+of usable cache lines for TEECore. Because Raptor Cove's L1D and L2 cache
+associativity is 12, respectively 16, not all possible memory addresses can be
+stored in all cache lines. Table~\ref{50:tab:cache_size} lists Raptor Cove's
+cache parameters as stated in the official data
+sheet~\cite{raptorlake_spec_sheet}. The L2 and L3 caches in Raptor Cove are
+non-inclusive.\\
 
 \begin{table}[ht]
   \centering
-  \begin{tabular}{ |l||c|c|c|c| }
+  \begin{tabular}{ |l||c|c|c|c|c| }
     \hline
-    Array Size & Size   & Associativity   & Line Size & Number of Lines \\
+    Array Size & Size   & Associativity   & Line Size & Number of Lines & Lines per Set \\
     \hline
-    L1I Cache  & 32 KiB & 8               & 64 Bytes  & 512             \\
-    L1D Cache  & 48 KiB & 12\footnotemark & 64 Bytes  & 768             \\
-    L2 Cache   & 2 MiB  & 8               & 64 Bytes  & 32,768          \\
-    L3 Cache   & 3 MiB  & 8               & 64 Bytes  & 49,152          \\
+    L1I Cache  & 32 KiB & 8               & 64 Bytes  & 512             & 64            \\
+    L1D Cache  & 48 KiB & 12              & 64 Bytes  & 768             & 64            \\
+    L2 Cache   & 2 MiB  & 16              & 64 Bytes  & 32,768          & 2,048         \\
+    L3 Cache   & 3 MiB  & 12              & 64 Bytes  & 49,152          & 4,096         \\
     \hline
   \end{tabular}
   \caption{Cache Parameters of Intel Raptor Cove Microarchitecture}
   \label{50:tab:cache_size}
 \end{table}
-\footnotetext{Intel's specification sheet states a associativity of 8, while
-  the CPUID instruction reports one of 12. The CPUID result is most likely
-  correct, as an associativity of 8 would yield a number of sets of 96, which is
-not a power of two.}
 
-To evaluate memory constraints, I will use a simple, trusted application whose
-only purpose is to increase a counting variable stored in shared memory. This
-scenario mimics the minimum working set of a secure application in TEECore. I
-used different performance counter events to evaluate the memory used by
-TEECore. These events are shown in table~\ref{50:tab:events}. I use the event
-\textit{FRONTEND\_RETIRED.L1I\_MISS} as an indicator of TEECore usage of the
-instruction cache. Low values indicate that TEECore fits the L1 instruction
-cache and thus can fit the 32 KiB of this cache. This event only counts one miss
-per cache line and required me to additionally program a PEBS \gls{msr}
-register. The event \textit{L1D.REPLACEMENT} indicates the number of times a
-cache line in the L1 data cache was replaced. High values indicate that TEECore
-uses more than 48 KiB of cache for data. The event
-\textit{MEM\_LOAD\_RETIRED.L2\_HIT} indicates that TEECore is using more memory
-than the L1 data and instruction cache can provide. Events of type
-\textit{MEM\_LOAD\_RETIRED.L3\_HIT} indicate that TEECore is using more than 2
-MiB and, therefore, requires more memory than the L1 and L2 caches can provide.
-This event further indicates that it is spilling into shared resources and,
-therefore, indicates that TEECore can no longer uphold its security guarantees.
-Therefore, I regard any occurrence as unacceptable. In the remaining part of
-this chapter, I will refer to these events by their abbreviation.
+To evaluate memory constraints, I will use a simple trusted application which
+allocates all available memory. After allocating memory, this application access
+the memory by first reading and the writing an incremented value back the each
+64 bytes field. These memory accesses are those that I measure. The application
+does no communication with the normal partition. I used different performance
+counter events to evaluate the memory used by TEECore. These events are shown in
+table~\ref{50:tab:events}. I use the event \textit{FRONTEND\_RETIRED.L1I\_MISS}
+as an indicator of TEECore usage of the instruction cache. Low values indicate
+that TEECore fits the L1 instruction cache and thus can fit the 32 KiB of this
+cache. This event only counts one miss per cache line and required me to
+additionally program a PEBS \gls{msr} register. Because the code was never run
+before, I expect the counter to be not zero. The event \textit{L1D.REPLACEMENT}
+indicates the number of times a cache line in the L1 data cache was replaced.
+This is the case whenever the CPU needs to swap lines between the L1 cache and
+any other resource. High values indicate that TEECore uses more than 48 KiB of
+cache for data. The event \textit{MEM\_LOAD\_RETIRED.L2\_HIT} indicates that
+TEECore is using more memory than the L1 data and instruction cache can provide.
+Events of type \textit{MEM\_LOAD\_RETIRED.L2\_MISS} indicate that TEECore is
+using more than 2 MiB and, therefore, requires more memory than the L1 and L2
+caches can provide. This is event is also useful to make claims about the
+effectiveness about TEECore's initialization phase. The
+\textit{MEM\_LOAD\_RETIRED.L2\_MISS} event further indicates if memory is
+spilling into shared resources and, therefore, indicates that TEECore can no
+longer uphold its security guarantees. To summarize, any occurrences of this
+event indicates that TEECore uses shared resources. Therefore, I regard any
+occurrence as unacceptable. In the remaining part of this chapter, I will refer
+to all events by their abbreviation as listed in table~\ref{50:tab:events}.
 
 \begin{table}[ht]
   \centering
@@ -212,6 +219,114 @@ this chapter, I will refer to these events by their abbreviation.
   \caption{Performance Monitoring Events for evaluating memory constraints}
   \label{50:tab:events}
 \end{table}
+
+The remaining parts of this section split into two parts. In
+section~\ref{eval:mem_constraints:influences}, I investigate what effects the
+implementation of Raptor Cove's cache has on TEECore. In
+Section~\ref{eval:mem_constraints:size} I evaluate results of the performance
+counters for different allocated sizes.
+\FloatBarrier
+
+\subsection{Effects of Cache Implementation on Measurements}
+\label{eval:mem_constraints:influences}
+While evaluating the constraints the cache implementation imposes on TEECore, I
+found that the initialization routine did not work as intended. In this section
+I will explain why additional steps are necessary to correctly implement
+TEECore's initialization routine. Table~\ref{50:tab:init} shows performance
+counter results for repeatedly accessing the memory allocated by the test
+application.
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{ |l||c|c|c|c| }
+    \hline
+    Event        & MEM\_OPS\_TOTAL & L1D\_REPLACEMENT & L2\_HIT & L2\_MISS \\
+    \hline
+    1st Pass   & 3a815 & 7503 & 488 & 7061         \\
+    2nd Pass  & 3a815 & 7503 & 1c79 & 5709          \\
+    3rd Pass   & 3a815 & 7504 & 623a & 1119         \\
+    4th Pass  & 3a815 & 7504 & 7371 & 0          \\
+    \hline
+  \end{tabular}
+  \caption{Performance Monitoring Result without Initialization Phase}
+  \label{50:tab:init}
+\end{table}
+
+To reproduce the effect of the initialization phase, I ran and measured the
+memory access in multiple passes. Each pass performs the same memory operations
+as described in section~\ref{eval:mem_constraints}. To prove that all passes
+perform the same number of memory operations, I replaced the instruction event
+with one that measures the total number of memory operations (MEM\_OPS\_TOTAL).
+The test application operates on the maximum available memory, that is, 1,876
+KiB of consecutive memory. As described in the design
+chapter\ref{sec:implementation:teeKernel}, the expected behavior would be that
+after the initialization phase, no L2 misses occur. In this test, the
+initialization phase is emulated by the first pass. As the measurement results
+in table~\ref{50:tab:init} show, this is not the case. Instead, L2 misses occur
+until the fourth pass.\\
+
+Because TEECore uses 2 MiB of consecutive memory, which is aligned at a 2 MiB
+boundary, no conflict misses can occur. To create conflict misses in the L2
+cache, TEECore would need to access more pages that hash to the same cache tag
+than the number of sets would allow for. This is only the case if TEECore maps
+memory whose physical addresses lie 2 MiB apart. Another point that contradicts
+the idea that conflicts cause these misses is the fact that the number of
+conflicts decreases with the number of passes. If the cause was conflict misses,
+repeated access to the same memory with the same access pattern would yield the
+same amount of conflict misses.\\
+
+Further investigation shows that the cache replacement policy can have an
+influence that I did not account for in my design and initial implementation.
+Research suggests that Intel implements a replacement policy called \gls{qlru}
+in the L2 and L3 caches of their recent processors \cite{briongos2020reload+,
+Abel20b}. With this algorithm, each cache line has an age state stored in two
+bits. The minimum age is thus zero, and the maximum age is three. Concerning the
+implementation, either the leftmost or rightmost line in a set is replaced that
+has an age of three. If no lines have an age of three, the hardware increments
+all age counters by one. It now searches for a line with age 3 to replace. New
+lines are initialized with an age of 0 in Icelake processors. Additionally, the
+\textit{WBINVD} instruction does not reset the age state~\cite{Abel20b}. As
+Icelake is the successor of Raptor Cove, I assume the same to be the case for
+Raptor Cove. This assumption fits the observed caching behavior.\\
+
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/qlru.tex}
+    \caption{Example of Cache Line Replacement using the \gls{qlru} Algorithm in a Cache Set}
+    \label{fig:50:qlru}
+  \end{center}
+\end{figure}
+
+A simplified example that needs two initialization passes is shown in
+Figure~\ref {fig:50:qlru}. Assume we have a working set of data $W$ that
+consists of $W = \{w_1, w_2, w_3, w_4\}$ and a second set of data $I$ that fills
+the cache. The initial data set $I = \{i_1, i_2, i_3, i_4\}$ was loaded before
+the initialization phase to the cache, e.g., while executing boot code. The
+topmost box shows the initial state before running each pass in Figure~\ref
+{fig:50:qlru}. First, the cache only contains items from the initial data set
+with different age states. Upon accessing $w_1$, a cache miss is generated.
+Because the age of $i_3$ is three, the cache replaces it with $w_1$. The initial
+age of any item brought to the cache is 1. The second access is done to $w_2$.
+Again, a cache miss occurs. Because no item has an age of 3, all age states are
+incremented. As a result, $i_1$ reaches an age of 3 and is replaced by $w_2$
+with an age of 1. When accessing $w_3$, the cache misses again. As a result, all
+ages are incremented again, and $i_3$ and $w_1$ reach an age of 3. The leftmost
+item, which is $i_3$, is replaced by $w_1$ and an age of 1. Because now $w_1$
+has reached the age of 3, it is now replaced by $w_4$ in the next step. After
+the first pass the cache contains $w_2, i_2, w_3$ and $w_4$ although all items
+of $W$ were accessed. To fill all cache lines with data from $w$, a second pass
+is required. The first two accesses work in the same manner as before. The last
+two accesses hit the cache. They result in the reduction of the age of the
+respective items.\\
+
+Due to the possibility of cache items having an age of zero and a maximum age of
+3, at least three initialization passes are necessary to ensure that the age of
+all items already residing in the cache reaches the maximum value. A fourth run
+then ensures that all of those items are replaced with values from the working
+set.
+
+\FloatBarrier
+\subsection{Effects of increasing Working Set}
+\label{eval:mem_constraints:size}
 
 I measure two scenarios for all test cases. For the first scenario (SC1), I will
 measure all high-level code TEECore. This scenario includes all TEECore's
