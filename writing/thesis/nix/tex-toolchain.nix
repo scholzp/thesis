@@ -14,6 +14,7 @@ texlive.combine {
     latexmk
     mfirstuc
     makecell
+    placeins
     siunitx
     standalone
     todonotes
