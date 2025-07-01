@@ -27,10 +27,10 @@ Linux as kernel running in the normal partition. The prototype of TEECore
 requires Linux to set it up and prepare memory for it. In
 section~\ref{sec:implementation:hostKernel}, I describe how I configured Linux
 to set uo TEECore. To enable Linux to communicate with TEECore finally, I
-implemented a driver as a loadable Linux kernel module. I describe this kernel
-module in section~\ref{sec:implementation:kmod}.\todo{Something something
-trusted applications} As a target for the prototype implementation of TEECore I
-use an Intel Core i7 14700k processor.
+implemented a driver as a Linux kernel module. I describe this kernel in
+section~\ref{sec:implementation:kmod}.\todo{Something something trusted
+applications} As a target for the prototype implementation of TEECore I use an
+Intel Core i7 13700k processor.
 
 \section{TEECore}
 \label{sec:implementation:teeKernel}
