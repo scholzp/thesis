@@ -52,6 +52,8 @@ tested cases, I assume the attacker to have privileged rights as described in
 section~\ref{sec:30:tee_attacker_model}. The attacker can, therefore, do
 everything the privileged software in the normal partition is capable of.\\
 
+\subsection{Passive Attacker}
+\label{sec:evaluation:passive}
 The first test cases test basic functionality to detect attacks that use memory
 access and the inclusive caches as an attack vector. These attacks are to be
 detected by TEECore through changes in the cache lines that result from the
@@ -94,6 +96,8 @@ TEECore. This test showed a shortcoming of TEECores protection capabilities in
 an early implementation phase because an attacker that only reads could not be
 detected without the initial write to all memory.\\
 
+\subsection{Active Attacker}
+\label{sec:evaluation:active}
 The simulation for an attacker that writes to the target memory is similar in
 setup but different in its effects. As with the read attack, the secure
 application shares the physical address of the target memory with the Linux
@@ -110,6 +114,8 @@ remote side and reads on the target side should yield events because of the
 involved cache line state modifications for each operation. TEECore shows
 exactly this behavior. It, therefore, can detect the attacker described.\\
 
+\subsection{False Positives}
+\label{sec:evaluation:fp}
 Another aspect is the number of false positives of events that TEECore detects.
 For this, I used another modification of the attack described before. Once
 again, the secure application allocates the target memory and transmits the
@@ -119,6 +125,8 @@ result, TEECore should measure neither L2 cache misses nor L3 cache hits.
 Repeating this test in 10 iterations showed that TEECore did not measure any
 false positives. All \glspl{pmc} measured zero occurences.\\
 
+\subsection{Inter-processor Interrupts}
+\label{sec:evaluation:ipi}
 As an additional attack vector, I identified interrupts. For Interrupts such as
 the default vectors, \glspl{nmi} and \glspl{pmi}, which are routed through the
 \gls{idt}, the countermeasures described in~\ref{sec:30:tee_kernel} are taken.
@@ -181,34 +189,17 @@ allocates all available memory. After allocating memory, this application access
 the memory by first reading and the writing an incremented value back the each
 64 bytes field. These memory accesses are those that I measure. The application
 does no communication with the normal partition. I used different performance
-counter events to evaluate the memory used by TEECore. These events are shown in
-table~\ref{50:tab:events}. I use the event \textit{FRONTEND\_RETIRED.L1I\_MISS}
-as an indicator of TEECore usage of the instruction cache. Low values indicate
-that TEECore fits the L1 instruction cache and thus can fit the 32 KiB of this
-cache. This event only counts one miss per cache line and required me to
-additionally program a PEBS \gls{msr} register. Because the code was never run
-before, I expect the counter to be not zero. The event \textit{L1D.REPLACEMENT}
-indicates the number of times a cache line in the L1 data cache was replaced.
-This is the case whenever the CPU needs to swap lines between the L1 cache and
-any other resource. High values indicate that TEECore uses more than 48 KiB of
-cache for data. The event \textit{MEM\_LOAD\_RETIRED.L2\_HIT} indicates that
-TEECore is using more memory than the L1 data and instruction cache can provide.
-Events of type \textit{MEM\_LOAD\_RETIRED.L2\_MISS} indicate that TEECore is
-using more than 2 MiB and, therefore, requires more memory than the L1 and L2
-caches can provide. This is event is also useful to make claims about the
-effectiveness about TEECore's initialization phase. The
-\textit{MEM\_LOAD\_RETIRED.L2\_MISS} event further indicates if memory is
-spilling into shared resources and, therefore, indicates that TEECore can no
-longer uphold its security guarantees. To summarize, any occurrences of this
-event indicates that TEECore uses shared resources. Therefore, I regard any
-occurrence as unacceptable. In the remaining part of this chapter, I will refer
-to all events by their abbreviation as listed in table~\ref{50:tab:events}.
+counter events to evaluate different aspects of TEECore. These events are shown
+in table~\ref{50:tab:events}. For the following tests I differentiate between
+high-level Rust code, that is used to program the run time environment and
+low-level assembly code that is run before the high-level code to setup the
+environment.
 
 \begin{table}[ht]
   \centering
   \begin{tabular}{ |p{6cm}|p{1.35cm}|p{1.25cm}|p{4cm}|}
     \hline
-    \makecell[l]{Intel Perfmon Event Name \\ (abbreviation)} & Selector & UMask & Description                                                                      \\
+    \makecell[l]{Intel Perfmon Event Name \\ (Abbreviation)} & Selector & UMask & Description                                                                      \\
     \hline
     \makecell[l]{FRONTEND\_RETIRED.L1I\_MISS\\ (L1I\_MISS)}  & 0x80     & 0x04  & Counts cycles where a code line fetch is stalled due to an L1 instruction cache miss. The decode pipeline works at a 32 Byte granularity. \\
     \makecell[l]{L1D.REPLACEMENT \\ (L1D\_REPLACEMENT)}      & 0x51     & 0x01  & Counts cache lines replaced into the L0 and L1 d-cache.                          \\
@@ -219,6 +210,56 @@ to all events by their abbreviation as listed in table~\ref{50:tab:events}.
   \caption{Performance Monitoring Events for evaluating memory constraints}
   \label{50:tab:events}
 \end{table}
+\FloatBarrier
+
+\subsection{Code Size}
+\label{sec:evaluation:mem:code}
+To measure the size of the run time environment I use the event
+\textit{L1I\_MISS}. It serves as an indicator of TEECore's usage of the
+instruction cache. For this, I modified the low-level setup code to program a
+\gls{pmc} to measure \textit{L1I\_MISS} right before transferring control to the
+high-level code. Without any warmup run, L1I misses yield the number of lines
+that were fetch to execute TEECore. This effectively tells us the size of
+TEECore's code. This event only counts one miss per cache line and requires me
+to additionally program a PEBS \gls{msr}. Because the code was never run before,
+I expect the counter to be not zero. Table~\ref{50:tab:code_size} shows the
+measurement results.
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{ |l||c| }
+    \hline
+    Event            & Value \\
+    \hline
+    L1I\_MISS        & 29 \\
+    \hline
+  \end{tabular}
+  \caption{Unmodified Test Case results}
+  \label{50:tab:code_size}
+\end{table}
+
+In total, xxx\todo{Zahlen bitte} lines were replaced in the L1 instruction
+cache. This means, TEECore requires yyy bytes for its code.
+
+\subsection{Total Memory Consumption}
+I use the remaining event to evaluate TEECore with respect to memory constraints
+implied by the hardware it runs on. The event \textit{L1D.REPLACEMENT} indicates
+the number of times a cache line in the L1 data cache was replaced. This is the
+case whenever the CPU needs to swap lines between the L1 cache and any other
+resource. After a warm up run, any values not zero indicate that TEECore uses
+more than 48 KiB of cache for data. The event
+\textit{MEM\_LOAD\_RETIRED.L2\_HIT} indicates that TEECore is using more memory
+than the L1 data and instruction cache can provide. Events of type
+\textit{MEM\_LOAD\_RETIRED.L2\_MISS} indicate that TEECore is using more than 2
+MiB and, therefore, requires more memory than the L1 and L2 caches can provide.
+This event is also useful to make claims about the effectiveness about TEECore's
+initialization phase. The \textit{MEM\_LOAD\_RETIRED.L2\_MISS} event further
+indicates if memory is spilling into shared resources and, therefore, indicates
+that TEECore can no longer uphold its security guarantees. To summarize, any
+occurrences of this event indicates that TEECore uses shared resources.
+Therefore, I regard any occurrence as unacceptable. In the remaining part of
+this chapter, I will refer to all events by their abbreviation as listed in
+table~\ref{50:tab:events}.
 
 The remaining parts of this section split into two parts. In
 section~\ref{eval:mem_constraints:influences}, I investigate what effects the
@@ -329,14 +370,15 @@ set.
 \label{eval:mem_constraints:size}
 
 I measure two scenarios for all test cases. For the first scenario (SC1), I will
-measure all high-level code TEECore. This scenario includes all TEECore's
-high-level setup routines and test application code. This scenario reflects the
-memory usage of the current implementation. For the second scenario (SC2), I
-will measure all code from the beginning of the execution of the test
-application. This test case reflects the minimum required memory to run the
-application. The difference between SC1 and SC2 in memory usage reveals
-potential for optimization. To measure SC2, I invalidate the whole caches by
-using the \textit{WBINVD} instruction. \\
+measure all high-level code TEECore. The high level code includes all program
+code written in Rust, but excludes all assembly code required for transferring
+the CPU to a state that can execute TEECore. This scenario reflects the memory
+usage of the current implementation. For the second scenario (SC2), I will
+measure all code from the beginning of the execution of the test application.
+This test case reflects the minimum required memory to run the application. The
+difference between SC1 and SC2 in memory usage reveals potential for
+optimization. To measure SC2, I invalidate the whole caches by using the
+\textit{WBINVD} instruction. \\
 
 My first test case is the baseline. I run the unmodified test application to
 identify the minimal memory consumption for both scenarios.
