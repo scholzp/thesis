@@ -125,16 +125,21 @@ ensure that it can detect access to data that is implicitly shared through cache
 coherency in the inclusive L3 cache.\\
 
 Before the TEECore can transfer control to tasks, it must bring the environment
-to a defined state. All memory is stored in the CPU's local cache in the
+to a defined state. All memory has to be stored in the CPU's local cache in the
 exclusive or modified state. To achieve this, TEECore writes to all memory it
 has to protect, invalidating shared cache lines in other cores in this process.
 As a result TEECore can detect whenever a remote CPU accesses data from RAM or
-shared L3 cache, as the remote copies the respective memory items to its L1
-cache, triggering a MESIF state change in the isolated cores cache. To protect a
-task against interrupt-based attacks, TEECore has to set up the \gls{idt}
-correctly so that any occurrence of any interrupt results in a system reset.
-TEECore achieves this by setting the \gls{idtr} to zero, which results in a
-general protection fault once the CPU tries to locate the \gls{idt}. Because
+shared L3 cache, as the remote CPU copies the respective memory items to its L1
+cache, triggering a MESIF state change in the isolated cores cache. Such memory
+snoops are documented behavior of all recent Intel CPUs\cite{sdm}. Nevertheless,
+I want to mention that this is a requirement for TEECore to work. Other possible
+cache implementations, for example, that would push changes of shared cache
+lines to remote cores, would not work with TEECore.\\
+
+To protect a task against interrupt-based attacks, TEECore has to set up the
+\gls{idt} correctly so that any occurrence of any interrupt results in a system
+reset. TEECore achieves this by setting the \gls{idtr} to zero, which results in
+a general protection fault once the CPU tries to locate the \gls{idt}. Because
 this provokes a second fault after the first, the CPU generates a double fault,
 ultimately resulting in a triple fault and, thus, a system reset. TEECore
 triggers a platform reset when receiving maskable interrupt and \glspl{nmi} this
@@ -254,14 +259,12 @@ expected good value. Additionally, each hash value extends a specific \gls{pcr}
 in the \gls{tpm}. Beginning from the firmware, each involved measurement is
 added to a measurement log that tracks what component was measured and what
 \gls{pcr} was extended. A given \gls{pcr} can then prove the integrity of the
-log. TEECore uses this chain in two ways. First, TEECore can verify using the
-contents of the \gls{pcr} that its setup phase is performed in a known good and,
-therefore, trusted state of the platform. Second, by making the \gls{tpm} attest
-to its \gls{pcr} values, TEECore can prove that it started from a trusted state
-and that the values that left TEECore were not modified. The latter aspect is
-important because it prevents man-in-the-middle attacks. An appraise can
-exchange asymmetric encryption key with TEECore, after successfully identifying
-it. This allows to TEECore and the appraiser to exchange confidential data.\\
+log. TEECore uses this chain in two ways. By making the \gls{tpm} attest to its
+\gls{pcr} values, TEECore can prove that itself started from a trusted state and
+that the values that left TEECore were not modified. An appraiser can exchange
+asymmetric encryption key with TEECore, after successfully identifying it. This
+allows TEECore and the appraiser to created a encrypted channel and exchange
+confidential data using it.\\
 
 A \gls{tpm} never uses its \gls{ek} to sign or encrypt data. Instead, it uses
 key derivation functions to create keys on demand with the help of its
@@ -410,14 +413,15 @@ because all memory accesses happen in the cache. Once the setup phase succeeds,
 an attacker could only observe access to the shared memory region that TEECore
 and software in the normal partition use to communicate.\\
 
-TEECore can detect if it is running inside a \gls{vm}, or if the
-platform uses a genuine \gls{tpm}. This would require network access or a
-protocol that allows TEECore network communication through software running in
-the normal partition. Physical attacks that aim at manipulation or tapping the
-bus by which the \gls{tpm} is connected to the system cannot be prevented
-by TEECore. The \gls{tcb} of TEECore consists of software involved in
-system initialization. This includes the root of trust for measurement,
-firmware, bootloader, commodity \gls{os}, and TEECore. On the hardware side, the
-\gls{tcb} consists of the \gls{tpm} and the CPU.
+TEECore cannot detect if it is running inside a \gls{vm}, or if the platform
+uses a genuine \gls{tpm}. This comes from the fact that the executing
+environment can control what code it executes. For example, a malicious
+\gls{vmm} could skip all checks implemented in TEECore and inject result of
+these checks as it pleases. Physical attacks that aim at manipulation or tapping
+the bus by which the \gls{tpm} is connected to the system cannot be prevented by
+TEECore. The \gls{tcb} of TEECore consists of software involved in system
+initialization. This includes the root of trust for measurement, firmware,
+bootloader, commodity \gls{os}, and TEECore. On the hardware side, the \gls{tcb}
+consists of the \gls{tpm} and the CPU.
 
 %%% Local Variables: %% TeX-master: "diplom" %% End:
