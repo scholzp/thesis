@@ -140,14 +140,15 @@ monitoring the behavior of CPU components external to the processor core. Such
 components, for example, include main memory, shared caches, and other shared
 resources. In Intel processors, such components are referred to as uncore. Intel
 processors implement so-called offcore-response events to measure the events
-resulting from the uncore responding to the processor core's requests. I first
-tried to use these offcore response events to measure the communication of the
-core executing TEECore with the remaining system. While I could see events
-working to count communication to the memory mapped as uncacheable, I could not
-measure any communication from and to the L3 caches of my test CPU. In contrast,
-after extensive testing, I found that some of the core's local events measured
-the activity of the L3 cache. This might be because... \todo{Add a plausible
-cause}. As a result, I decided to use the events listed in
+resulting from the uncore responding to the processor core's requests.\todo{hier nochmal checken}
+% I first tried to use these offcore response events to measure the
+% communication of the core executing TEECore with the remaining system. While I
+% could see events working to count communication to the memory mapped as
+% uncacheable, I could not measure any communication from and to the L3 caches
+% of my test CPU. In contrast, after extensive testing, I found that some of the
+% core's local events measured the activity of the L3 cache. This might be
+% because... \todo{Add a plausible cause}.
+I use the events listed in
 table~\ref{40:tab:events} to implement TEECore's attack detection mechanism.
 Table~\ref{40:tab:events} contains information about performance monitoring
 events as found at Intels
