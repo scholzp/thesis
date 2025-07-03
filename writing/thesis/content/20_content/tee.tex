@@ -8,24 +8,24 @@ trust is defined.
 
 \subsection{Chain of Trust}
 \label{sec:20:chain_of_trust}
-Signatures of real humans differ because humans do not work entirely
-deterministic. The process of forging signatures of other humans requires
-dictations and practice by the forger because the human factor introduces
-entropy to the process of signing. On the contrary, computers are built to work
-deterministically. If the same input data is processed the same way, computers
-working as intended by humans produce the same output. It is, therefore, that
-authentication in the digital realm is implemented through cryptography and the
-knowledge of secrets. Communication involves at least two parties, which we want
-to call Alice and Bob in the following example.\\
+% Signatures of real humans differ because humans do not work entirely
+% deterministic. The process of forging signatures of other humans requires
+% dictations and practice by the forger because the human factor introduces
+% entropy to the process of signing. On the contrary, computers are built to work
+% deterministically. If the same input data is processed the same way, computers
+% working as intended by humans produce the same output. It is, therefore, that
+% authentication in the digital realm is implemented through cryptography and the
+% knowledge of secrets.
 
-When referring to cryptographic algorithms, a secret is called a key, and based
-on the kind of keys used, we can differentiate between two kinds of
-cryptographic algorithms. In symmetric algorithms, the same key is used for
-encryption and decryption. Alice and Bob share thus the same secret. In
-asymmetric algorithms, each of Alice and Bob maintain their secrets. These keys
-have a public and a private part, respectively. Alice uses the public part of
-Bob's key when they want to encrypt a message for Bob, and only Bob's private
-key can decrypt a message in this way.\\
+Communication involves at least two parties, which we want to call Alice and Bob
+in the following example. When referring to cryptographic algorithms, a secret
+is called a key, and based on the kind of keys used, we can differentiate
+between two kinds of cryptographic algorithms. In symmetric algorithms, the same
+key is used for encryption and decryption. Alice and Bob share thus the same
+secret. In asymmetric algorithms, each of Alice and Bob maintain their secrets.
+These keys have a public and a private part, respectively. Alice uses the public
+part of Bob's key when they want to encrypt a message for Bob, and only Bob's
+private key can decrypt a message in this way.\\
 
 Digital signatures use asymmetric cryptography. Given that Alice wants to sign a
 message so that Bob can verify that Alice is the sender, both proceed as follows
@@ -193,13 +193,8 @@ It allows the application in the \gls{tee} to store data in a confidentiality,
 integrity, and freshness-conserving way. Trusted I/O paths secure the
 communication between a \gls{tee} and its users.\\
 
-In the following sections we will see multiple implementations of CPU vendors,
-learn about \glspl{tpm} and how a software solution can look. All of them serve
-as input for my implementation.
-
 \section{Trusted Platform Module}
 \label{sec:20:tpm}
-\todo{A lot of passive to fix here}
 The \gls{tpm} is a low-cost cryptographical coprocessor that offers different
 cryptographic functions, such as hash functions, asymmetric and symmetric
 encryption and decryption functions, asymmetric signing and verification
@@ -215,20 +210,20 @@ memory, all physically protected from the host system. Other physical separation
 means can be used to implement \gls{tpm} services, such as unique processor
 modes with dedicated memory access rights.\\
 
-The most recent version of the \gls{tpm} specification is 2.0. The first
-widespread family of \glspl{tpm} followed specification version 1.2, which was
-implemented on modules shipped with personal computers beginning from the year
-2005~\cite{arthur2015practical}. One major drawback of version 1.2 was the
-hard-coded usage of SHA-1 as a hashing algorithm. SHA-1 was first broken in 2005
-by Wang et al.~\cite{wang2005collision}. In 2011, NIST deprecated SHA-1 because
-of security concerns~\cite{nist-sha1}. \gls{tpm} 1.2 is constrained with respect
-to its data structures to use either RSA or SHA-1\cite{tpm_architecture}
-Therefore, when designing \gls{tpm} 2.0, the \gls{tcg} decided to leave the
-exact algorithms specific \glspl{tpm} support open for their implementation.
-Instead, the specification mandates a \gls{tpm} of version 2.0 to implement at
-least one symmetric hashing, one symmetric encryption, and one asymmetric
-encryption and signing algorithm. \\
-
+The most recent version of the \gls{tpm} specification is 2.0.
+% The first
+% widespread family of \glspl{tpm} followed specification version 1.2, which was
+% implemented on modules shipped with personal computers beginning from the year
+% 2005~\cite{arthur2015practical}. One major drawback of version 1.2 was the
+% hard-coded usage of SHA-1 as a hashing algorithm. SHA-1 was first broken in 2005
+% by Wang et al.~\cite{wang2005collision}. In 2011, NIST deprecated SHA-1 because
+% of security concerns~\cite{nist-sha1}. \gls{tpm} 1.2 is constrained with respect
+% to its data structures to use either RSA or SHA-1\cite{tpm_architecture}
+% Therefore, when designing \gls{tpm} 2.0, the \gls{tcg} decided to leave the
+% exact algorithms specific \glspl{tpm} support open for their implementation.
+% Instead, the specification mandates a \gls{tpm} of version 2.0 to implement at
+% least one symmetric hashing, one symmetric encryption, and one asymmetric
+% encryption and signing algorithm. \\
 In x86 systems, \gls{tpm} 2.0 is widely spread today and one of Windows 11s
 system requirements. Often, \gls{tpm} is not implemented as a dedicated hardware
 module but as firmware \gls{tpm}. The firmware \gls{tpm} is part of the Intel
@@ -249,9 +244,10 @@ generate a digest of input. Next to its cryptographic properties, the advantage
 of a hash function is the output's constant length independent of the input's
 length. Thus, the buffer only needs to be large enough to hold the result of the
 digest. Message digests are used to store data outside of the \gls{tpm} or
-generate certificates of values. The \gls{tpm} uses HMACs when storing data
-outside of it. HMACs allow verifying that this data was not altered and
-originates from a certain entity with the signing key.\\
+generate certificates of values.% The \gls{tpm} uses HMACs when storing data
+%outside of it. HMACs allow verifying that this data was not altered and
+%originates from a certain entity with the signing key.
+\\
 
 The \gls{tcg} specifies three roots of trust for a trusted system. Two of them
 can be implemented by the \gls{tpm}. The first is the root of trust for storage.
@@ -289,4 +285,3 @@ The remote party receives the quote, the public key, and the message contents.
 The remote party can validate the certificate by executing the signature
 validation function. With the public key of the \gls{tpm}, a remote party can
 verify that the \gls{tpm} is genuine, and the vendor pledged to do so.
-\todo{Do we need information on how system software interacts with the TPM?}
