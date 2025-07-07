@@ -25,7 +25,9 @@ function into TEECore's code. This makes it complicated to adopt TEECore to new
 tasks. To support easier adoption, TEECore should be able to load tasks from
 binaries, such as \gls{elf} files. Such functionality would require the
 implementation of a binary loader together with infrastructure to support
-dynamic binary loading.
+dynamic binary loading. Alternatively, TEECore could support linking of static
+libraries to ship applications as binaries. Enhancements to the build system
+and a clear API for application would then be required.
 
 Moreover, the prototype only allows communication with one remote party, as it
 does not enforce exclusive usage of the shared communication path. To allow
@@ -41,33 +43,27 @@ the secure application communication, and the general state of TEECore.
 \section{Other Platform Support}
 Currently, TEECore is only implemented for one Intel platform. This platform
 implements inclusive caches. An open question at this point is how TEECore
-behaves on architectures implementing a (partly) exclusive or non-inclusive
-cache hierarchy with different states of the implemented coherency protocols.
-In general, AMD processors implement such a non-inclusive cache policy, which
-would allow for a comparison of how TEECore's approach performs in such an
-architecture. To support an AMD platform, a programmer must find the right
-events and implement the programming of the \gls{pmc} facility as required by
-the architecture. Evaluating TEECore on such a platform would give valuable
-insight into its general security and if such a difference can influence its
-security properties. For example, a study on the behavior of the isolated core
-receiving an INIT \gls{ipi} could yield information about what cache
-implementation TEECore is better suited for and what changes TEECore would
-require to achieve the same protection level, if there are any differences.
+behaves on architectures implementing different cache coherency protocols. For
+example, AMD processors implement the MOESI protocol, which would allow for a
+comparison of how TEECore's approach performs in such an architecture.
+Additionally, I would like to evaluate AMD processors regarding their
+performance measurement facilities.
 
 \section{Additional Features}
-As mentioned in chapter~\ref{eval:compare:security}, the TEECore prototype
-implementation is vulnerable against \glspl{ipi}. Combining
-TEECore with other \gls{tee} technologies could help mitigate this flaw and
-increase the security of these other technologies. So, as a possible research
-area, TEECore could be combined with one of these technologies to increase
-overall security. Moreover, other processor features could be used to further
-increase isolation. For example, Intel offers a technology called cache
-allocation technology, which can be used to partition L3 caches via quality of
-service. Such a technology could increase resources available to TEECore by
-disallowing other cores or applications to access cache lines allocated to
-TEECore. Some AMD processors implement a similar feature that allows for the
-specification of quality of service constraints for cache usage. Further,
-TEECore could use undocumented features such as cache-as-ram (CAR).
+As mentioned in chapter~\ref{sec:evaluation:ipi}, the TEECore prototype
+implementation is vulnerable against \glspl{ipi}. Combining TEECore with other
+\gls{tee} technologies could help mitigate this flaw and increase the security
+of these other technologies. So, as a possible research area, TEECore could be
+combined with one of these technologies to increase overall security. Moreover,
+other processor features could be used to further increase isolation. For
+example, Intel offers a technology called cache allocation technology, which can
+be used to partition L3 caches via quality of service. Such a technology could
+increase resources available to TEECore by disallowing other cores or
+applications to access cache lines allocated to TEECore. Some AMD processors
+implement a similar feature that allows for the specification of quality of
+service constraints for cache usage. Further, TEECore could use undocumented
+features such as cache-as-ram (CAR). Finding ways to utilize a dynamic root of
+trust for measurement would reduce TEECore's \gls{tcb}.
 
 %%% Local Variables:
 %%% TeX-master: "diplom"
