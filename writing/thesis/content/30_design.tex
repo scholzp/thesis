@@ -21,18 +21,43 @@ In this chapter, I will explain the design of the TEECore and how a system that
 utilizes the TEECore prototype looks. The design tries to mitigate the risk of
 covert side channels by fully excluding them on an architectural base.\\
 
-In the first section (c.f.~\ref{sec:30:tee_general}), I will describe the
-general system and usage of the TEECore prototype implementation. The second
-section(section~\ref{sec:30:tee_kernel}) will explain TEECore in more detail and
-how it tries to achieve its goals. TEECore alone does not implement any
-workloads that third-party software can use. Such workloads and under what
-constraints they must be implemented will be explained by
-section~\ref{sec:30:tee_apps} of this chapter. I will then explain the remote
-attestation scheme of TEECore in section~\ref{sec:30:tee_ra_scheme} before I
-sketch the envisioned boot flow in section~\ref{sec:30:tee_boot_chain}. With all
-components explained, I want to conclude this chapter by discussing the attacker
-model that TEECore can defend and not defend against in
-section~\ref{sec:30:tee_attacker_model}.
+First, I want to discuss the attacker model that TEECore can defend against and
+not defend against in section~\ref{sec:30:tee_attacker_model}. This section is
+followed by (c.f.~\ref{sec:30:tee_general}), in which I will describe the
+general system and usage of the TEECore prototype implementation. The third
+section (section~\ref{sec:30:tee_kernel}) will explain TEECore in more detail
+and how it achieves its goals. TEECore alone does not implement any workloads
+that third-party software can use. Such workloads and under what constraints
+they must be implemented will be explained in section~\ref{sec:30:tee_apps} of
+this chapter. I will then explain the remote attestation scheme of TEECore in
+section~\ref{sec:30:tee_ra_scheme} before I sketch the envisioned boot flow in
+section~\ref{sec:30:tee_boot_chain}.
+
+\section{Threat Model}
+\label{sec:30:tee_attacker_model}
+An attacker against whom TEECore can defend is allowed to run privileged
+software on the same machine as TEECore. This includes the ability to create
+covert side channels. TEECore can prevent a wide variety of side channel attacks
+by design. An exception are cache-based side channel attacks, which TEECore can
+only detect. Upon detecting a side channel, TEECore can react in a way that
+prevents an attacker from exfiltrating data. In particular, TEECore can react to
+attacks like Spectre and Meltdown. TEECore is immune to interrupt-based side
+channel attacks such as SGX-Step. Additionally, TEECore can defend against an
+attacker who has arbitrary access to memory or I/O ports. \\
+
+TEECore can further employ mechanisms to protect itself from bus-tapping
+attacks. It is able to deliver evidence to outside parties that it is operating
+on a trusted system from a trusted state. Conversely, TEECore is not able to
+defend itself against an attacker who can alter the firmware. For its detection
+model to work, TEECore depends on the absence of sibling threads on the core it
+owns. Moreover, TEECore cannot defend itself against an attacker that controls
+the \gls{smm}. Similarly, TEECore requires physical hardware to run. In a
+virtualized environment, TEECore cannot defend against the \gls{vmm}. As an
+additional requirement, TEECore mandates the deactivation of hardware
+prefetchers and the presence of a \gls{tpm}.\\
+
+Denial of service attacks are out of scope, as an attacker with physical access
+or, administrative access to the machine can power it off.
 
 \section{General System Design}
 \label{sec:30:tee_general}
@@ -79,7 +104,7 @@ and placed into the memory map of both partitions for their systems to include
 and map it.\\
 
 The idea of partitioning the system is more similar to the idea behind ARM
-TrustZone\todo{ref} than to \gls{sgx} or \gls{sev}. This is because TEECore
+TrustZone than to \gls{sgx} or \gls{sev}. This is because TEECore
 tries to use the given hardware's functionality to mimic an isolated trusted CPU
 core and works more like the idea of a trusted world in ARM TrustZone instead of
 \gls{sgx} and \gls{sev}. While AMD indeed integrates an ARM Core in their
@@ -128,13 +153,16 @@ Before the TEECore can transfer control to tasks, it must bring the environment
 to a defined state. All memory has to be stored in the CPU's local cache in the
 exclusive or modified state. To achieve this, TEECore writes to all memory it
 has to protect, invalidating shared cache lines in other cores in this process.
-As a result TEECore can detect whenever a remote CPU accesses data from RAM or
+As a result, TEECore can detect whenever a remote CPU accesses data from RAM or
 shared L3 cache, as the remote CPU copies the respective memory items to its L1
-cache, triggering a MESIF state change in the isolated cores cache. Such memory
-snoops are documented behavior of all recent Intel CPUs\cite{sdm}. Nevertheless,
-I want to mention that this is a requirement for TEECore to work. Other possible
-cache implementations, for example, that would push changes of shared cache
-lines to remote cores, would not work with TEECore.\\
+cache, triggering a MESIF state change in the isolated cores' cache. Such memory
+snoops are documented behavior of all recent Intel CPUs~\cite{sdm}.
+Nevertheless, I want to mention that this is a requirement for TEECore to work.
+Other possible cache implementations, for example, that would push changes of
+shared cache lines to remote cores, would not work with TEECore. Moreover, for
+TEECore to work correctly, all prefetchers need to be disabled. This is because
+cache lines brought into the cache by prefetchers are not considered when
+counting the events stated (c.f. section~\ref{eval:sec}).\\
 
 To protect a task against interrupt-based attacks, TEECore has to set up the
 \gls{idt} correctly so that any occurrence of any interrupt results in a system
@@ -343,85 +371,18 @@ driver into Linux's initrd, I can make them part of the measurement of the Linux
 performed by the bootloader. Therefore, I do not have to trust the Linux kernel
 to measure TEECore correctly. \\
 
-As described in section~\ref{}\todo{habe ich eine für measured boot?}, each
-piece of the boot chain measures the software it loads for the next step in the
-boot chain and extends a chosen \gls{pcr} in the \gls{tpm} with its measurement.
-The root of trust is formed by the root of trust for measurement, which is not
-necessarily a part of the firmware but, in all cases, specially protected. With
-the knowledge of each component's source and build chains, an appraiser can
-generate the same binaries and perform the same measurements. These measurements
-and the measured boot log enable the appraiser to verify that each loaded binary
-is a known correct version. The appraiser has only to trust the root of trust
-for measurement because it can detect all other malicious modifications of other
-software components by comparing the respective hash values. Still, the
-\gls{tcb} includes all software components loaded by the system before TEECore,
-as the measured boot does not protect the system from software bugs contained in
-binaries that are assumed to be safe.
-
-\section{Attacker Model}
-\label{sec:30:tee_attacker_model}
-The design of TEECore aims mainly to prevent any covert side channel that uses
-architectural components to form the side channel. In particular, I aim to
-detect cache-based side channels and actively defend against attacks such as
-Spectre and Meltdown. The main defense mechanism is the configuration of the
-\gls{pmc} and the \gls{idt} that lead to a system reset upon registering an
-attack.
-% Because TEECore does not prevent the attack, information leakage is still
-% possible in the time frame between detection and taking consequences. I will
-% investigate in chapter~\ref{eval}\todo{correct reference} how big this time
-% frame is and how an attacker could abuse it.
-TEECore also protects against interrupt-based single-stepping attacks like
-SGX-Step (\ref{sec:20:interrupt_sca}). With the special configuration of the
-\gls{idt}, all interrupts received by TEECore, including including \glspl{nmi},
-lead to the same result: a platform reset. To summarize, TEECore can defend
-against an attacker who reads and writes to memory addresses contained in the
-cache of the isolated core, as these actions result in MESI state changes. This
-attacker can have arbitrary privileges if the attack is not executed from within
-the \gls{smm}. Likewise, I/O ports are not considered an attack vector by me, as
-the application model of TEECore forbids access to I/O devices. Moreover,
-TEECore is designed to run in an environment without any form of simultaneous
-multithreading, as it cannot defend against sibling threads that share resources
-of a CPU core. A mitigation to employ against this limitation is disabling any
-sibling threads, so that the CPU can only execute one hardware thread per CPU
-core.\\
-
-The \gls{smm} serves as an exception from the aforementioned security guarantees
-because it can effectively prevent TEECore from reacting to the occurrence of
-measurement events. The main reason for this is that \gls{smm} can deny TEECore
-from executing and thus reacting to performance monitoring events. Additionally,
-Intel allows for freezing debug features while \gls{smm} code is executed. This
-feature allows system software for masking events originating from
-\gls{smm}~\cite{intel_sdm}. Moreover, malicious \gls{smm} software could modify
-the \gls{pmc} configuration. To summarize, \gls{smm} could be used to mount an
-attack from different vectors. How the actual interaction with \gls{smm} would
-look like is, at the point of writing this, not clear. Evaluating such attacks
-would require a platform that allows modification of \gls{smm} software and is
-therefore left for future work. Another interrupt-based attacker could be the
-\gls{pmi} sent by the commodity \gls{os} or any other software to reset the core
-that runs the isolated partition. The initialization sequence to bring up
-additional application processors in x86 systems is to send a \gls{ipi} sequence
-of Init-Startup-Startup. Other than resetting a CPU, in the case of the Init
-\gls{ipi}, the Intel SDM states that the state of the cache, the \gls{pmc}, and
-their configuration registers remain unchanged. The \gls{idtr} is initialized
-with 0. In theory, this should lead to a configuration similar to TEECore. While
-the \gls{pmc} configuration stays the same, a \glspl{pmi} should not be
-generated, because the init \gls{ipi} resets the \gls{lapic}. This attack part
-of my evaluation process \ref{eval:sec}.\\
-
-TEECore is immune to other software that spies on its memory access patterns
-because all memory accesses happen in the cache. Once the setup phase succeeds,
-an attacker could only observe access to the shared memory region that TEECore
-and software in the normal partition use to communicate.\\
-
-TEECore cannot detect if it is running inside a \gls{vm}, or if the platform
-uses a genuine \gls{tpm}. This comes from the fact that the executing
-environment can control what code it executes. For example, a malicious
-\gls{vmm} could skip all checks implemented in TEECore and inject result of
-these checks as it pleases. Physical attacks that aim at manipulation or tapping
-the bus by which the \gls{tpm} is connected to the system cannot be prevented by
-TEECore. The \gls{tcb} of TEECore consists of software involved in system
-initialization. This includes the root of trust for measurement, firmware,
-bootloader, commodity \gls{os}, and TEECore. On the hardware side, the \gls{tcb}
-consists of the \gls{tpm} and the CPU.
+Each piece of the boot chain measures the software it loads for the next step in
+the boot chain and extends a chosen \gls{pcr} in the \gls{tpm} with its
+measurement. The root of trust is formed by the root of trust for measurement,
+which is not necessarily a part of the firmware but, in all cases, specially
+protected. With the knowledge of each component's source and build chains, an
+appraiser can generate the same binaries and perform the same measurements.
+These measurements and the measured boot log enable the appraiser to verify that
+each loaded binary is a known correct version. The appraiser has only to trust
+the root of trust for measurement because it can detect all other malicious
+modifications of other software components by comparing the respective hash
+values. Still, the \gls{tcb} includes all software components loaded by the
+system before TEECore, as the measured boot does not protect the system from
+software bugs contained in binaries that are assumed to be safe.
 
 %%% Local Variables: %% TeX-master: "diplom" %% End:
