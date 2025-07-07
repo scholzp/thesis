@@ -28,63 +28,50 @@ requires Linux to set it up and prepare memory for it. In
 section~\ref{sec:implementation:hostKernel}, I describe how I configured Linux
 to set uo TEECore. To enable Linux to communicate with TEECore finally, I
 implemented a driver as a Linux kernel module. I describe this kernel in
-section~\ref{sec:implementation:kmod}.\todo{Something something trusted
-applications} As a target for the prototype implementation of TEECore I use an
-Intel Core i7 13700k processor.
+section~\ref{sec:implementation:kmod}. As a target for the prototype
+implementation of TEECore I use an Intel Core i7 13700k processor.
 
 \section{TEECore}
 \label{sec:implementation:teeKernel}
 TEECore is a fork of
-PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}}. PhipsBoot is a
-Multiboot
-2\footnote{\url{https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html}}
+PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}}, a Multiboot 2
 compliant kernel written in the memory-safe programming language Rust, to serve
 as a bootloader for 64-bit x86 kernels. A feature of PhipsBoot is that it is
-relocatable and supports arbitrary load addresses. It depends on a first-stage
-bootloader\todo{maybe this is not a multi-stage bootloader} that brings the
-system to a state defined in the Multiboot 2 specification. That is, the CPU is
-in 32-bit protected mode with segmentation enabled~\cite{mb2}. After handover,
-PhipsBoot does all initialization steps to bring the CPU into 64-bit mode with
-enabled PEA paging. This part of Phipsboot is written in x86 assembly code. It
-initializes the page tables and sets up huge pages before transferring the CPU
-into 64-bit mode. For later usage, Phipsboot sets up additional page tables for
-execution. Because of its memory mapping, PhipsBoot expects to be loaded to a 2
-MiB-aligned address. Its small size, less than 2 MiB, allows PhipsBoot to set up
-the page table hierarchy using a single page table that maps the kernel.
-PhipsBoot uses memory statically reserved for dynamic memory allocation in the
-kernel's Elf image. Besides setting up the general run time, PhipsBoot does not
-implement more features but offers a great starting point for the implementation
-of TEECore.\\
+relocatable and supports arbitrary load addresses. As a Multiboot 2 compliant
+kernel, PhipsBoot requires that the CPU is in 32-bit protected mode with
+segmentation enabled~\cite{mb2}. It therefore depends on other software that
+brings the CPU to this state before transferring control to PhipsBoot. After the
+handover, PhipsBoot does all initialization steps to bring the CPU into 64-bit
+mode with enabled PEA paging. This part of Phipsboot is written in x86 assembly
+code. I will refer to these assembly routines as low-level code in the following
+section. It initializes the page tables for its own use and sets up huge pages
+before transferring the CPU into 64-bit mode. Phipsboot sets up additional page
+tables for the software it loads. Because of its memory mapping, PhipsBoot
+expects to be loaded to a 2 MiB-aligned address. Its small size, less than 2
+MiB, allows PhipsBoot to set up the page table hierarchy using a single page
+table that maps its kernel. PhipsBoot uses memory statically reserved for
+dynamic memory allocation in the kernel's \gls{elf} image. Besides setting up
+the general run time, PhipsBoot does not implement any additional features.
+After bringing the platform to 64-bit \gls{g_lmode}, Phipsboot starts executing
+its Rust routines, which would start another rich kernel. The Rust
+implementation, which I refer to as high-level code, is not feature-complete.
+The features implemented are checking for a valid multiboot header, a working
+\gls{idt} setup, and a memory allocator. Because of its minimal design and its
+ability to be relocated to arbitrary memory addresses, I chose PhipsBoot as the
+base for TEECore. In the following, I will explain the chosen features I added
+to PhipsBoot to create TEECore.\\
 
-The first feature I introduced was the ability to modify page tables because
-Phipsboot did not support mapping arbitrary memory. Instead, the setup assembly
-routine of Phipsboot maps the entire memory of the loaded binary. The page
-tables are mapped in this process as read-only. Moreover, the Rust high-level
-code does not know the address of the last level page table. To allow mapping of
-arbitrary memory, I modified the page table setup routine and changed the last
-page table to be writable instead of read-only, and made it accessible in the
-Rust high-level code by propagating its address. Note that TEECore is aligned to
-a 2 MiB boundary because of the initial huge page mapping. Therefore, the
-mappping of TEECore addresses starts in the first entries of the last level page
-table until index $n$. Through observation, I found that no more than the first
-128 entries in the page table are used to map all memory used by the kernel
-binary. The number of initially mapped pages reflects that TEECore's ELF image
-is around 300 KiB in size. For dynamic mapping of memory that TEECore's binary
-does not contain, I, therefore, reserved the last 128 entries of the last level
-page table. These 128 page table entries enable  TEECore to map up to 512 KiB of
-arbitrary memory that was not contained in the binary while allowing for the
-binary to grow to a size of 1536 KiB. Overall, the total maximal size of 2 MiB
-can fit in most L2 caches of Intel x86\_64 performance cores produced since
-2022. The L2 cache is a core exclusive resource in these processors.\\
-
-For mapping arbitrary memory, TEECore uses addresses derived from the virtual
-address of the last level page table. The uppermost 43 bits are the same as in
-the last level page's virtual address. Bits 21 to 9 are the index into the last
-level page table, which is 384 for the first page to map and increments by one
-for every additional mapped page. At this index, the page frame address is
-stored in the last level of the page table. The last 9 bits are the index into
-the page frame. Listing~\ref{code:map_external} shows the pseudocode of the
-mapping algorithm explained.
+\subsection{Mapping of Arbritary Memory}
+\label{sec:implementation:teeKernel:mem}
+Phipsboot does not support mapping of arbitrary memory. Instead, the setup
+assembly routine of Phipsboot maps the entire memory of the loaded Phipsboot
+binary. The page tables are mapped in this process as read-only. Moreover, the
+last level page table is not exposed to the Rust high-level. TEECore requires
+this functionality to access external memory, such as shared memory resources or
+device memory. To allow mapping of arbitrary memory, I modified the page table
+setup routine and changed the last page table to be writable instead of
+read-only. Furthermore, I exposed the linking symbol denoting the last-level
+page table's address to the Rust high-level code to propagate its address.\\
 
 \begin{lstlisting}[language=Rust, caption=Mapping of external memory, label=code:map_external]
 pub unsafe fn map_page_frame(phys_addr: u64) -> u64 {
@@ -104,6 +91,35 @@ pub unsafe fn map_page_frame(phys_addr: u64) -> u64 {
 }
 \end{lstlisting}
 
+The mapping routine needs to find the right place to map the memory. Phipsboot
+uses huge pages to map its assembly low-level code. Its Rust high-level code
+uses 4 KiB mappings, but inherits the alignment. Because of this, it expects to
+be loaded to a 2 MiB-aligned address. TEECore inherits these characteristics. To
+accommodate the strict memory restriction TEECore faces, I decided to use a
+single last-level page table. The alignment to 2 MiB allows the TEECore binary
+to grow to up to 2 MiB in size without using more than a single last-level page
+table. Alternatively, TEECore can use free page table entries not filled with
+addresses of its binaries to map arbitrary memory. This is possible because
+TEECore does not use the whole 2 MiB of memory. Instead, it uses the first 128
+entries, which leaves the last 384 entries unused. This reflects the observed
+TEECore binary's size of around 300 KiB. For dynamic mapping of memory that
+TEECore's binary does not contain, I, therefore, reserve the last 128 entries of
+the last level page table. These 128 page table entries enable TEECore to map up
+to 512 KiB of arbitrary memory that was not contained in the binary. This leaves
+TEECore room to grow to a size of 1536 KiB. Overall, the total maximal size of 2
+MiB can fit in most L2 caches of Intel x86\_64 performance cores produced since
+2022~\cite{intel_optimization}. The L2 cache is a core-exclusive resource in
+these processors.\\
+
+For mapping arbitrary memory, TEECore uses addresses derived from the virtual
+address of the last-level page table. The uppermost 43 bits are the same as in
+the last level page's virtual address. Bits 21 to 9 are the index into the last
+level page table, which is 384 for the first page to map and increments by one
+for every additional mapped page. At this index, the page frame address is
+stored in the last level of the page table. The last 9 bits are the index into
+the page frame. Listing~\ref{code:map_external} shows the pseudocode of the
+mapping algorithm explained.\\
+
 Mapping arbitrary memory is important in implementing the shared memory
 communication path. To obtain information about the address and layout of the
 shared memory used for communication, the bootloader provides a memory map to
@@ -114,33 +130,31 @@ implementation, the Linux kernel module fills the role of the bootloader (c.f.
 \ref{sec:implementation:kmod}). Other than the memory owned by the kernel, the
 memory intended to be used by TEECore and Linux is mapped as uncacheable. This
 mapping prevents cache pollution and false positives for allowed access of a
-remote core to memory also used by the \gls{tee}.\\
+remote core to memory also used by the \gls{tee}.
 
+\subsection{Atack Detection Mechanism}
+\label{sec:implementation:teeKernel:pmcs}
 To prepare the environment, TEECore needs to ensure that all memory used by it
 is in the exclusive or modified state so that a remote core must trigger a
-measurable event when it tries to access memory owned by TEECore. For this, I
-implemented a function that iterates over the page table entries and accesses
-all bytes of all pages that are set present. This function reads a given address
-and writes back the same value to the same address to trigger the modified state
-of the cache line. This state change leads to invalidating a remote core's cache
-lines referencing the same memory item. I discovered this necessity when
-implementing my attack simulations (c.f.~\ref{eval:sec}). While TEECore could
-detect the active attacker, the passive one was undetectable because the reading
-of cache lines in the shared state in both caches does not trigger any
-microarchitectural responses. It is, therefore, necessary to hold all memory
-that TEECore should keep secret in the exclusive or modified state to detect
-cache synchronization over the cache coherency protocol.\\
+measurable event when it tries to access memory owned by TEECore. TEECore
+achieves this by running a function that iterates over the page table entries.
+For each entry that is marked present, all bytes of the mapped memory are
+accessed. This function reads a given address and writes back the same value to
+the same address to trigger the modified state of the cache line. This state
+change leads to invalidating a remote core's cache lines referencing the same
+memory item over the cache coherency protocol. As soon as a remote core accesses
+the same memory, the cache line states in TEECore's CPU changes. TEECore can
+thus measure changes in the microarchitectural state of a cache line by keeping
+them in an exclusive or modified state. TEECore can only in this way, for
+example, detect a passive attacker that performs reading access from a remote
+core to TEECore's memory. This is because the reading of cache lines, which are
+in the shared state in the remote and target caches, do not trigger any
+microarchitectural responses.\\
 
-The aforementioned preparation ensures, that all access from remote cores to
-TEECore's memory result in additional microarchitectural state changes, namely
-cache line state changes. In the next step, TEECore configures the hardware so
-that it can measure these changes through the help of \glspl{pmc}. x86\_64
-processors manufactured by Intel and AMD offer special events dedicated to
-monitoring the behavior of CPU components external to the processor core. Such
-components, for example, include main memory, shared caches, and other shared
-resources. In Intel processors, such components are referred to as uncore. Intel
-processors implement so-called offcore-response events to measure the events
-resulting from the uncore responding to the processor core's requests.\todo{hier nochmal checken}
+The preparation as mentioned earlier ensures that all access from remote cores
+to TEECore's memory results in additional microarchitectural state changes,
+namely cache line state changes. TEECore configures the hardware so that it can
+measure these changes with the help of \glspl{pmc}.
 % I first tried to use these offcore response events to measure the
 % communication of the core executing TEECore with the remaining system. While I
 % could see events working to count communication to the memory mapped as
@@ -148,12 +162,14 @@ resulting from the uncore responding to the processor core's requests.\todo{hier
 % of my test CPU. In contrast, after extensive testing, I found that some of the
 % core's local events measured the activity of the L3 cache. This might be
 % because... \todo{Add a plausible cause}.
-I use the events listed in
-table~\ref{40:tab:events} to implement TEECore's attack detection mechanism.
-Table~\ref{40:tab:events} contains information about performance monitoring
-events as found at Intels
-database\footnote{\url{https://perfmon-events.intel.com/}} for Raptor Lake
-processors.
+Table~\ref{40:tab:events} lists the events that TEECore uses to implement its
+attack detection mechanism. Requests issued by hardware prefetchers might not be
+measured by performance monitoring counters~\cite{perfmon}. TEECore, therefore,
+disables hardware prefetchers. Table~\ref{40:tab:events} contains information
+about performance monitoring events as found at Intel's database for Raptor Lake
+processors~\cite{perfmon}. It is important to note that these events are
+specific to load instructions. This means that the TEECore has to execute a load
+to the respective address before it can detect cache line changes.
 
 \begin{table}[!h]
   \centering
@@ -170,19 +186,17 @@ processors.
   \label{40:tab:events}
 \end{table}
 
-To enable counting of the chosen events, I programmed the respective \gls{pmc}
-\glspl{msr}. The performance monitoring facilities of x86 CPUs I use consist
-of a pair of two \glspl{msr}, one \textit{IA32\_PERFEVTSELx} and
-\textit{IA32\_PMCx} each, where $x$ is the index of the pair. A physical
-processor supports at least four of those pairs. The \textit{IA32\_PERFEVTSELx}
-\gls{msr} contains the configuration of the performance counter, including the
-event to measure and information about interrupt generation, as well as
-de-/activation bits of the counter, while \textit{IA32\_PMCx} \glspl{msr}
-contain the measurement value. Although all \textit{IA32\_PMCx} \glspl{msr} have
-a size of 64 bits and fewer bits might be implemented in hardware. For example,
-my test CPU implements 48 bits for \textit{IA32\_PMCx}. The Layout of
-\textit{IA32\_PERFEVTSELx} \glspl{msr} is shown by
-figure~\ref{fig:state:technical:perfsel}.
+The performance monitoring facilities of x86 CPUs I use consist of a pair of two
+\glspl{msr}, one \textit{IA32\_PERFEVTSELx} and \textit{IA32\_PMCx} each, where
+$x$ is the index of the pair. The Intel Core i7 13700k implements eight pairs of
+these \glspl{msr}. A given \textit{IA32\_PERFEVTSELx} \gls{msr} contains the
+configuration of the performance counter, including the event to measure and
+information about interrupt generation, as well as de-/activation bits of the
+counter, while a \textit{IA32\_PMCx} \gls{msr} contains the measurement value.
+Although all \textit{IA32\_PMCx} \glspl{msr} have a size of 64 bits, fewer
+bits might be implemented in hardware. For example, my test CPU implements 48
+bits for \textit{IA32\_PMCx}. The Layout of \textit{IA32\_PERFEVTSELx}
+\glspl{msr} is shown by figure~\ref{fig:state:technical:perfsel}.
 
 \begin{center}
   \begin{figure}
@@ -205,39 +219,32 @@ occurrence of the respective event and triggers the delivery of a \gls{pmi}.
 After setting up \textit{IA32\_PMCx}, TEECore enables the counter by setting
 the \textit{EN} bit in the respective \textit{IA32\_PERFEVTSELx} \gls{msr}
 after finishing its preparation phase. From this point on, writes to
-\textit{IA32\_PMCx} are forbidden.
+\textit{IA32\_PMCx} are forbidden until the counter is disabled.\\
 
-One of the first actions by TEECore is to set up the \gls{idt} accordingly. In
-doing so, it writes zero to the \gls{idtr}, which leads to triple faulting once
-the \gls{lapic} deliveres an interrupt to TEECore. Because I designed TEECore to
-work without interrupts, every interrupt TEECore receives is considered an
-attack. From then on, TEECore cannot be interrupted and thus is not prone to
-single-step attacks. In a second step, TEECore configures the \gls{lapic} to
-enable the delivery of \gls{pmi}. As described in
+To complete the setup, TEECore needs to configure the \gls{idt} accordingly, by
+writing zero to the \gls{idtr}. Once the \gls{lapic} delivers an interrupt to
+TEECore, this configuration leads to a triple fault, effectively resetting the
+whole platform. This configuration allows for protection against single-step
+attacks that use interrupts. Moreover, as described in
 section~\ref{sec:30:tee_kernel}, TEECore uses \glspl{pmi} to signal itself that
-it has been attacked. First, it uses the aforementioned functionality to map the
-\gls{lapic} register space. \gls{lapic} registers are memory-mapped
-CPU-exclusive registers with 32-bit widths. Relevant to my use case is the
-\textit{spurious-interrupt vector} register and the \textit{\gls{lvt}}. The
-spurious-interrupt vector register is important for software activating the
-\gls{lapic} because, after reset, the \gls{lapic} might not be software enabled.
-However, it responds to \gls{ipi} messages. To activate the \gls{lapic}, TEECore
-writes to the \textit{APIC Software Enable/Disable} bit. After enabling the
-\gls{lapic}, TEECore has to configure it accordingly to activate delivery of
-\glspl{pmi}. For this, TEECore configures the Performance Monitoring Register of
-the \gls{lvt} to deliver \glspl{pmi} as \glspl{nmi}. As a last step, TEECore
-clears the mask bit in the Performance Monitoring Register of the \gls{lvt}.
-After this, the \gls{lapic} is ready to deliver \glspl{pmi} to TEECore.\\
+it has been attacked. These kinds of interrupts are routed through the \gls{idt}
+too and result in a triple fault in the same process as any other interrupt.\\
 
-\begin{center}
-  \begin{figure}
-    \centering
-    \includestandalone{images/shared_mem_layout.tex}
-    \caption{Illustration of the Layout of the Shared Memory used For Communication}
-    \label{fig:impl:shared_mem_layout}
-  \end{figure}
-\end{center}
+TEECore must set up the \gls{lapic} to activate the delivery of \glspl{pmi}. It
+does so by mapping the \gls{lapic} register space as described in
+section~\ref{sec:implementation:teeKernel:mem} to a virtual address. At this
+point, the \gls{lapic} is software disabled. While it responds to special
+interrupts, such as \glspl{nmi} and INIT \glspl{ipi}, it does not forward
+\glspl{pmi}. TEECore writes to the \textit{APIC Software Enable/Disable} bit in
+the \textit{spurious-interrupt vector} register to software enable the
+\gls{lapic}. Furthermore, TEECore configures the Performance Monitoring Register
+of the \gls{lvt} to deliver \glspl{pmi} as \glspl{nmi}. To complete the setup of
+the \gls{lapic}, TEECore clears the mask bit in the Performance Monitoring
+Register of the \gls{lvt}. After this, the \gls{lapic} is ready to deliver
+\glspl{pmi} to TEECore.
 
+\subsection{Shared Memory Communication Path}
+\label{sec:implementation:teeKernel:shared}
 I implemented a structure to manage the memory in question to enable
 communication through the shared memory channel. Access to the shared memory
 follows a simple protocol that splits the memory, as shown in
@@ -256,6 +263,15 @@ communication party, if both don't adhere to the same protocol. These race
 conditions are not of concern for my prototype implementations but should be
 mitigated if TEECore is employed in real world scenarios.\\
 
+\begin{center}
+  \begin{figure}[]
+    \centering
+    \includestandalone{images/shared_mem_layout.tex}
+    \caption{Illustration of the Layout of the Shared Memory used For Communication}
+    \label{fig:impl:shared_mem_layout}
+  \end{figure}
+\end{center}
+
 After initialization, the \gls{tee} environment starts a state machine that
 controls the execution of tasks. In the first state, the \gls{tee} polls the
 shared memory until it receives a message containing the command to execute one
@@ -273,7 +289,6 @@ should be implemented.
 
 \section{Normal Partition Kernel: Linux}
 \label{sec:implementation:hostKernel}
-
 As a highly configurable open-source general-purpose operating system, Linux is
 an example of the implementation of the host kernel. The Linux kernel I used for
 my prototype is version 6.13. Linux allows its configuration by passing command
@@ -374,131 +389,5 @@ them to the respective tasks routine. Lastly, the kernel module creates a
 character device to allow user space applications to use TEECore. Writes and
 reads to this device are implemented by the kernel module and used to form
 messages send to TEECore.
-
-% \section{Applications}
-% \label{sec:implementation:attacks}
-% To proof the effectiveness of the prototype I implemented three possible attacks
-% as tasks. Furthermore, I impemented a simple \textit{ping} task that allows me
-% to investigate ressource usage of the \gls{tee} allone. In the follwing
-% subsection I want to show some implementationt details of the attacks and the
-% \textit{ping} application.
-
-% \subsection{Ping Application}
-% \label{sec:implementation:attacks:ping}
-
-% The \textit{ping} application is a simple application that shows how to work
-% with the shared memory communication path. This application does not require to
-% allocate additional memory in any form, it only used the shared memory. The
-% purpose of this application is to increment a variable shared beyond partition
-% boundaries on both, the isolated partition and the normal partition. For this,
-% ping application in the secure partition writes an identifier to identify itself
-% against in the normal partition and initliazes the first byte of the payload
-% region in the shared memory with zero. The linux kernel module, upon recieving a
-% message from the ping application, calls a matching handler function. If the
-% message would traget from any user space application, this handler function
-% would delegate the message to it. The handler function increases the shared
-% counter in the payload field and write to the message identifier, triggering a
-% response from the secure partition's ping application. After a specified number
-% of iteration, the secure application terminates. Consequently TEECore changes to
-% a state in which it awaits the next message form the normal partiton.
-
-% WIP\todo{Describe some details of secure applications}
-% This simple task does nothing more than to increment a value shared between the
-% \gls{tee} and the host OS. It can be viewed as the minimal working set of the
-% \gls{tee} to run tasks. Therefore, the result for memory usage is the minimum to
-% expect for any other task. Measuring the resource usage with appropriate
-% \gls{pmc} allows me to make assumptions about the resources a future payload can
-% use. I collected data with the following events:
-% \begin{itemize}
-%     \item L1 replacements
-%     \item L1 Miss (any)
-%     \item Offcore events \todo{umask and so angeben um reproduzierbarkeit zu
-%               wahren}
-% \end{itemize}
-% Between each ping cycle I used used the \textit{wbinvd} instruction of x86, that
-% results in the core writing back all it's cache entries to memory and
-% invalidating each cache line. Executing the following ping cycle until reading
-% the \gls{pmc} again yields the number of cache lines filled with data necessary
-% to execute a complete cycle. From the cache line size I can then conclude the
-% total memory requirements of the runtime part of the \gls{tee}.
-
-% \subsection{Stalling Attack}
-% The denial of service attack floods the \gls{tee} with \glspl{nmi}. It is
-% intended to prove that the \gls{tee} can defend against interrupts that the
-% \gls{tee} cannot mask.
-% \todo{maybe move this into the chapter intro}
-
-% \subsection{Memory Attacks}
-% \label{sec:implementation:attacks:memory}
-% In theory, an attacker is able to leak data through the microarchitectural
-% behavior of the CPU cache's implementation. The first attacker is passive and
-% only interested in spying unobserved on the secrets of the \gls{tee}. The
-% attacker would use their access to read the \gls{tee} memory. If the \gls{tee}
-% cannot observe this, then secrets could be leaked through this channel upon
-% writing. The second attacker is an active one who tries to write the \gls{tee}
-% memory to influence its control flow. Both attacks follow the same workflow.\\
-
-% To simulate these attacks, the \gls{tee} first initializes a memory area of the
-% size of 4KiB and finds its physical location. Because I want to observe the side
-% effects of the attack, this memory is not mapped as uncacheable on the \gls{tee}
-% side but instead like any other memory in the \gls{tee}. The \gls{tee} then
-% communicates the address through the shared memory channel to the Linux kernel
-% module in which the respective attack implementations reside. The remote side
-% now maps the physical address space into its address space and either reads or
-% writes to the memory. When finished, the remote kernel module creates the
-% respective answer and transfers control over the memory area on this way back to
-% the \gls{tee}. The \gls{tee} now reports on the state of the performance
-% counters.\todo{maybe add some code examples?}\\
-
-% \section{Attacks}
-% \label{sec:30:attack}
-% The goal of the \gls{tee} prototype is to defend against an attacker with access to it
-% is backing memory. An attacker could trigger leakage or modification through
-% access to the right memory address with the help of cache coherence protocols.
-% These are the same mechanisms used in the Spectre and meltdown class
-% side-channel attacks. By simulating these kinds of attacks, we can study the
-% behavior of the prototype's implementation.\\
-
-% From this, we can derive two attackers based on their invasions. The first class
-% of attackers are passive ones, those who can read memory and are only interested
-% in spying secrets from the \gls{tee}. The second attacker is an active one that
-% modified code protected in the \gls{tee} with malicious intent.\\
-
-% From a technical perspective, the active attacker is easier to spot. Code that
-% resides in the cache of the isolated core that attackers did not exfiltrate will
-% be exclusive or shared in the MESI state. Shared denotes the state where the
-% respective cache line is contained in another cache, possibly in an invalid
-% state in the remote cache. Exclusive denotes the state of exclusive ownership of
-% the cache line. In other words, the item is not contained in any other cache. If
-% the attacker now attempts to change the memory item, this results in
-% invalidating the cache line in the core owned by the \gls{tee}. The result on the test
-% CPU is a snoop, which offcore performance counter events can track.\\
-
-% The passive attacker is harder to spot. Because changing a cache line from
-% exclusive to shared does not necessarily result in data transfer between the
-% CPU-exclusive parts of the cache. For example, if both the \gls{tee} and a remote CPU
-% have valid copies of a data item in their respective caches, the cache line in
-% both CPUs is tagged as shared. If one core modifies the data item, the write
-% access results in communication between the cores, invalidating the remote cache
-% line. A scenario in which a passive attacker might not be spotted is if the
-% attacker can somehow gain access to memory that the \gls{tee} did not modify after
-% setting up the environment protection routines. Therefore, we assume the
-% attacker can read arbitrary memory at any time. A successful defense is if those
-% reading attempts can be reliably spotted by the \gls{tee}.\\
-
-% A third class of attackers could try to send interrupts to the \gls{tee} with varying
-% goals. Like SGX step\todo{cite}, an attacker could try to single-step the \gls{tee}.
-% Regarding the isolation, this single stepping does not allow us to learn
-% anything from the \gls{tee}. Another goal could be to flood the \gls{tee} with \glspl{nmi} to
-% prevent the \gls{tee} from reacting to an attack. Theoretically, the \gls{tee} must react to
-% the \glspl{nmi} before doing anything else. While the design creates an interrupt-free
-% environment, I must consider the possibility of such an attack. The \gls{tee}
-% implementation should react appropriately even if flooded by \glspl{nmi}.\\
-
-% The last possible attack vector is \glspl{ipi}. If the attacker can reset the CPU and
-% make it execute code that leaks secret, appropriate countermeasures should be
-% thought of. How a CPU reacts to such \glspl{ipi} is implementation-specific. Therefore,
-% the purpose of the simulation of such an attack is to collect data about this
-% topic and not necessarily find a defense mechanism.\\
 
 %%% Local Variables: %% TeX-master: "diplom" %% End:
