@@ -8,7 +8,6 @@ contains all necessary features.
 
 \section{Intel Software Guard Extensions}
 \label{sec:20:sgx}
-\todo{A lot of passive to fix here}
 Intel \gls{sgx} is an extension in x86\_64 processors manufactured by Intel,
 that allows the creation of trusted execution environments. Intel first shipped
 \gls{sgx} in 2015, with processors implementing the Skylake microarchitecture.
@@ -306,6 +305,8 @@ chapter~\ref{sec:20:interrupt_sca}. For attacks abusing transient execution,
 this approach of deactivating transient execution would come with a
 high-performance penalty.\\
 
+\section{Utilizing Performance Monitoring Counters}
+\label{sec:20:pmc}
 Instead, existing solutions attempt to monitor the cache and other
 microarchitectural behavior through \gls{pmc} to find any anomaly. The idea
 behind this approach is that a program shows specific behavior. This behavior
