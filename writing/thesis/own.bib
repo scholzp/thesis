@@ -1035,7 +1035,7 @@
 }
 
 @manual{intel_sdm,
-  organization = {Intel Coperation},
+  organization = {Intel Coporation},
   title        = {Intel® 64 and IA-32 Architectures Software Developer's Manual},
   year         = {2023},
   month        = {dec}
@@ -1186,7 +1186,7 @@
 }
 
 @manual{intel_optimization,
-  organization = {Intel Coperation},
+  organization = {Intel Coporation},
   title        = {Intel® 64 and IA-32 Architectures Optimization Reference Manual},
   year         = {2023},
   month        = {aug}
@@ -1277,3 +1277,64 @@
   year      = {2006},
   publisher = {ACM New York, NY, USA}
 }
+
+@online{perfmon,
+  author  = {Intel Coporation},
+  title   = {PerfMon Events},
+  year    = 2025,
+  url     = {https://perfmon-events.intel.com/},
+  urldate = {2025-07-04}
+}
+
+@article{mccalpin2018comments,
+  title   = {Comments on timing short code sections on Intel processors, July 2018},
+  author  = {McCalpin, John D},
+  journal = {URL: https://sites. utexas. edu/jdm4372/2018/07/23/comments-ontiming-short-code-sections-on-intel-processors}
+}
+
+
+@article{mccalpin2018comments,
+  title   = {Comments on timing short code sections on Intel processors, July 2018},
+  author  = {McCalpin, John D},
+  journal = {URL: https://sites. utexas. edu/jdm4372/2018/07/23/comments-ontiming-short-code-sections-on-intel-processors}
+}
+
+@online{xucode,
+  author  = {Intel Coporation},
+  title   = {XuCode: An Innovative Technology for Implementing Complex Instruction Flows},
+  year    = 2025,
+  url     = {https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/secure-coding/xucode-implementing-complex-instruction-flows.html},
+  urldate = {2025-07-04}
+}
+
+@inproceedings{schluter2024heckler,
+  title     = {$\{$HECKLER$\}$: Breaking Confidential $\{$VMs$\}$ with Malicious Interrupts},
+  author    = {Schl{\"u}ter, Benedict and Sridhara, Supraja and Kuhne, Mark and Bertschi, Andrin and Shinde, Shweta},
+  booktitle = {33rd USENIX Security Symposium (USENIX Security 24)},
+  pages     = {3459--3476},
+  year      = {2024}
+}
+
+@inproceedings{CounterSEVeillance,
+  title     = {CounterSEVeillance: Performance-Counter Attacks on AMD SEV-SNP},
+  abstract  = {Confidential virtual machines (VMs) promise higher security by running the VM inside a trusted execution environment (TEE). Recent AMD server processors support confidential VMs with the SEV-SNP processor extension. SEV-SNP provides guarantees for integrity and confidentiality for confidential VMs despite running them in a shared hosting environment.In this paper, we introduce CounterSEVeillance, a new side-channel attack leaking secret-dependent control flow and operand properties from performance counter data. Our attack is the first to exploit performance counter side-channel leakage with single-instruction resolution from SEV-SNP VMs and works on fully patched systems. We systematically analyze performance counter events in SEV-SNP VMs and find that 228 are exposed to a potentially malicious hypervisor. CounterSEVeillance builds on this analysis and records performance counter traces with an instruction-level resolution by single-stepping the victim VM using APIC interrupts in combination with page faults. We match CounterSEVeillance traces against binaries, precisely recovering the outcome of any secret-dependent conditional branch and inferring operand properties. We present four attack case studies, in which we exemplarily showcase concrete exploitable leakage with 6 of the exposed performance counters. First, we use CounterSEVeillance to extract a full RSA-4096 key from a single Mbed TLS signature process in less than 8 minutes. Second, we present the first side-channel attack on TOTP verification running in an AMD SEV-SNP VM, recovering a 6-digit TOTP with only 31.1 guesses on average. Third, we show that CounterSEVeillance can leak the secret key from which the TOTPs are derived from the underlying base32 decoder. Fourth and finally, we show that CounterSEVeillance can also be used to construct a plaintext-checking oracle in a divide-and-surrender-style attack. We conclude that moving an entire VM into a setting with a privileged adversary increases the attack surface, given the vast amounts of code not vetted for this specific security setting.},
+  keywords  = {Performance Counter, Confidential Virtual Machines, AMD SEV},
+  author    = {Stefan Gast and Hannes Weissteiner and Schr{\"o}der, {Robin Leander} and Daniel Gruss},
+  year      = {2025},
+  month     = feb,
+  language  = {English},
+  booktitle = {Network and Distributed System Security (NDSS) Symposium 2025},
+  note      = {Network and Distributed System Security Symposium 2025 : NDSS 2025, NDSS 2025 ; Conference date: 23-02-2025 Through 28-02-2025},
+  url       = {https://www.ndss-symposium.org/ndss2025/}
+}
+
+@manual{amd_z4_optimization,
+  title        = {Software Optimization Guide for the AMD Zen4 Microarchitecture},
+  organization = {Advnaced Micro Devices},
+  year         = {2023},
+  month        = {April},
+  edition      = {1.0},
+  note         = {Publication No. 57647},
+  url          = {https://www.amd.com/content/dam/amd/en/documents/epyc-technical-docs/software-optimization-guides/57647.zip}
+}
+
