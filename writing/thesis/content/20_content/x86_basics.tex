@@ -40,7 +40,7 @@ compatibility with legacy CPUs, over the course of time additional operation
 modes were introduced to the \gls{isa}. Modern CPUs allow to execute 16-bit
 legacy software in \gls{g_rmode}. The \gls{g_pmode} was introduced together with
 memory protection to the x86 \gls{isa}. With x86\_64 the \gls{isa} is extended
-by \gls{g_lmode}\cite{intel_sdm}. To maintain the aforementioned compatibility
+by \gls{g_lmode}~\cite{intel_sdm}. To maintain the aforementioned compatibility
 to legacy software, all x86 systems start in 16-bit \gls{g_rmode}. Because of
 the limitation of the address space to the first 1 MiB of memory, code that
 transfers a processor from \gls{g_rmode} to any other operation mode has to
@@ -69,11 +69,12 @@ section~\ref{sec:state:technical:modes}, \gls{smm} does not activate additional
 processor features. Instead, it is a hardware-assisted isolation mechanism that
 protects firmware code from system software. In legacy systems, firmware used
 the \gls{smm} to react to special hardware events that required the firmware to
-react to platform events, e.g., energy management\cite{intel_sdm}. The \gls{smm}
-code resides in a specially protected area of the main memory, referred to as
-\gls{smram}. \gls{smm} executes with the highest privileges in x86, and system
-software cannot interfere with it. In fact, \gls{smm} can interrupt systems
-software whenever necessary, not vice versa.
+react to platform events, e.g., energy management~\cite{intel_sdm}. The
+\gls{smm} code resides in a specially protected area of the main memory,
+referred to as \gls{smram}. \gls{smm} executes with the highest privileges in
+x86, and system software cannot interfere with it. In fact, \gls{smm} can
+interrupt systems software whenever necessary, not vice versa. Firmware has to
+issue a \gls{smi} to enter \gls{smm}.
 
 \subsection{Virtualization}
 \label{sec:state:technical:virt}
@@ -95,7 +96,7 @@ the VMM. Processor architectures have to fulfill different conditions to be
 called virtualizable. In the case of x86, additional \gls{isa} extensions
 allow for virtualizability~\cite {adams2006comparison}. AMD processors
 implement the Secure Virtual Machine (SVM) extensions while Intel processors
-implement Intel Virtualization Extensions (VT-x or VMX)\cite{amd_manual,
+implement Intel Virtualization Extensions (VT-x or VMX)~\cite{amd_manual,
 intel_sdm}.
 
 \subsection{Interrupts and Exceptions}
@@ -135,7 +136,7 @@ cannot write directly to the \gls{idtr} but has to prepare the special memory
 descriptor from which the LIDT instruction loads the \gls{idt}. After setting up
 and loading the \gls{idt}, the CPU executes interrupt handlers as defined by
 system software. System software can enable maskable interrupts by executing the
-\textit{STI} instruction.\\
+\textit{STI} instruction. \\
 
 % Over time, interrupt controllers were improved and adapted to new use cases
 % similar to CPUs. In \gls{g_rmode}, the CPU falls back to using the Intel 8259 or
@@ -148,28 +149,38 @@ system software. System software can enable maskable interrupts by executing the
   \begin{center}
     \includestandalone{images/lapic.tex}
     \caption{Illustration of how \glspl{lapic} integrate in a
-    multiprocessor system (Figure after \cite{amd_manual}, p. 620)}
+    multiprocessor system (Figure after~\cite{amd_manual}, p. 620)}
     \label{fig:state:technical:lapic}
   \end{center}
 \end{figure}
 
-Intel introduced the advanced programmable interrupt controller (APIC)
-with its 486 processor line to allow the system to operate with multiple CPUs.
-In modern CPUs, multiprocessor configurations are prevalent, and each logical
-processor core has its own APIC. Because the APIC is CPU local, these APICs are
-called local APICs or \gls{lapic}. \glspl{lapic} forward interrupts from
-different sources to the respective CPU core. For example, the \gls{lapic}
-receives interrupts such as \gls{ipi} from other \glspl{lapic} and forwards
-legacy interrupts from the PIC via LINT0 pin. CPU external devices can deliver
+Intel introduced the advanced programmable interrupt controller (APIC) with its
+486 processor line to allow the system to operate with multiple CPUs. In modern
+CPUs and multiprocessor configurations are prevalent, and each logical processor
+core has its own APIC. Because the APIC is CPU local, these APICs are called
+local APICs or \gls{lapic}. \glspl{lapic} forward interrupts from different
+sources to the respective CPU core. For example, the \gls{lapic} receives
+interrupts such as \gls{ipi} from other \glspl{lapic} and forwards legacy
+interrupts from the PIC via the LINT0 pin. CPU external devices can deliver
 their interrupts to the IOAPIC, which forwards them to the respective
 gls{lapic}. Devices that implement PCI version 2.2 and later do not use the
-IOAPIC. Instead, these devices use Message Signaled Interrupts, by directly
-writing to a memory mapped register of the \gls{lapic}.
-Figure~\ref{fig:state:technical:lapic} shows a schematic view on how the
+IOAPIC. Instead, these devices use Message Signaled Interrupts by directly
+writing to a memory-mapped register of the \gls{lapic}.
+Figure~\ref{fig:state:technical:lapic} shows a schematic view of how the
 \gls{lapic} of each CPU core integrates into the system. All APIC registers are
-mapped to the 4-KiB APIC register space starting at the address specified
-in APIC base address register. System software can then access APIC registers
-with memory reads and writes to the APIC register space.
+mapped to the 4-KiB APIC register space starting at the address specified in the
+APIC base address register. System software can then access APIC registers with
+memory reads and writes to the APIC register space. Most interrupts require the
+CPU to interact with the \gls{lapic}. Exceptions are \gls{smi}, \gls{nmi}, INIT
+and STARTUP \glspl{ipi}, as well as ExtINT. These interrupts are sent directly
+to the CPU~\cite{amd_manual, intel_sdm}. \glspl{smi}, INIT and STARTUP
+\glspl{ipi} are not routed through the \gls{idt}. As described in
+section~\ref{sec:state:technical:smm}, a \gls{smi} invokes the \gls{smm}. INIT
+\glspl{ipi} transfer the CPU into a special state that effectively halts it
+until it receives a STARTUP \gls{ipi}. All other interrupts are held pending by
+the processor, and the CPU is reset to an initial state. The STARTUP \gls{ipi}
+causes the CPU to begin processing a bootstrap routine, whose vector number is
+placed in the Vector field.
 
 \subsection{Caches}
 \label{sec:state:technical:caches}
@@ -197,7 +208,7 @@ fastest access. Most modern x86 CPUs divide their L1 cache into two parts: L1D
 for data and L1I instructions. With increasing levels, caches grow in size but
 tend to be slower. For example, while the L2 Cache of AMD's recent Zen4 CPUs
 offers only 14 cycles of latency, the L3 Cache of the same CPU has a latency of
-50 cycles\cite{zen4}.\\
+50 cycles~\cite{zen4}.\\
 
 When the CPU tries to access data, it first queries the fastest cache. If the
 CPU can locate the data in the cache, this is called a cache hit. On a cache
@@ -262,8 +273,8 @@ write-back strategy.
 %AMD processors useMOESI as a cache coherency protocol~\cite{amd_manual}.
 Intel processors
 %,on the other hand,
-use MESIF as a coherency protocol~\cite{thomadakis2011architecture}
-to maintain consistency of the caches among different CPUs.
+use MESIF as a coherency protocol to maintain consistency of the caches among
+different CPUs~\cite{thomadakis2011architecture}.
 %MOESI and
 MESIF is an extension of the MESI protocol, introducing the additional
 \textit{Forward} state respectively.
@@ -280,28 +291,25 @@ The meaning of the states in the MESI and MESIF protocols are as follows:
     most recent and correct copies. No other processor holds a copy.
   \item \textbf{Invalid}: The cache line is invalid and needs to be replaced by
     a valid copy from main memory or other CPU's caches before it can be used.
-    %   \item \textbf{Owned}: Only one processor can hold a cache line in this state.
-    %     Other processors might hold a correct copy of the cache line in shared
-    %     state. The owning core responds to requests. The copy residing in main
-    %     memory might be stale. The cache line needs to be written back before it can
-    %     be discarded, as it is dirty.
-  \item \textbf{Forward}: Comparable to the \textbf{owned} state. It differs in
-    that the content of the cache line is clean. Therefore, the processor does
-    not require to write the line back to main memory before discarding it.
+  \item \textbf{Forward}: Only one processor can hold a cache line in this
+    state. Other processors might hold a correct copy of the cache line in
+    shared state. The owning core responds to requests. The cache line is clear,
+    so no writeback is required before discarding the line.
 \end{itemize}
 
 \begin{figure}
   \begin{center}
     \includestandalone{images/mesi.tex}
-    \caption{MESI state transition of a cache line resulting from a (remote) read/write}
+    \caption{MESI state transition of a cache line resulting from a (remote) activity (after~\cite{mckenney2010memory}, p. 4)}
     \label{fig:state:technical:mesi}
   \end{center}
 \end{figure}
 
 All cache lines are tracked to be in one of the states.
-Figure~\ref{fig:state:technical:mesi}\todo{quelle} shows transitions of MESI
-states of a cache line as a result from a core's own or another core's remote
-access. Important for my use case are the following state transitions:
+Figure~\ref{fig:state:technical:mesi} shows transitions of MESI states of a
+cache line as a result from a core's own or another core's remote
+access~\cite{mckenney2010memory}. Important for my use case are the following
+state transitions:
 
 \paragraph{Exclusive to Shared}
 Processor $0$ has the exclusive copy of a cache line. Processor $1$ acquires a
@@ -309,7 +317,6 @@ copy to read. In this case, the state of the line in processor $0$'s
 cache changes from exclusive to shared to reflect that other cores use the line.
 
 \paragraph{Shared to Modified/Exclusive/Invalid}
-\todo{Übergang shared -> exclusive in grafik fehlt}
 Processor $0$ and processor $1$ both have the same data item in their local
 caches. The state of both copies of the cache lines is \textit{shared}. Before
 processor $0$ writes to the cache line it triggers the invalidation of the line
@@ -331,18 +338,18 @@ in a shared memory structure, such as the \gls{llc}.
 \subsection{Cache Inclusivity}
 \label{sec:state:technical:caches_inclusivity}
 The use of different coherency protocols to synchronize data between multiple
-CPU cores has a direct effect on the inclusivity of the cache implementation. On
-all current x86\_64 multicore CPUs, the \gls{llc} is shared among all cores for
-synchronization and uses one of the coherency protocols. Multicore CPUs produced
-by Intel use an inclusive \gls{llc}~\cite{intel_optimization}. An inclusive
-cache describes a cache containing items in lower cache levels. If an item is
-modified in a lower cache level, the changes are automatically propagated to the
-higher inclusive cache level. The opposite of an inclusive cache is an exclusive
-cache design, as used by most AMD CPUs. Exclusive caches do not necessarily
-contain items of lower cache levels, and the synchronization of modified items
-needs to be propagated in other ways. The additional "owned" state of the MOESI
-protocol solves this issue.\todo{this might be more understandable with a
-graphic}
+CPU cores have a direct effect on the inclusivity of the cache implementation.
+On all current x86\_64 multicore CPUs, the \gls{llc} is shared among all cores
+for synchronization and uses one of the coherency protocols. older multicore
+CPUs produced by Intel use an inclusive \gls{llc}, while more recent ones use a
+non-inclusive \gls{llc}~\cite{intel_optimization, raptorlake_spec_sheet}. An
+inclusive cache describes a cache containing items in lower cache levels. If an
+item is modified in a lower cache level, the changes are automatically
+propagated to the higher inclusive cache level. The opposite of an inclusive
+cache is an exclusive cache design, as used by recent AMD
+CPUs~\cite{amd_z4_optimization}. Exclusive caches do not necessarily contain
+items of lower cache levels, and the synchronization of modified items needs to
+be propagated in other ways.
 
 \subsection{Hardware Performance Monitoring Counters}
 \label{sec:state:technical:hpc}
@@ -417,7 +424,7 @@ called page frames, by which each page can be backed.
 \begin{figure}
   \begin{center}
     \includestandalone{images/paging.tex}
-    \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables (after \cite{amd_manual}, p. 142)}
+    \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables (after~\cite{amd_manual}, p. 597)}
     \label{fig:state:technical:paging}
   \end{center}
 \end{figure}
@@ -469,11 +476,10 @@ address as an index to access the respective byte in the page frame. \\
 \begin{figure}
   \begin{center}
     \includestandalone{images/pte_rights.tex}
-    \caption{Layout of the 12 least significant bits in a page table entry}
+    \caption{Layout of the 12 least significant bits in a page table entry (after~\cite{amd_manual}, p. 592)}
     \label{fig:state:technical:paging_rights}
   \end{center}
 \end{figure}
-\todo{referent auf AMD manual}
 The unused lower 12 bits of each table entry are reused for management
 properties, such as access rights management.
 Figure~\ref{fig:state:technical:paging_rights} shows the layout of the lower 12
