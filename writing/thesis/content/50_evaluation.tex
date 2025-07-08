@@ -15,12 +15,12 @@ and the constraints it imposes on workload tasks. For this, I use a slightly
 modified version of TEECore that allows me to gather data. For example, I
 replaced the \gls{idt} to implement rudimentary interrupt handling routines.
 These routines do nothing more than to ensure that all debug data is transferred
-and prevent the system from being reset. Nevertheless, the implemented interrupt
-handling routines ensure that TEECore becomes unresponsive after receiving an
-interrupt, by executing an endless loop. To further evaluate the content of
-\glspl{pmc}, I configure them to not yield any \gls{pmi}. This configuration
-allows me to investigate the behavior of the CPU cache in more detail. TEECore
-prints this information through a serial connection.
+and to prevent the system from being reset. Nevertheless, the implemented
+interrupt handling routines ensure that TEECore becomes unresponsive after
+receiving an interrupt, by executing an endless loop. To further evaluate the
+content of \glspl{pmc}, I configure them to not yield any \gls{pmi}. This
+configuration allows me to investigate the behavior of the CPU cache in more
+detail. TEECore prints this information through a serial connection.
 
 \section{Evaluation Setup}
 \label{sec:evaluation:setup}
@@ -40,17 +40,15 @@ instruction and a 48 KiB-sized data cache. The second level cache (L2) has a
 size of 2 MiB. It is a unified cache, meaning that it is not divided into data
 and instruction parts. The third and, thus, last level cache is shared among all
 CPU cores. It is implemented as core-associated slices with a size of 3 MiB
-each, summing up to a total of 20 MiB of shared L3 cache. All caches are
-inclusive, meaning they contain all data of the lower cache levels
-(see~\ref{sec:state:technical:caches_inclusivity}). Moreover, the cache line
-size in this CPU is 64 bytes.
+each, summing up to a total of 24 MiB of shared L3 cache. The L2 cache is
+exclusive while the L3 is an inclusive cache
+(see~\ref{sec:state:technical:caches_inclusivity})~\cite{raptorlake_spec_sheet}.
+Moreover, the cache line size in this CPU is 64 bytes.
 
 \section{Security Properties}
 \label{eval:sec}
 The main defense mechanism is the configuration of the \gls{pmc} and the
-\gls{idt} that lead to a system reset upon registering an attack. With the
-special configuration of the \gls{idt}, all interrupts received by TEECore,
-including \glspl{nmi}, lead to the same result: a platform reset. I do not
+\gls{idt} that lead to a system reset upon registering an attack. I do not
 regard I/O ports as an attack vector, as the application model of TEECore
 forbids access to I/O devices. TEECore, therefore, does not access any I/O
 ports. Moreover, TEECore is designed to run in an environment without any form
@@ -82,105 +80,104 @@ section~\ref{sec:evaluation:active}.\\
 
 TEECore is vulnerable to attacks mounted from within \gls{smm}. The main reason
 for this is that \gls{smm} can deny TEECore from executing and thus reacting to
-performance monitoring events. Additionally, Intel allows for freezing debug
-features while \gls{smm} code is executed. This feature allows system software
-for masking events originating from \gls{smm}~\cite{intel_sdm}. Moreover,
-malicious \gls{smm} software could modify the \gls{pmc} configuration. To
-summarize, \gls{smm} could be used to mount an attack from different vectors.
-How the actual interaction with \gls{smm} would look like is, at the point of
-writing this, not clear. Evaluating such attacks would require a platform that
-allows modification of \gls{smm} software and is therefore left for future work.
-Another interrupt-based attacker could be the \gls{pmi} sent by the commodity
-\gls{os} or any other software to reset the core that runs the isolated
-partition. The initialization sequence to bring up additional application
-processors in x86 systems is to send a \gls{ipi} sequence of
-Init-Startup-Startup. I show a working attack exploiting INIT \glspl{ipi} in
-section~\ref{sec:evaluation:ipi}.\\
+\gls{pmi}. Additionally, Intel allows for freezing debug features while
+\gls{smm} code is executed. This feature allows system software for masking
+events originating from \gls{smm}~\cite{intel_sdm}. Moreover, malicious
+\gls{smm} software could modify the \gls{pmc} configuration. To summarize,
+\gls{smm} could be used to mount an attack from different vectors. How the
+actual interaction with \gls{smm} would look like is, at the point of writing
+this, not clear. Evaluating such attacks would require a platform that allows
+modification of \gls{smm} software and is therefore left for future work.
+Another kind of interrupts that an attacker can abuse are \glspl{ipi}. The
+initialization sequence to bring up additional application processors in x86
+systems is to send a \gls{ipi} sequence of Init-Startup-Startup. I show a
+working attack exploiting INIT \glspl{ipi} in
+section~\ref{sec:evaluation:ipi}.
 
 \subsection{Passive Attacker}
 \label{sec:evaluation:passive}
-The first test cases test basic functionality to detect attacks that use memory
-access and the inclusive caches as an attack vector. These attacks are to be
-detected by TEECore through changes in the cache lines that result from the
-cache coherency protocol. I found two possible test cases, based on the behavior
-of an attacker. An attacker either tries to read or write the memory used by
-TEECore. Because the cache coherency protocol ensures the reader sees the
-correct data, an attacker could exfiltrate secrets. By writing to the memory
-used by TEECore, which in turn would update TEECore's memory, an attacker could
-inject data into the isolated environment. To simulate these kinds of attacks, I
-implemented a small trusted application that allocates memory of the size of 4
-KiB, which I call the target memory. The trusted application then communicates
-the physical address of the target memory to the normal partition using the
-shared memory communication path. Upon receiving the physical address of the
-target memory, the kernel module maps it into its address space and performs the
-respective operation. After mapping the target memory in the Linux kernel
-module, the CPU remote to TEECore has not yet interacted with it, and it is not
-stored in a remote cache. Only the cache of the CPU core running TEECore, to
-which I refer as the target core, has the target memory cached. After the
-initialization phase (see section~\ref{sec:30:tee_kernel}), the target memory is
-at least in the modified state in this cache. Upon reading the target memory,
-the kernel module's CPU core receives a copy of the data. Both CPU cores
-maintain their copy in the shared state. The target core needs to fetch the data
-from the remote core. Therefore, the expected result of this test is to see L2
-cache misses in the first attempt by TEECore to access the target memory after
-the remote core has read it. The attacker, in this case, does not modify the
-memory, so the performance counters do not trigger for subsequent access by the
-remote core as long as the target core does not modify the target memory.
-Concerning the number of L2 misses and L3 hits, I expect to count 64 occurrences
-per event. The number of occurrences results from the fixed size of the target
-memory of 4096 Bytes. Counting a combination of fewer L2 misses and L3 hits
-would mean that the data was not shared among cores. After running the test, the
-results fully met my expectations. For the first time, the remote core reads the
-target memory, and TEECore registers 64 events. After the second read, TEECore
-does not register any more events. The result demonstrates the importance of the
-cache line state transition to either exclusive or modified in the
-initialization phase of TEECore. This test showed a shortcoming of TEECores'
-protection capabilities in an early implementation phase because an attacker who
-only reads could not be detected without the initial write to all memory. With
-enabled prefetchers, this detection routine fails.\\
+The first test case tests basic functionality to detect attacks that use memory
+access and the caches coherency protocol as an attack vector. Such attacks are
+to be detected by TEECore through changes in the cache line states that result
+from the cache coherency protocol. Because the cache coherency protocol ensures
+the reader sees the correct data, an attacker could exfiltrate secrets. To
+simulate the passive attacker, I implemented a small trusted application that
+allocates memory of the size of 4 KiB, which I call the target memory. The
+trusted application then communicates the physical address of the target memory
+to the normal partition using the shared memory communication path. Upon
+receiving the physical address of the target memory, the kernel module maps it
+into its address space and performs the read operation. After mapping the
+target memory in the Linux kernel module, the CPU remote to TEECore has not yet
+interacted with it, and it is not stored in a remote cache. Only the cache of
+the CPU core running TEECore, to which I refer as the target core, has the
+target memory cached. After the initialization phase (see
+section~\ref{sec:30:tee_kernel}), the target memory is at least in the modified
+state. Upon reading the target memory, the kernel module's CPU
+core receives a copy of the data. Both CPU cores maintain their copy in the
+shared state. The target core needs to fetch the data from the remote core.
+Therefore, the expected result of this test is to see L2 cache misses in the
+first attempt by TEECore to access the target memory after the remote core has
+read it. The attacker, in this case, does not modify the memory, so the
+performance counters do not trigger for subsequent access by the remote core as
+long as the target core does not modify the target memory. Concerning the number
+of L2 misses and L3 hits, I expect to count 64 occurrences per event. The number
+of occurrences results from the fixed size of the target memory of 4096 Bytes.
+Counting a combination of fewer L2 misses and L3 hits would mean that the data
+was not shared among cores. After running the test, the results fully met my
+expectations. For the first time, the remote core reads the target memory, and
+TEECore registers 64 events. After the second read, TEECore does not register
+any more events. The result demonstrates the importance of the cache line state
+transition to either exclusive or modified in the initialization phase of
+TEECore. This test showed a shortcoming of TEECores' protection capabilities in
+an early implementation phase because an attacker who only reads could not be
+detected without the initial write to all memory. With enabled prefetchers, this
+detection routine fails.\\
 
 \subsection{Active Attacker}
 \label{sec:evaluation:active}
-The simulation for an attacker that writes to the target memory is similar in
-setup but different in its effects. As with the read attack, the secure
-application shares the physical address of the target memory with the Linux
-kernel module. In contrast, the kernel module now writes to the target memory.
-As a result, the cache line, which was in a modified state in the target CPU
-core's cache, now changes to invalid because the remote CPU has the correct copy
-in its cache. If the target CPU now reads or writes the target memory, it has to
-query the changes from the remote CPU. The cache line changes from invalid to
-shared or modified, dependent on the operation of the target CPU. This change is
-accompanied by changes in the L3 cache, which triggers the \gls{pmc} events.
-Subsequently, I should measure one event per affected cache line, totaling 64
-events counted. In contrast to the reading attack, performing writes on the
-remote side and reads on the target side should yield events because of the
-involved cache line state modifications for each operation. TEECore shows
-exactly this behavior. It, therefore, can detect the attacker described. With
-enabled prefetchers, this detection routine also fails.\\
+The goal of the active attacker is to write to address that back TEECore's
+memory, which in turn would update TEECore's memory with the written values
+through the cache coherency protocol. An attacker could inject data into the
+isolated environment in this way. The simulation for an active attacker that
+writes to the target memory is similar in setup to the passive attacker in
+section~\ref{sec:evaluation:passive}, but different in its effects. As with the
+passive attack, the secure application shares the physical address of the target
+memory with the Linux kernel module. In contrast, the kernel module now writes
+to the target memory. As a result, the cache line, which was in a modified state
+in the target CPU core's cache, now changes to invalid because the remote CPU
+has the correct copy in its cache. If the target CPU now reads or writes the
+target memory, it has to query the changes from the remote CPU. The cache line
+changes from invalid to shared or modified, dependent on the operation of the
+target CPU. This change is accompanied by changes in the L3 cache, which
+triggers the \gls{pmc} events. Subsequently, I should measure one event per
+affected cache line, totaling 64 events counted. In contrast to the reading
+attack, performing writes on the remote side and reads on the target side should
+yield events because of the involved cache line state modifications for each
+operation. TEECore shows exactly this behavior. It, therefore, can detect the
+attacker described. With enabled prefetchers, this detection routine also
+fails.\\
 
 \subsection{Inter-processor Interrupts}
 \label{sec:evaluation:ipi}
-As an additional attack vector, I identified interrupts. For Interrupts such as
-the default vectors, \glspl{nmi} and \glspl{pmi}, which are routed through the
-\gls{idt}, the countermeasures described in~\ref{sec:30:tee_kernel} are taken.
-As a result, the \gls{idt} configuration of TEECore ultimately leads to a triple
-fault and, thus, a platform reset. Sending a \gls{nmi} from the kernel module to
-the target core resulted in the expected behavior. As described in
+As an additional attack vector, I identified \glspl{ipi}. For interrupts that
+are routed through the \gls{idt}, \glspl{nmi} and \glspl{pmi}, the
+countermeasures described in~\ref{sec:30:tee_kernel} are taken. As a result, the
+\gls{idt} configuration of TEECore ultimately leads to a triple fault and, thus,
+a platform reset. Sending a \gls{nmi} from the kernel module to the target core
+results in the expected behavior. As described in
 section~\ref{sec:state:technical:interrupts}, \glspl{ipi} such as INIT are not
 routed through the \gls{idt}. Instead, the \gls{lapic} sends these directly to
 the CPU. As a result, TEECore cannot reset the platform upon receiving an INIT
 \gls{ipi}. Instead, the CPU handles the INIT as described in the Intel SDM. The
 target CPU, therefore, changes into a state that stops program execution until
 it receives a STARTUP \gls{ipi} message. Malicious system software running on
-any remote core can effectively starve TEECore and prevent its execution. The
-remaining question is whether the target core still participates in the cache
-coherency protocol. If so, a remote core can retrieve memory content from the
-secure partition without allowing TEECore to detect this exfiltration. To test
-this, I used the same setup as in the other tests on the side of TEECore. The
-trusted application allocates memory, writes a predefined value to it, and then
+any remote core can effectively starve TEECore and prevent its execution. To
+test if the isolated core still participates in the cache coherency protocol, I
+used the same setup as in the other tests on the side of TEECore. The trusted
+application allocates memory, writes a predefined value to it, and then
 transmits the physical address to the kernel module. Before the kernel module
 reads the target memory, it sends an INIT \gls{ipi} to the target core.
-Comparing the read value with the one written by the trusted application before
+Comparing the value read with the one written by the trusted application before
 allows me to conclude if the attack was successful. The test indeed showed that
 TEECore is vulnerable to this kind of attack. Because the target core is halted,
 TEECore can neither detect nor prevent such attacks.
@@ -209,8 +206,8 @@ of usable cache lines for TEECore. Because Raptor Cove's L1D and L2 cache
 associativity is 12, respectively 16, not all possible memory addresses can be
 stored in all cache lines. Table~\ref{50:tab:cache_size} lists Raptor Cove's
 cache parameters as stated in the official data
-sheet~\cite{raptorlake_spec_sheet}. The L2 and L3 caches in Raptor Cove are
-non-inclusive.\\
+sheet~\cite{raptorlake_spec_sheet}. The L2 cache is exclusive of the L1 cache,
+while the L3 cache is inclusive of the lower level caches.\\
 
 \begin{table}[ht]
   \centering
@@ -228,16 +225,16 @@ non-inclusive.\\
   \label{50:tab:cache_size}
 \end{table}
 
-To evaluate memory constraints, I will use a simple trusted application which
+To evaluate memory constraints, I will use a simple trusted application that
 allocates all available memory. After allocating memory, this application access
-the memory by first reading and the writing an incremented value back the each
-64 bytes field. These memory accesses are those that I measure. The application
-does no communication with the normal partition. I used different performance
-counter events to evaluate different aspects of TEECore. These events are shown
-in table~\ref{50:tab:events}. For the following tests I differentiate between
-high-level Rust code, that is used to program the run time environment and
-low-level assembly code that is run before the high-level code to setup the
-environment.
+the memory by first reading and then writing an incremented value back to the
+each 64 byte fields. These memory accesses are those that I measure. The
+application does no communication with the normal partition. I use different
+performance counter events to evaluate different aspects of TEECore. These
+events are shown in table~\ref{50:tab:events}. For the following tests I
+differentiate between high-level Rust code, that is used to program the run time
+environment and low-level assembly code that is run before the high-level code
+to setup the environment.
 
 \begin{table}[ht]
   \centering
@@ -291,7 +288,7 @@ runs. It's also possible that the measurements are inherently inaccurate (see
 forward section~\ref{eval:mem_constraints:accu}).
 
 \subsection{Total Memory Consumption}
-I use the remaining event to evaluate TEECore with respect to memory constraints
+I use the remaining events to evaluate TEECore with respect to memory constraints
 implied by the hardware it runs on. The event \textit{L1D.REPLACEMENT} indicates
 the number of times a cache line in the L1 data cache was replaced. This is the
 case whenever the CPU needs to swap lines between the L1 cache and any other
@@ -351,11 +348,12 @@ perform the same number of memory operations, I replaced the instruction event
 with one that measures the total number of memory operations (MEM\_OPS\_TOTAL).
 The test application operates on the maximum available memory, that is, 1,876
 KiB of consecutive memory. As described in the design
-chapter\ref{sec:implementation:teeKernel}, the expected behavior would be that
+chapter~\ref{sec:implementation:teeKernel}, the expected behavior would be that
 after the initialization phase, no L2 misses occur. In this test, the
 initialization phase is emulated by the first pass. As the measurement results
-in table~\ref{50:tab:init} show, this is not the case. Instead, L2 misses occur
-until the fourth pass.\\
+in table~\ref{50:tab:init} show, that TEECore behaves differently then expected.
+Instead, of only missing the L2 in the first pass, L2 misses occur until the
+fourth pass.\\
 
 Because TEECore uses 2 MiB of consecutive memory, which is aligned at a 2 MiB
 boundary, no conflict misses can occur. To create conflict misses in the L2
@@ -486,7 +484,7 @@ request to L2 and therefore L2\_HIT. As the documentation of the performance
 monitoring events states, this could be caused by L1D\_REPLACEMENT also counting
 opportunistic replacements, while L2\_HIT only counts retired load
 instructions~\cite{perfmon}. Events counted by L1D\_REPLACEMENT but not by
-L2\_HIT includes, for example, fill buffer interaction and speculative
+L2\_HIT include, for example, fill buffer interaction and speculative
 replacements.
 
 \FloatBarrier
@@ -528,9 +526,9 @@ L1D\_REPLACEMENTs occur. As described before, L1D\_REPLACEMENTS don't
 necessarily need to add up to L2\_MISSes (see
 section~\ref{eval:mem_constraints:size}). The cache's replacement is hard to
 predict in this example too (see section~\ref{eval:mem_constraints:influences}).
-Overall, considering that the caches are non-inclusive, all values I measured
-are plausible. I leave the task of finding the remaining source of noise to
-future work.
+Overall, considering that the L2 cache is exclusive of the L1 cache, all values
+I measured are plausible. I leave the task of finding the remaining source of
+noise to future work.
 
 \section{Comparison to other TEE Solutions}
 \label{eval:compare}
@@ -555,27 +553,29 @@ processor is the Intel Core i7 13700k I used to evaluate TEECore. For a more
 detailed comparison of both microarchitectures, refer to
 section~\ref{sec:evaluation:setup}. While I targeted P-Cores for my prototype
 implementation, full support for this processor would also mean implementing
-TEECore support for E-Cores. This means that supporting many CPUs of different
-vendors and architectures would mean additional implementation efforts in
-TEECore. On the other hand, \gls{isa} extensions such as \gls{sgx} or \gls{sev}
-also come in different versions that support different features that might need
-adaption from software. Intel \gls{sgx}, for example, can support different
-memory sizes. Furthermore, without an abstraction layer like TEECore, an
-application must adapt to the different vendor-specific \gls{isa} extensions
-anyway. To conclude, the portability advantage is mainly on the application
-side, for applications receive a consistent interface to support processors for
-which TEECore is implemented. On the other hand, with the usage of \glspl{pmc},
-TEECore uses a mechanism to detect side-channel attacks present in most modern
-processors. To adopt TEECore's detection primitives to other processors boils
-down to finding the right events and programming the \glspl{pmc} the right way.
-Except for \gls{isa} specific extensions, the only hardware requirements of
-TEECore are the presence of core exclusive resources such as a private cache and
-\gls{pmc} facilities that can signal to TEECore that data spilled from private
-resources to shared ones. Such facilities are present not only in x86 processors
-but also in ARM as an optional but recommended extension. Compared to Enma,
-TEECore is independent of other \gls{os}, as TEECore runs as a runs as
-an independent instance next to the \gls{os}. This allows other \gls{os}es to
-use TEECore, while Enma is restricted to L4Re.
+support for E-Cores. This means that supporting many CPUs of different vendors
+and architectures would mean additional implementation efforts in TEECore. On
+the other hand, \gls{isa} extensions such as \gls{sgx} or \gls{sev} also come in
+different versions that support different features that might need adaption from
+software~\cite{el2022benchmarking, intel_sdm, kaplan_amd_2020}. Intel \gls{sgx},
+for example, can support different memory sizes. Furthermore, without an
+abstraction layer like TEECore, an application must adapt to the different
+vendor-specific \gls{isa} extensions anyway. To conclude, the portability
+advantage is mainly on the application side, for applications receive a
+consistent interface to support processors for which TEECore is implemented. On
+the other hand, with the usage of \glspl{pmc}, TEECore uses a mechanism to
+detect side-channel attacks present in most modern processors. To adopt
+TEECore's detection primitives to other processors boils down to finding the
+right events and programming the \glspl{pmc} the right way. Except for a
+compatible \gls{pmc} facility, the only hardware requirements of TEECore are the
+presence of core exclusive resources such as a private cache. Performance
+monitoring facilities are present not only in x86 processors but also in ARM as
+an optional but recommended extension. Intel \gls{tdx}, \gls{sgx} and AMD
+\gls{sev} are currently only available for server grade CPUs, while TEECore can
+potentially run on all commodity CPUs. Compared to Enma, TEECore is independent
+of other \gls{os}, as TEECore runs as an independent instance next to the
+\gls{os}. This allows other \gls{os}es to use TEECore, while Enma is restricted
+to L4Re~\cite{reitz_isolierende_2019}.
 
 \subsection{Security}
 \label{eval:compare:security}
@@ -583,15 +583,16 @@ TEECore can defend against most attacks described in
 chapter~\ref{sec:30:tee_attacker_model}. In contrast to other \gls{tee}
 implementations, TEECore can detect and react to cache-based side-channel
 attacks. This class of attacks is explicitly stated by Intel \gls{sgx}, AMD
-\gls{sev}, and Enma not to be part of the attacker model, as these solutions can
-neither detect nor defend against these attacks. On the other hand, TEECore
-lacks mechanisms to defend against two attack vectors on x86 processors that
-\gls{sgx} and \gls{sev} can defend against. First, TEECore depends on the
-platform firmware not being malicious. This dependency comes from the fact that
-parts of the firmware have to be trusted by TEECore, as it serves as a root of
-trust for measurement for Secure Boot. The firmware can be removed from the
-\gls{tcb} by replacing it with a dynamic root for
-trust~\cite{mccune_flicker_2008,amd_manual,intel_sdm}.
+\gls{sev}, and Enma not to be part of the attacker model or proven to be
+vulnerable, as these solutions can neither detect nor defend against these
+attacks~\cite{van2017sgx, kaplan_amd_2020, reitz_isolierende_2019}. On the other
+hand, TEECore lacks mechanisms to defend against two attack vectors on x86
+processors that \gls{sgx}, and \gls{tdx} can defend against. First,
+TEECore depends on the platform firmware not being malicious. This dependency
+comes from the fact that parts of the firmware have to be trusted by TEECore, as
+it serves as a root of trust for measurement for Secure Boot. The firmware can
+be removed from the \gls{tcb} by replacing it with a dynamic root for
+trust~\cite{mccune_flicker_2008,amd_manual,intel_sdm}.\\
 
 As described in chapter~\ref{sec:30:tee_boot_chain}, TEECore's \gls{tee}
 functionality is dependent on Secure Boot. Aside from Secure Boot, the firmware
@@ -605,19 +606,21 @@ mode to the \gls{smm}, the firmware is unable to decrypt the memory in use.
 Memory encryption does not help TEECore defend against malicious \gls{smm}
 because \gls{smm} could even read the content of the isolated core's registers
 as soon as it manages to interrupt TEECore at the right moment. Furthermore,
-other solutions require memory encryption to protect against memory-tapping
-attacks. TEECore itself is immune to such attacks as its memory contents never
-leave the core and are not sent over the memory bus. If this happens, TEECore
-regards this as an attack. Nevertheless, the shared memory communication path
-can be tapped. It is therefore the responsibility of the secure application and
-the normal partition's applications to secure this communication channel.
-Furthermore, other \gls{tee} solutions are not vulnerable against IPI attacks
-described in section~\ref{eval:sec}, though they are vulnerable against other
-kinds of interrupt-based attacks~\cite{van2017sgx, schluter2024heckler}. Memory
-encryption could also help TEECore defend against this kind of attack, but it
-would require encrypting values as soon as they are moved from registers to the
-cache. To conclude, TEECore solves problems other than \gls{sgx}, \gls{tdx}, and
-\gls{sev}. \\
+\gls{tdx} and \gls{sgx} require memory encryption to protect against
+memory-tapping attacks~\cite{tdx_whitepaper, costan2016intel}. \gls{sev} does
+not implement mitigation against memory tapping attacks~\cite{kaplan_amd_2020}.
+TEECore itself is immune to such attacks as its memory contents never leave the
+processor's cache and thus are not sent over the memory bus. If this happens,
+TEECore regards this as an attack. Nevertheless, the shared memory communication
+path can be tapped. It is therefore the responsibility of the secure application
+and the normal partition's applications to secure this communication channel
+e.g. by using encryption. Furthermore, other \gls{tee} solutions are not
+vulnerable against IPI attacks described in section~\ref{eval:sec}, though they
+are vulnerable against other kinds of interrupt-based attacks~\cite{van2017sgx,
+schluter2024heckler}. Memory encryption could also help TEECore defend against
+this kind of attack, but it would require encrypting values as soon as they are
+moved from registers to the cache. To conclude, TEECore solves problems other
+than \gls{sgx}, \gls{tdx}, and \gls{sev}. \\
 
 As a result, the idea of combining different approaches might sound appealing as
 TEECore allows the detection of side-channel attacks, while other solutions are
@@ -632,14 +635,16 @@ and implement the remote attestation feature in an additional \gls{sgx} enclave.
 Because enclave memory is encrypted, this could solve the problem of INIT
 \glspl{ipi}. Conversely, \gls{sgx} could benefit from the additional isolation
 TEECore provides to prevent interrupt-based side channels and make cache-side
-channel-based attacks visible. Similarly, TEECore could provide a means for
+channel-based attacks visible. This approach is analog to that implemented by
+Quanshield (see section~\ref{sec:20:mitigations:interrupt_sca}), albeit with
+stronger isolation properties. Similarly, TEECore could provide a means for
 detecting cache-based side channels to \gls{tdx} and \gls{sev}. \gls{sev} does
 not protect against profiling through \glspl{pmc}
 facilities~\cite{kaplan_amd_2020}. There even exist attacks which exfiltrate
 data through the use of \glspl{pmc} from a \gls{sev}
 \gls{vm}~\cite{CounterSEVeillance}. Intel \gls{tdx} context switches \gls{pmc}
 and allows to optionally enable \gls{pmc} facilities for the
-guest~\cite{aktas2023intel}. For confidential \glspl{vm}, TEECore could
+guest~\cite{tdx_whitepaper}. For confidential \glspl{vm}, TEECore could
 implement hypervisor capabilities and execute secure applications as \glspl{vm}.
 Again, memory would be encrypted when receiving an interrupt and returning from
 \gls{vm} execution. Running TEECore in a \gls{vm} does not provide additional
@@ -658,7 +663,7 @@ code running on a dedicated security processor~\cite{xucode, kaplan_amd_2020}.
 At this point, one has to differentiate between the processor and the platform
 firmware. A user must trust at least the processor manufacturer and the software
 installed on these SoCs. This allows x86 hardware extensions to exclude platform
-software that does not originate from the processor vendor and is excluded from
+firmware that does not originate from the processor vendor and is excluded from
 firmware~\cite{xucode}. Arm TrustZone also includes trusted firmware in its
 \gls{tcb}~\cite{pinto_demystifying_2019}. To summarize, the \gls{tcb} of TEECore
 is larger than those of the hardware solutions but comparable to the \gls{tcb}
