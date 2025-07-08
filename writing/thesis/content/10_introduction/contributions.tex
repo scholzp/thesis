@@ -2,7 +2,7 @@
 \label{sec:10:contributions}
 As described in the motivation (see chapter~\ref{sec:10:motivation}) chapter of
 this thesis, research shows that side channel attacks impose a big threat to
-current \glspl{tee} implementations. As such, the undermine security guarantees
+current \glspl{tee} implementations. As such, they undermine security guarantees
 of such solutions (c.f. chapter~\ref{sec:20:attacks}). To significantly reduce
 the impact of side channels, I propose TEECore. TEECore is a software based
 \gls{tee} that achieves isolation through levering core local resources. TEECore
@@ -24,9 +24,6 @@ tackles the following goals:
     implement a policy that is restricting execution to core local caches.
   \item I evaluate ways to enable such an execution environment to offer
     remote attestation features.
-  \item I evaluate my implementation regarding system resources. In detail, I
-    will evaluate what workload fits next to the runtime environment in the
-    core's local caches.
   \item I evaluate against what attacker model TEECore, as a sole software
     solution, can defend.
 \end{enumerate}
