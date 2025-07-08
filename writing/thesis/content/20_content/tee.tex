@@ -49,19 +49,21 @@ keys of each of their communication partner. A third party, the \gls{ca}, that
 Bob trusts, can help with this. The \gls{ca}'s task is to pledge to Bob that a
 certified key belongs to Alice or any other chosen entity and not a potentially
 malicious third party. Bob trusts the \gls{ca} to do the keys' background check
-and only deliver certificates of trusted identities. Alice first registers their
-key with the \gls{ca}. The \gls{ca} owns a pair of private and public keys too.
-It uses these keys to cryptographically bind Alice's public key to Alice's
-identity. The \gls{ca} this way creates a certificate that it signs with its
-private key. With this certificate, Bob can validate that a public key belongs
-to Alice by validating the certificate with the \glspl{ca} public key. Alice now
-delivers their public key and the certificate issued by the \gls{ca}. This
-proves to Bob that the key belongs Alice. As long as the \gls{ca} is not
-malicious, Bob can detect man-in-the-middle attacks if any malicious entity
-ships a key not belonging to Alice. While all participants can create
-certificates for their key with a dedicated key pair, such self-signed
-certificates could allow man-in-the-middle attacks again. Hence, a trusted third
-party creates the certificates.\\
+and only deliver certificates of trusted identities.
+% Alice first registers their
+% key with the \gls{ca}. The \gls{ca} owns a pair of private and public keys too.
+% It uses these keys to cryptographically bind Alice's public key to Alice's
+% identity. The \gls{ca} this way creates a certificate that it signs with its
+% private key. With this certificate, Bob can validate that a public key belongs
+% to Alice by validating the certificate with the \glspl{ca} public key. Alice now
+% delivers their public key and the certificate issued by the \gls{ca}. This
+% proves to Bob that the key belongs Alice. As long as the \gls{ca} is not
+% malicious, Bob can detect man-in-the-middle attacks if any malicious entity
+% ships a key not belonging to Alice. While all participants can create
+% certificates for their key with a dedicated key pair, such self-signed
+% certificates could allow man-in-the-middle attacks again. Hence, a trusted third
+% party creates the certificates.
+\\
 
 \begin{figure}
   \begin{center}
@@ -71,32 +73,35 @@ party creates the certificates.\\
   \end{center}
 \end{figure}
 
-Because the single \gls{ca} is trusted by all participants in the network,
-compromising it would mean control over all the communication in the network.
-The solution to this is distributed trust. Multiple \gls{ca}'s can exist in a
+% Because the single \gls{ca} is trusted by all participants in the network,
+% compromising it would mean control over all the communication in the network.
+% The solution to this is distributed trust.
+Multiple \gls{ca}s can exist in a
 network and compete with each other on the reputation gained from
-users~\cite{perlman1999overview}. Such a \gls{pki} is used in many network
-technologies, such as HTTPS, that use the X.509 standard. Next to leaf
-certificates issued to Alice and Bob, a \gls{ca} can also issue certificates on
-keys that allow other entities to issue certificates and act as an \gls{ica},
-creating a chain of certificates.
+users~\cite{perlman1999overview}.
+% Such a \gls{pki} is used in many network
+% technologies, such as HTTPS, that use the X.509 standard.
+Next to leaf certificates issued to Alice and Bob, a \gls{ca} can also issue
+certificates on keys that allow other entities to issue certificates and act as
+an \gls{ica}, creating a chain of certificates.
 Figure~\ref{fig:state:technical:chain_of_trust} shows such a chain of
-certificates. If Bob now wants to establish trust in the certificate provided by
-Alice, they must first decide if they trust the \gls{ica}. The first step is to
-verify that Alice's certificate was issued by the \gls{ica}. In the next step,
-Bob needs to check all succeeding certificates until they reach the root
-\gls{ca} by validating the \glspl{ica} respective certificates with the public
-key of their issuer. In this way, Bob builds a chain of trust by verifying the
-validity of the chain of certificates and deciding to trust the root \gls{ca}.
-In the following section, we will see that such trust chains allow the
-implementation of software attestation schemes.
+certificates.
+% If Bob now wants to establish trust in the certificate provided by
+% Alice, they must first decide if they trust the \gls{ica}. The first step is to
+% verify that Alice's certificate was issued by the \gls{ica}. In the next step,
+% Bob needs to check all succeeding certificates until they reach the root
+% \gls{ca} by validating the \glspl{ica} respective certificates with the public
+% key of their issuer. In this way, Bob builds a chain of trust by verifying the
+% validity of the chain of certificates and deciding to trust the root \gls{ca}.
+% In the following section, we will see that such trust chains allow the
+% implementation of software attestation schemes.
 
 \subsection{Remote attestation}
 \label{sec:20:remote_attestation}
-Remote attestation proves claims about a target
-by delivering evidence to an relying party over a network that supports these
-claims. Before I further proceed to explain remote attestation, I want to
-define the following terms similar to Coker et. al~\cite{coker_principles_2011}.
+Remote attestation proves claims about a target by delivering supporting
+evidence to an relying party over a network. Before I further proceed to explain
+remote attestation, I want to define the following terms similar to Coker et.
+al~\cite{coker_principles_2011}.
 \begin{itemize}
   \item \textbf{Appraiser}: Member of a network. Makes decisions about other
     parties on the base of delivered evidence.
@@ -227,8 +232,8 @@ The most recent version of the \gls{tpm} specification is 2.0.
 In x86 systems, \gls{tpm} 2.0 is widely spread today and one of Windows 11s
 system requirements. Often, \gls{tpm} is not implemented as a dedicated hardware
 module but as firmware \gls{tpm}. The firmware \gls{tpm} is part of the Intel
-Platform Trust Technology (Intel PTT) on Intel platforms. AMD platforms use an
-implementation called fTPM, which is integrated in the platform security
+Platform Trust Technology (Intel PTT). AMD platforms use an implementation
+called fTPM, which is integrated in the platform security
 processor~\cite{pirker2024brief}. \\
 
 At manufacturing time, a vendor burns a \gls{ek} together with a certificate
