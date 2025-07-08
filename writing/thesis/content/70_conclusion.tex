@@ -22,11 +22,15 @@ CPU core exclusive resources of multi-core CPUs, as described in
 chapter~\ref{sec:30:tee_kernel}. This approach ensures no communication paths to
 other cores of the same CPU exist. In chapter~\ref{eval:sec}, I have shown that
 in a carefully crafted environment, \glspl{pmc} can be used to detect side
-channels reliably. TEEcore can react to attacks by programming the performance
-counting facility to send \glspl{pmi} on the occurrence of such events as shown
-in chapter~\ref{sec:implementation:teeKernel}. At this point, it is essential to
-differentiate between preventing and reacting to side channels. TEECore does not
-protect from side-channel attacks. As I have shown in
+channels reliably. While for longer runs the results show slightly increased
+values for counters that measure traffic in the core-exclusive caches, I showed
+that in my test case no false positives for inter-core traffic can be measured.
+Moreover, in my test cases all events resulting in inter-core cache coherency
+traffic were detected. TEEcore can thus react to attacks by programming the
+performance counting facility to send \glspl{pmi} on the occurrence of such
+events as shown in chapter~\ref{sec:implementation:teeKernel}. At this point, it
+is essential to differentiate between preventing and reacting to side channels.
+TEECore does not protect from side-channel attacks. As I have shown in
 section~\ref{sec:evaluation:ipi}, this comes from the cache coherency algorithms
 implemented by the Intel Core i7 13700k I used for testing. This enables an
 attacker to carefully craft attacks to retrieve data. This is exceptionally
@@ -34,10 +38,15 @@ critical as software running in the normal partition can also accidentally
 interrupt TEECore with an INIT \gls{ipi}. These interrupts are part of the
 regular platform initialization routine and can be broadcast to all CPUs as a
 shortcut. Privileged software in the normal partition must therefore be adapted
-to the use of TEECore, to prevent it from accidentally attacking TEECore.
+to the use of TEECore, to prevent it from accidentally breaking TEECore.
 Nevertheless, as I argued in chapter~\ref{eval:compare:security}, TEECore could
 assist in protecting other \gls{tee} solutions and make them detect side-channel
-attacks.
+attacks. \\
+
+For TEECore to work as a standalone solution, future processor implementation
+need to be adopted. For example, programmable caches that would allow for an
+opt-out of the cache coherency protocol, would enable TEECore to fully protect
+its data.
 
 %%% Local Variables:
 %%% TeX-master: "diplom"
