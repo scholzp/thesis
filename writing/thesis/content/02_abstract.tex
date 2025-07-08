@@ -23,7 +23,7 @@
 % - in the end, i evaluate my solutions regardning security to achive an argue why its not a feasable standalone solution with current available hardware
 
 Trusted execution environments allow the execution of code in an environment
-isolated from the remaining systems and effectively aim to protect data against
+isolated from the remaining system and effectively aim to protect data against
 unauthorized access and program code from being tampered with without detection.
 To form a trusted relationship with the user, trusted execution environments
 offer remote attestation, by which they can prove claims about the code running
@@ -41,7 +41,7 @@ vulnerabilities exist but do not mitigate the source of the problems but rather
 channels through which they extract information. Consequently, researchers
 discover new vulnerabilities each year. \\
 
-In this thesis, I want to develop a software-based approach to trusted execution
+In this thesis, I develop a software-based approach to trusted execution
 environments. Instead of using vendor-specific hardware extensions, my approach
 is to use features present in nearly all commodity processors. By isolating a
 single CPU core to run my environment, I create a highly isolated environment
@@ -59,49 +59,6 @@ currently available hardware, my solution can not alone protect sufficiently
 from attacks and needs to be paired with additional solutions. I evaluate what
 of the already existing solutions can be paired with my solution to increase
 overall security properties.
-
-% Das ab hier ist nur ein Platzhalter. Das ist der Abstract vom Einleitungsvortrag
-% Remote attestation is used in confidential computing to prove to a client over a
-% computer network that a system in question fulfills a set of defined properties.
-% In a computer system, software can use remote attestation to verify that, for
-% example, the bootflow of a system was not compromised by malware. One
-% requirement for remote attestation is a hardware device that forms the root of
-% trust\cite{coker2011principles}. For the bootflow example, the hardware root of
-% trust in x86 systems is given by a Trusted Platform Module which, short TPM.
-
-% A technology enabling the concept of remote attestation to a per-application
-% basis is Intel's Software Guard Extensions (SGX). It allows applications to run
-% code in a secure enclave, isolated from the operating system or hypervisor. SGX
-% protects the integrity of the code to run in an enclave by providing remote
-% attestation about the state of the enclave. An explication can decide on the
-% provided attestation results if it wants to exchange secrets with the enclave.
-% Confidentiality of secrets exchanged with the enclave through is protected by
-% cryptography when using SGX. The root of trust is formed by the correctly
-% implemented special SGX instructions. Enclave keys are embedded in the firmware,
-% protected by the Intel management engine.\cite{costan2016intel}
-
-% In recent years many flaws in the implementation of SGX were discovered by
-% security researchers. With the advent of side-channel attacks, such as Spectre,
-% a new attack vector was discovered. While not part of the threat model of SGX,
-% special Spectre attacks can be used to leak enclave
-% content.\cite{chen2019sgxpectre, van2018foreshadow} Even without side channels,
-% architectural vulnerabilities can be used to leak SGX content and even
-% keys.\cite{borrello2022aepic}
-
-% All these vulnerabilities work because they expose data through the memory
-% subsystem. To mitigate this attack vector, I want to elaborate on the
-% possibility of constructing an enclave-like partition that runs code entirely in
-% local cache structures. For this, I want to isolate a single CPU core so that it
-% can not be tampered with from other system components. Software running in this
-% enclave shall be able to maintain its confidentiality by observing performance
-% counters, from which it can decide to react appropriately if it detects a data
-% breach. Moreover, I want to review algorithms for remote attestation applicable
-% to the isolated CPU core, so that its state can be attested to applications
-% running outside of the enclave. Combining both results in an enclave immune to
-% side channel attacks running on commodity hardware without the need for
-% additional hardware support. With the additional support of a hardware root of
-% trust like the TPM, this concept can achieve security guarantees similar to
-% Intel SGX.
 
 %%% Local Variables:
 %%% TeX-master: "diplom"
