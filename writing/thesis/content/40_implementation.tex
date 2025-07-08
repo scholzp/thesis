@@ -26,7 +26,7 @@ section~\ref{sec:implementation:teeKernel}. To demonstrate the prototype, I use
 Linux as kernel running in the normal partition. The prototype of TEECore
 requires Linux to set it up and prepare memory for it. In
 section~\ref{sec:implementation:hostKernel}, I describe how I configured Linux
-to set uo TEECore. To enable Linux to communicate with TEECore finally, I
+to set up TEECore. To enable Linux to communicate with TEECore, I
 implemented a driver as a Linux kernel module. I describe this kernel in
 section~\ref{sec:implementation:kmod}. As a target for the prototype
 implementation of TEECore I use an Intel Core i7 13700k processor.
@@ -35,31 +35,29 @@ implementation of TEECore I use an Intel Core i7 13700k processor.
 \label{sec:implementation:teeKernel}
 TEECore is a fork of
 PhipsBoot\footnote{\url{https://github.com/phip1611/phipsboot}}, a Multiboot 2
-compliant kernel written in the memory-safe programming language Rust, to serve
-as a bootloader for 64-bit x86 kernels. A feature of PhipsBoot is that it is
-relocatable and supports arbitrary load addresses. As a Multiboot 2 compliant
-kernel, PhipsBoot requires that the CPU is in 32-bit protected mode with
-segmentation enabled~\cite{mb2}. It therefore depends on other software that
-brings the CPU to this state before transferring control to PhipsBoot. After the
-handover, PhipsBoot does all initialization steps to bring the CPU into 64-bit
-mode with enabled PEA paging. This part of Phipsboot is written in x86 assembly
-code. I will refer to these assembly routines as low-level code in the following
-section. It initializes the page tables for its own use and sets up huge pages
-before transferring the CPU into 64-bit mode. Phipsboot sets up additional page
-tables for the software it loads. Because of its memory mapping, PhipsBoot
-expects to be loaded to a 2 MiB-aligned address. Its small size, less than 2
-MiB, allows PhipsBoot to set up the page table hierarchy using a single page
-table that maps its kernel. PhipsBoot uses memory statically reserved for
+compliant kernel written in the memory-safe programming language Rust. A feature
+of PhipsBoot is that it is relocatable and supports arbitrary load addresses. As
+a Multiboot 2 compliant kernel, PhipsBoot requires that the CPU is in 32-bit
+protected mode with segmentation enabled~\cite{mb2}. It therefore depends on
+other software that brings the CPU to this state before transferring control.
+After the handover, PhipsBoot does all initialization steps to bring the CPU
+into 64-bit mode with enabled paging. This part of Phipsboot is written in x86
+assembly code. I will refer to these assembly routines as low-level code in the
+following sections. It initializes the page tables for its own use and sets up
+huge pages before transferring the CPU into 64-bit mode. Phipsboot sets up
+additional page tables for the software it loads. Because of its memory mapping,
+PhipsBoot expects to be loaded to a 2 MiB-aligned address. Its small size, less
+than 2 MiB, allows PhipsBoot to set up the page table hierarchy using a single
+page table that maps its kernel. PhipsBoot uses memory statically reserved for
 dynamic memory allocation in the kernel's \gls{elf} image. Besides setting up
 the general run time, PhipsBoot does not implement any additional features.
 After bringing the platform to 64-bit \gls{g_lmode}, Phipsboot starts executing
-its Rust routines, which would start another rich kernel. The Rust
-implementation, which I refer to as high-level code, is not feature-complete.
-The features implemented are checking for a valid multiboot header, a working
-\gls{idt} setup, and a memory allocator. Because of its minimal design and its
-ability to be relocated to arbitrary memory addresses, I chose PhipsBoot as the
-base for TEECore. In the following, I will explain the chosen features I added
-to PhipsBoot to create TEECore.\\
+its Rust routines. The Rust implementation, which I refer to as high-level code,
+is not feature-complete. The features implemented are checking for a valid
+multiboot header, a working \gls{idt} setup, and a memory allocator. Because of
+its minimal design and its ability to be relocated to arbitrary memory
+addresses, I chose PhipsBoot as the base for TEECore. In the following sections,
+I will explain chosen features I added to PhipsBoot to create TEECore.\\
 
 \subsection{Mapping of Arbritary Memory}
 \label{sec:implementation:teeKernel:mem}
@@ -127,12 +125,12 @@ TEECore. This memory map is contained in the \gls{mbi} structure. The physical
 address of the structure is loaded to the \textit{EBX} register by the
 bootloader before it transfers control to TEECore. In the prototype
 implementation, the Linux kernel module fills the role of the bootloader (c.f.
-\ref{sec:implementation:kmod}). Other than the memory owned by the kernel, the
+\ref{sec:implementation:kmod}). Other than the memory owned by TEECore, the
 memory intended to be used by TEECore and Linux is mapped as uncacheable. This
 mapping prevents cache pollution and false positives for allowed access of a
-remote core to memory also used by the \gls{tee}.
+remote core to memory also used by TEECore.
 
-\subsection{Atack Detection Mechanism}
+\subsection{Attack Detection Mechanism}
 \label{sec:implementation:teeKernel:pmcs}
 To prepare the environment, TEECore needs to ensure that all memory used by it
 is in the exclusive or modified state so that a remote core must trigger a
@@ -168,7 +166,7 @@ measured by performance monitoring counters~\cite{perfmon}. TEECore, therefore,
 disables hardware prefetchers. Table~\ref{40:tab:events} contains information
 about performance monitoring events as found at Intel's database for Raptor Lake
 processors~\cite{perfmon}. It is important to note that these events are
-specific to load instructions. This means that the TEECore has to execute a load
+specific to load instructions. This means that TEECore has to execute a load
 to the respective address before it can detect cache line changes.
 
 \begin{table}[!h]
@@ -186,17 +184,17 @@ to the respective address before it can detect cache line changes.
   \label{40:tab:events}
 \end{table}
 
-The performance monitoring facilities of x86 CPUs I use consist of a pair of two
-\glspl{msr}, one \textit{IA32\_PERFEVTSELx} and \textit{IA32\_PMCx} each, where
-$x$ is the index of the pair. The Intel Core i7 13700k implements eight pairs of
-these \glspl{msr}. A given \textit{IA32\_PERFEVTSELx} \gls{msr} contains the
-configuration of the performance counter, including the event to measure and
-information about interrupt generation, as well as de-/activation bits of the
-counter, while a \textit{IA32\_PMCx} \gls{msr} contains the measurement value.
-Although all \textit{IA32\_PMCx} \glspl{msr} have a size of 64 bits, fewer
-bits might be implemented in hardware. For example, my test CPU implements 48
-bits for \textit{IA32\_PMCx}. The Layout of \textit{IA32\_PERFEVTSELx}
-\glspl{msr} is shown by figure~\ref{fig:state:technical:perfsel}.
+The performance monitoring facilities of x86 CPUs I use, consist of a pair of
+two \glspl{msr}, one \textit{IA32\_PERFEVTSELx} and \textit{IA32\_PMCx} each,
+where $x$ is the index of the pair. The Intel Core i7 13700k implements eight
+pairs of these \glspl{msr}. A given \textit{IA32\_PERFEVTSELx} \gls{msr}
+contains the configuration of the performance counter. This includes the event
+to measure and information about interrupt generation, as well as de-/activation
+bits of the counter. Figure~\ref{fig:state:technical:perfsel} shows the layout
+of \textit{IA32\_PERFEVTSELx}. \glspl{msr} of type \textit{IA32\_PMCx} \gls{msr}
+contain the measurement values. Although all \textit{IA32\_PMCx} \glspl{msr}
+have a size of 64 bits, fewer bits might be implemented in hardware. For
+example, my test CPU implements 48 bits for \textit{IA32\_PMCx}.
 
 \begin{center}
   \begin{figure}
@@ -207,18 +205,17 @@ bits for \textit{IA32\_PMCx}. The Layout of \textit{IA32\_PERFEVTSELx}
   \end{figure}
 \end{center}
 
-To set up \gls{pmc} for a specific event, TEECore sets the \textit{Events
+To set up a \gls{pmc} for a specific event, TEECore sets the \textit{Events
 Select} and \textit{UMASK} field in the respective \textit{IA32\_PERFEVTSELx}
 \textit{OS} bits to instruct hardware to count events for user mode and
 privileged software. TEECore furthermore sets the \textit{INT} bit to enable
 interrupt delivery on counter overflow. Because the \gls{lapic} delivers the
-interrupt through the \gls{lapic} on an overflow of the corresponding
-\textit{IA32\_PMCx}, TEECore has to additionally write all ones to this
-\gls{msr}. This write ensures that the counter overflows on the first
-occurrence of the respective event and triggers the delivery of a \gls{pmi}.
-After setting up \textit{IA32\_PMCx}, TEECore enables the counter by setting
-the \textit{EN} bit in the respective \textit{IA32\_PERFEVTSELx} \gls{msr}
-after finishing its preparation phase. From this point on, writes to
+interrupt on an overflow of the corresponding \textit{IA32\_PMCx}, TEECore has
+to additionally write all ones to this \gls{msr}. This write ensures that the
+counter overflows on the first occurrence of the respective event and triggers
+the delivery of a \gls{pmi}. After setting up \textit{IA32\_PMCx}, TEECore
+enables the counter by setting the \textit{EN} bit in the respective
+\textit{IA32\_PERFEVTSELx} \gls{msr}. From this point on, writes to
 \textit{IA32\_PMCx} are forbidden until the counter is disabled.\\
 
 To complete the setup, TEECore needs to configure the \gls{idt} accordingly, by
@@ -226,9 +223,10 @@ writing zero to the \gls{idtr}. Once the \gls{lapic} delivers an interrupt to
 TEECore, this configuration leads to a triple fault, effectively resetting the
 whole platform. This configuration allows for protection against single-step
 attacks that use interrupts. Moreover, as described in
-section~\ref{sec:30:tee_kernel}, TEECore uses \glspl{pmi} to signal itself that
-it has been attacked. These kinds of interrupts are routed through the \gls{idt}
-too and result in a triple fault in the same process as any other interrupt.\\
+section~\ref{sec:30:tee_kernel}, TEECore uses \glspl{pmi} to make hardware
+signal to it, that it has been attacked. These kinds of interrupts are routed
+through the \gls{idt} too and result in a triple fault in the same process as
+any other interrupt.\\
 
 TEECore must set up the \gls{lapic} to activate the delivery of \glspl{pmi}. It
 does so by mapping the \gls{lapic} register space as described in
@@ -245,13 +243,12 @@ Register of the \gls{lvt}. After this, the \gls{lapic} is ready to deliver
 
 \subsection{Shared Memory Communication Path}
 \label{sec:implementation:teeKernel:shared}
-I implemented a structure to manage the memory in question to enable
-communication through the shared memory channel. Access to the shared memory
-follows a simple protocol that splits the memory, as shown in
+I implemented a structure to manage the shared memory channel. Access to the
+shared memory follows a simple protocol that splits the memory, as shown in
 figure~\ref{fig:impl:shared_mem_layout}. The first byte denotes the sender, the
 second denotes the task identifier, and the remaining part is used for a payload
 that can be sent along with the other tags. I assume there are only two
-communication parties in the current prototype: the \gls{tee} kernel and the
+communication parties in the current prototype: TEECore and the
 host kernel. A message is sent by writing the first byte. To receive a message,
 the respective party polls the first byte of the shared memory and waits until
 the signal is written by the other party. In the current prototype only one
@@ -272,14 +269,14 @@ mitigated if TEECore is employed in real world scenarios.\\
   \end{figure}
 \end{center}
 
-After initialization, the \gls{tee} environment starts a state machine that
-controls the execution of tasks. In the first state, the \gls{tee} polls the
+After initialization, TEECore starts a state machine that
+controls the execution of tasks. In the first state, TEECore polls the
 shared memory until it receives a message containing the command to execute one
-of the predefined tasks. Once this message is received, the \gls{tee} executes
+of the predefined tasks. Once this message is received, TEECore executes
 the task as commanded. While the task runs, it can access the shared memory for
 multiple reasons. The first reason is that the task can access the payload
 section of the memory to receive additional input data from the party outside of
-the \gls{tee}. The second reason is that the task can prepare an answer to the
+TEECore. The second reason is that the task can prepare an answer to the
 outside party's request. For this, the task can write to fields dedicated to the
 sender information, the command, and the payload. It is the task's
 responsibility to write to the shared memory data needed to create a response to
@@ -290,16 +287,17 @@ should be implemented.
 \section{Normal Partition Kernel: Linux}
 \label{sec:implementation:hostKernel}
 As a highly configurable open-source general-purpose operating system, Linux is
-an example of the implementation of the host kernel. The Linux kernel I used for
-my prototype is version 6.13. Linux allows its configuration by passing command
-line arguments to the kernel on boot. This makes it able to limit the resources
-Linux uses. \\
+an example of the implementation of the noraml partition's kernel. The Linux
+kernel I used for my prototype is version 6.13. Linux allows its configuration
+by passing command line arguments to the kernel on boot. This makes it able to
+limit the resources Linux uses. \\
 
-To isolate the CPU core, I use the command line option \textit{nr\_cpus=n},
-where $n$ is an arbitrary number that limits Linux to using a maximum core
-count of $n$. I use $n=3$ to limit Linux to 3 cores. While Linux supports CPU
+To isolate the isolated partition's CPU core, I use the command line option
+\textit{nr\_cpus=n}, where $n$ is an arbitrary number that limits Linux to using
+a maximum core count of $n$. I use $n=3$ to limit Linux to 3 cores. While Linux
+supports CPU
 hotplugging\footnote{\url{https://docs.kernel.org/core-api/cpu_hotplug.html}},
-which would allow enabling cores to be turned off through the same feature,
+which would allow cores to be turned off through the same feature,
 \textit{nr\_cpu} introduces a hard limit. This limit originates from the fact
 that managemant data structures for late CPU hotplugging need to be
 preallocated. The \textit{nr\_cpu} limits the number of preallocated structures,
@@ -319,17 +317,17 @@ is the only possible way.\\
 The driver for TEECore, implemented as a Linux kernel module, performs
 additional initialization steps that I explain in
 section~\ref{sec:implementation:kmod}. Linux, nevertheless, is the first
-software to be run in my prototype. All other components, namely the \gls{tee}
-kernel as an ELF-file image and the Linux kernel module embedded in its initial
-RAM disk image, which allows in theory, the signing of a single image for a
-secure boot thus ensures the integrity of all components on startup.\\
+software to be run in my prototype. All other components, namely TEECore as an
+\gls{elf} image and the Linux kernel module embedded in its initial RAM disk
+image, which allows in theory, the signing of a single image for a secure boot
+thus ensures the integrity of all components on startup.\\
 
 \section{Linux kernel module}
 \label{sec:implementation:kmod}
 As I described in section~\ref{sec:implementation:hostKernel}, the Linux kernel
-module is the driver not only enabling Linux to communicate with the \gls{tee}
-kernel on the isolated core but also the component that initializes the isolated
-core and loads the \gls{tee} kernel into memory.\\
+module is the driver not only enabling Linux to communicate with TEECore on the
+isolated core but also the component that initializes the isolated core and
+loads TEECore into memory.\\
 
 For this, the kernel module claims the memory reserved through the Linux command
 line argument and copies the startup code to the reserved memory. I wrote the
@@ -342,20 +340,20 @@ to edit a binary would arise. The \gls{mbi}, which TEECore expects, is created
 by the kernel module at run time. Because of this, the address of the \gls{mbi}
 is not known at compile time. After allocating the memory, the kernel module
 modifies the startup code at runtime by replacing a placeholder with the actual
-\gls{mbi} address.\\
+address of the \gls{mbi}.\\
 
-In the next step, the kernel module locates the \gls{elf} binary of the TEECore
+In the next step, the kernel module locates the \gls{elf} binary of TEECore
 and places it in memory. For this, the module allocates memory through the Linux
 kernel's \textit{allocpages} interface at a physical address aligned to 2 MiB.
 Once allocated, the kernel module does not deallocate the pages to prevent Linux
-from reusing the memory and possibly overwriting the TEECore. Once the required
+from reusing the memory and possibly overwriting TEECore. Once the required
 memory is allocated and mapped in the kernel address space, the kernel module
-begins to parse the \gls{tee} kernel's \gls{elf} image and copies all necessary
+begins to parse TEECore's \gls{elf} image and copies all necessary
 parts to memory. The kernel module brings its own \gls{elf} loader for this. The
 kernel module does not use the Linux' \gls{elf} file loader because it does not
 allow me to obtain the physical address to which the \gls{elf} image is
 loaded. The kernel module requires the TEECore binary's physical address to
-calculate the TEECore code entry address. This address is the second important
+calculate the TEECore code entry address. This address is a second important
 address generated at runtime of the kernel module with which the boot code is
 updated. The kernel module then sets up the shared memory region by allocating
 the amount of memory specified before. It then creates a \gls{mbi} structure
@@ -363,29 +361,30 @@ containing the physical address of the shared region with a custom-defined
 memory type. TEECore later parses the \gls{mbi} structure to find the physical
 memory backing the shared memory communication channel.\\
 
-Once all parts necessary to run the \gls{tee} kernel are placed in memory, the
-kernel module prepares to start the isolated core. At this point, Linux does not
-allow interaction with any core not initialized by it, e.g., the kernel module
-cannot address the isolated core with any kernel-provided functions. To
-circumvent this shortcoming, I gained access to the \gls{lapic} of the core
-running the kernel module to send the required INIT and startup \gls{ipi}
-sequence to the isolated core. Another problem arises when implementing this
-routine: APIC IDs are not bound to start at 0, nor do they have to increment by
-one for each CPU core. To overcome this issue, I queried the APIC IDs of the
+Once all parts necessary to run TEECore are placed in memory, the kernel module
+prepares to start the isolated core. At this point, Linux does not allow
+interaction with any core not initialized by it, e.g., the kernel module cannot
+address the isolated core with any kernel-provided functions. To circumvent this
+shortcoming, I gained access to the \gls{lapic} of the core running the kernel
+module to send the required INIT and startup \gls{ipi} sequence to the isolated
+core. Another problem arises when implementing this routine: APIC IDs are not
+bound to start at 0, nor do they have to increment by one for each CPU
+core~\cite{intel_sdm}. To overcome this issue, I queried the APIC IDs of the
 cores mapped by Linux and calculated the offset for each core. I used this
 offset to calculate the APIC ID of the target core by adding the offset to the
 ID of the last core mapped by Linux. After sending the \gls{ipi} sequence to the
 remote core, the startup code will be executed, and a far jump to TEECore's code
-will be performed by the remote CPU.\\
+will be performed by the secure partition's CPU after runnint the startup
+code.\\
 
-After initializing the remote core, the kernel module manages communication with
-the \gls{tee} kernel. It, therefore, implements the protocol described in
+After initializing the secure partition's CPU, the kernel module manages
+communication with TEECore. It, therefore, implements the protocol described in
 \ref{sec:implementation:teeKernel}. To receive messages, the kernel module
 installs a timer, which it uses to poll the shared memory periodically for new
 messages. The kernel module also implements the remote part of tasks in the
 prototype. To start a specific task, the kernel module sends a message
-containing the task's ID and evaluates messages from the \gls{tee} to delegate
-them to the respective tasks routine. Lastly, the kernel module creates a
+containing the task's ID and evaluates messages from TEECore to delegate them to
+the respective task's handling routine. Lastly, the kernel module creates a
 character device to allow user space applications to use TEECore. Writes and
 reads to this device are implemented by the kernel module and used to form
 messages send to TEECore.
