@@ -8,17 +8,17 @@ full potential.
 
 The first feature missing is domain separation between the secure applications
 and the TEECore kernel. Currently, secure applications are run with the same
-privileges as TEECore, which is a potential security issue. Because TEECore is
-designed to operate in an interrupt-free environment, the transition between
-different privilege levels would need to be implemented using the x86\_64
-specific \textit{syscall} and \textit{sysret} instructions.
+privileges as TEECore, which is a security risk. Because TEECore is designed to
+operate in an interrupt-free environment, the transition between different
+privilege levels would need to be implemented using the x86\_64 specific
+\textit{syscall} and \textit{sysret} instructions.
 
 Second, a secure channel would need to be established to exchange data between
 secure applications and applications in the normal partition. The shared memory
 communication path can be used for such a channel as a medium. To allow secure
 communication via this channel, TEECore would need to implement some key
-exchange algorithm for key exchange with a remote party and consequent
-encryption of the shared memory.
+exchange algorithm for key exchange with a remote party and consequently
+algorithms to encrypt the shared memory.
 
 Third, TEECore currently only works with tasks that are directly embedded as a
 function into TEECore's code. This makes it complicated to adopt TEECore to new
