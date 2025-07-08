@@ -14,7 +14,7 @@ needed to verify the workload's integrity and and the TEE's identity to the
 tenant.\\
 
 Different vendor-specific hardware approaches, such as Intel SGX, AMD SEV, and
-ARM TrustZone, exist to this day that fulfill the requirements of integrity and
+Arm TrustZone exist to this day that fulfill the requirements of integrity and
 confidentiality to different degrees. These technologies also bring some
 downsides. For instance, software needs to be adopted for each vendor to make
 use of the different TEE's implementations. Second, major security flaws in the
@@ -28,7 +28,7 @@ utilizing the memory subsystem or buses become impossible when using only CPU
 local and exclusive caches in the TEE. For example, the environment can monitor
 its confidentiality by leveraging performance counters to detect snooping from
 other CPUs or, if a cache line is displaced to a higher level, potentially
-shared part of the memory system. Such an approach enables the creation of a
+shared part, of the memory system. Such an approach enables the creation of a
 Trusted Execution Environment on commodity x86 hardware without the need for
 dedicated hardware support.\\
 
