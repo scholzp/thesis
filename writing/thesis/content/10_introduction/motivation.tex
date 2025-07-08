@@ -1,9 +1,9 @@
 \section{Motivation}
 \label{sec:10:motivation}
-As of the beginning of 2025, the service haveibeenpawned registered over 14
-billion breached user accounts with personal data such as date of birth, IP
-addresses, and names on over 855 websites~\cite{haveibeenpawned}. Criminals can
-use disclosed personal data, for example, for fraud, social engineering, and
+As of the beginning of 2025, the service \textit{haveibeenpawned} registered
+over 14 billion breached user accounts with personal data such as date of birth,
+IP addresses, and names on over 855 websites~\cite{haveibeenpawned}. Criminals
+can use disclosed personal data, for example, for fraud, social engineering, and
 identity theft. Furthermore, even without criminals, protecting privacy can be
 of great value. After all, privacy also concerns how data is collected and
 processed. While single pieces of information about an individual might not tell
@@ -15,7 +15,7 @@ further, a user can request a proof that the server's operator does not spy on
 the processing routine. A technology allowing these verification forms is called
 a \gls{tee}. Trusted execution environments have an isolation mechanism to
 defend against spying and modifying attacks. Moreover, they implement protocols
-to verify those isolation properties towards an relying party over the network,
+to verify those isolation properties towards a relying party over the network,
 a technology referred to as remote attestation. \\
 
 A tangible example of how remote attestation can help solve real-world problems
@@ -111,11 +111,11 @@ These technologies theoretically solve many problems around \glspl{tee}, but are
 known to be insecure because respective CPU implementations contain bugs that
 make it possible for attackers to circumvent hardware-assisted isolation
 mechanisms and leak secrets through side
-channels~\cite{kocher_spectre_2020,lipp_meltdown_2020,nilsson_survey_2020}.
+channels~\cite{Kocher2018spectre,lipp_meltdown_2020,nilsson_survey_2020}.
 While software updates could mitigate specific side-channel attacks, the source
 of the information leaks is still persistent in hardware, with researchers still
 finding new side-channel attacks each
-year~\cite{wikner2022retbleed,moghimi_downfall_2023,ragab_ghostrace_2024}. On
+year~\cite{wikner2022retbleed,moghimi2023downfall,ragab_ghostrace_2024}. On
 the other hand, the example of Signal elucidates that proper working \glspl{tee}
 are important because they might process critical data. In this thesis, I am
 going to explore how to guarantee side-channel free execution of software in a
