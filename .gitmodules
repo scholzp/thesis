@@ -1,0 +1,3 @@
+[submodule "implementation/TEECore"]
+	path = implementation/TEECore
+	url = https://github.com/scholzp/TEECore_proto.git
