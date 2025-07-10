@@ -45,17 +45,17 @@ nix-build
 ```
 
 This will build the following mandatory items:
-	* The initrd, containing the kernel module (in result)
-	* The Linux bzImage (in result-3)
+* The initrd, containing the kernel module (in result)
+* The Linux bzImage (in result-3)
 
 These build outputs can be used to boot on bare metal. The initrd contains the
 Linux user space application, the kernel module and TEECore. The bzImage is
 required for booting Linux.
 
 Additionally, the following build outputs are relevant:
-	* ISO-image that contains Linux with all modules
-	* The Linux kernel module binary (result-4)
-	* A Qemu setup that contains all modules (execute result-5)
-	* A Qemu setup that contains all modules and uses the swtpm (in result-6)
-	* A script that sets up a swtpm (in result-7)
-	* A Linux userspace application to interact with TEECore (result-8)
+* ISO-image that contains Linux with all modules
+* The Linux kernel module binary (result-4)
+* A Qemu setup that contains all modules (execute result-5)
+* A Qemu setup that contains all modules and uses the swtpm (in result-6)
+* A script that sets up a swtpm (in result-7)
+* A Linux userspace application to interact with TEECore (result-8)
