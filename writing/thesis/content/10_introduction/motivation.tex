@@ -1,0 +1,124 @@
+\section{Motivation}
+\label{sec:10:motivation}
+As of the beginning of 2025, the service \textit{haveibeenpwned} registered over
+14 billion breached user accounts with personal data such as date of birth, IP
+addresses, and names on over 855 websites~\cite{haveibeenpawned}. Criminals can
+use disclosed personal data, for example, for fraud, social engineering, and
+identity theft. Furthermore, even without criminals, protecting privacy can be
+of great value. After all, privacy also concerns how data is collected and
+processed. While single pieces of information about an individual might not tell
+much on their own, these pieces can be linked together to form a more
+comprehensive picture of said individual~\cite{solove2007ve}. In an ideal world,
+the user would not only be able to transmit encrypted data to a service but also
+to verify how the provider processes their data. To increase privacy even
+further, a user can request a proof that the server's operator does not spy on
+the processing routine. A technology allowing these verification forms is called
+a \gls{tee}. \glspl{tee} have an isolation mechanism to defend against spying
+and modifying attacks. Moreover, they implement protocols to verify those
+isolation properties towards a relying party over the network, a technology
+referred to as remote attestation. \\
+
+A tangible example of how remote attestation can help solve real-world problems
+is the implementation of Signal's automatic contact discovery service. The
+Signal Messenger aims to provide a privacy messaging service. It implements its
+own end-to-end encryption protocol to protect its users'
+communication~\cite{cohn2020formal}. However, communication alone is not all of
+Signals features. The history of PGP has shown that virtually no one uses
+privacy-enhancing technologies if their usability is low and their application
+is too complicated~\cite{ruoti2015johnny}. It is therefore not surprising that
+Signal also aims to provide a good user experience. To do so, the developers of
+Signal saw themself confronted by the problem of implementing a
+privacy-preserving way for automatic contact discovery~\cite{SignalCd}.\\
+
+Consequently, Signal does not store phone numbers on their servers to identify
+their users. Instead, users' phone numbers are processed by their devices to
+create pseudonyms. These pseudonyms are the result of a hash function, called
+hashes. The Signal client on the users' device generates these hashes, truncates
+them, and transmits the results to the server. The sever can then compare these
+pseudonyms with its database of registered users to connect the right contacts.
+In this way, Signal does not learn the phone numbers of its users, but is able
+to connect registered users with each other.\\
+
+When creating the contact discovery service, the implementers faced multiple
+problems. The first major problem was the requirement for a social graph. A
+social graph connects people based on their relationships in a network. In the
+example of Signal, a social graph would at least contain information about who
+communicates with whom. The social graph can either be centralized and stored on
+Signal's servers or decentralized and stored on the users' phone. To minimize
+data stored on Signal's servers about their users, the implementers decided to
+use the users' phonebooks stored on their phones. The second problem arises from
+this decision. The users' phone books must be processed in a way so that neither
+Signal, through their services, nor their server operators can learn anything
+about the users. To solve these problems, encrypting the phone books is not
+enough. For example, the user does not have any chance to conclude from the
+communication alone with whom they are communicating. Do they communicate with
+the Signal server, or are they a victim of a man-in-the-middle attack? Even if
+the communication partner proves with the help of signatures that they are the
+Signal server application, the user cannot verify what version of the server
+application is running or if it processes the data as expected. Until now, we
+have not considered the server operator, who might be malicious, too. They can
+manipulate and read the application's memory because they have privileged access
+to the server's software and hardware. Such a powerful adversary could read
+decrypted secrets directly from the application's memory or modify the server
+application in a way that it leaks secret data. In this example, the user wants
+to verify that the Signal server application adheres to the following claims:
+\begin{enumerate}
+  \item The Signal server application executes the code the user expects
+  \item The Signal server application is safe from being manipulated by
+    any other party
+  \item Any privileged party is unable to read the server application's
+    memory
+\end{enumerate}
+The server environment, therefore, needs a trusted security authority that can
+prove these claims to the users. Additionally, hardware isolation mechanisms
+must protect this security authority against tampering attempts of privileged
+parties. Otherwise, an attacker can influence the operation of the trusted party
+or fake it completely. \glspl{tee} solve these problems by
+integrating two building blocks. First, they can execute code in an isolated
+execution environment. Hardware enforces isolation, and interaction with the
+isolated code is only possible through defined interfaces of the isolating
+hardware. This way, privileged software is not able to access memory-isolated
+code. Additionally, to protect against memory bus-tapping attacks, isolation
+hardware often encrypts the memory. The second building block implements remote
+attestation. Through remote attestation, \glspl{tee} can verify that the
+execution environment runs the task under hardware-assisted isolation
+protection. Furthermore, the \gls{tee} can attest the state of the running
+software, which the relying party can use to compare the attestation result to a
+state expected by the users. If the \gls{tee} fulfills the aforementioned
+claims, the program running under isolation is safe, and the relying party can
+construct a secure communication channel.\\
+
+So, what does this mean concerning the Signal example? How can \glspl{tee} help
+in this example? With the assumption that Signal knows its registered users, the
+blog post describes a recipe, which I cite in a simplified form:
+\begin{enumerate}
+  \item The encrypted contact discovery request containing the users' phonebook
+    is transmitted from the user to the \gls{tee}
+  \item The \gls{tee} decrypts the request and compares the phone numbers from
+    the request with its database of registered users
+  \item The \gls{tee} builds the response message from the comparison results
+    and transmits the encrypted result back to the user
+\end{enumerate}
+For this, Signal only needs to know its registered users. It does not need to
+store the users' phonebooks on its servers to provide the contact discovery
+service. Neither Signal nor their server operators learns anything about the
+users' phonebooks.
+
+Most commodity CPUs currently implement technologies that enable the creation of
+\glspl{tee}. In that case, the CPU and its vendor act as security
+authorities~\cite{tdx_whitepaper,kaplan_amd_2020,pinto_demystifying_2019,costan2016intel}.
+These technologies theoretically solve many problems around \glspl{tee}, but are
+known to be insecure because respective CPU implementations contain bugs that
+make it possible for attackers to circumvent hardware-assisted isolation
+mechanisms and leak secrets through side
+channels~\cite{Kocher2018spectre,lipp_meltdown_2020,nilsson_survey_2020}.
+While software updates could mitigate specific side-channel attacks, the source
+of the information leaks is still persistent in hardware, with researchers still
+finding new side-channel attacks each
+year~\cite{wikner2022retbleed,moghimi2023downfall,ragab_ghostrace_2024}. On
+the other hand, the example of Signal elucidates that proper working \glspl{tee}
+are important because they might process critical data. In this thesis, I am
+going to explore how to guarantee side-channel free execution of software in a
+\gls{tee} by restricting the run time environment to core local resources.
+Furthermore, I am going to explore a mechanism that leverages performance
+measurement counters to monitor any information breaches.
