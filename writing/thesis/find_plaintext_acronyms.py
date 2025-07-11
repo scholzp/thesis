@@ -11,6 +11,13 @@ def find_acronyms(source_path: str) -> [str]:
             s = re.search(r'\{([A-Z]*)\}', line)
             if s != None:
                 result.append(s.group(1))
+                result.append(s.group(1) + 's')
+                result.append(s.group(1) + 'es')
+            s = re.search(r'\{(\w+([- ]\w+)+)\}', line)
+            if s != None:
+                result.append(s.group(1))
+                result.append(s.group(1) + 's')
+                result.append(s.group(1) + 'es')
     return result
 
 def find_in_file(tokens: [str], file_path: str) -> None :
@@ -20,9 +27,9 @@ def find_in_file(tokens: [str], file_path: str) -> None :
         while line := f.readline():
             hit = False
             for token in tokens:
-                s = re.search(" " + token + " ", line)
+                s = re.search(" " + token + " ", line, re.I)
                 if s != None:
-                    line = re.sub(token, '\033[96m' + token + '\033[0m', line)
+                    line = re.sub(token, '\033[96m' + token + '\033[0m', line, flags=re.I)
                     hit = True
 
             if hit == True:

@@ -5,7 +5,6 @@ The source code and building instructions for Linux are publicly available at
 GitHub. For reasons of reproducibility, I also provide the source code I used to
 create measurements presented in chapter~\ref{sec:evaluation}. Each test
 scenario can be found on a dedicated branch.\\
-\todo{Räume mal die Repo URL auf}
 Additionally, the source code of the Linux kernel module can be found as listed
 below. With the help of the build scripts in this repository any person
 interested can setup a Qemu based test environment, as well as images for
@@ -13,7 +12,7 @@ running a Linux kernel next to TEECore on bare metal.
 
 \subsubsection{Main Branch of TEECore}
 \begin{quote}
-  \url{https://github.com/scholzp/phipsboot/tree/main}
+  \url{https://github.com/scholzp/TEECore_proto/tree/main}
 \end{quote}
 
 \noindent
@@ -21,27 +20,40 @@ This repository contains all Code of TEECore. The main branch contains code that
 implements the reset procedure described in
 chapter~\ref{sec:implementation:teeKernel}.
 
-\subsubsection{SC1 Branch of TEECore}
+\subsubsection{Code Size of TEECore}
 \begin{quote}
-  \url{https://github.com/scholzp/phipsboot/tree/mem_eval_sc1}
+  \url{https://github.com/scholzp/TEECore_proto/tree/code_size}
 \end{quote}
 
 \noindent
-This branch contains all Code of TEECore used for SC1 in
-chapter~\ref{sec:evaluation}.
+This branch contains all Code of TEECore used for evaluating TEECore regarding
+its code size. See chapter~\ref{sec:evaluation:mem:code}.
 
-\subsubsection{SC2 Branch of TEECore}
+\subsubsection{Memory Constraints of TEECore}
 \begin{quote}
   \url{https://github.com/scholzp/phipsboot/tree/mem_eval_sc2}
 \end{quote}
 
 \noindent
-This branch contains all Code of TEECore used for SC2 in
-chapter~\ref{sec:evaluation}.
+This branch contains all Code of TEECore used to gather data about the different
+attacks discussed in chapters~\ref{sec:evaluation:passive},
+\ref{sec:evaluation:active} and~\ref{sec:evaluation:ipi}. Additional I used this
+version to evaluate the memory constraints in
+chapters~\ref{eval:mem_constraints:size} and ~\ref{eval:mem_constraints:accu}.
+
+\subsubsection{Cache Replacement}
+\begin{quote}
+  \url{https://github.com/scholzp/TEECore_proto/tree/bench_mem_constraints}
+\end{quote}
+
+\noindent
+This branch contains all Code of TEECore used to gather data about the cache
+replacement policy as discussed in
+chapter~\ref{eval:mem_constraints:influences}.
 
 \subsubsection{Linux Kernel Module and Test Environment}
 \begin{quote}
-  \url{https://github.com/scholzp/thesis/tree/impl}
+  \url{https://github.com/scholzp/thesis/tree/main}
 \end{quote}
 
 \noindent
