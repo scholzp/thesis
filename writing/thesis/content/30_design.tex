@@ -19,9 +19,9 @@
 
 In this chapter, I will explain the design of TEECore and how a system that
 utilizes the TEECore prototype looks. The design mitigates the risk of
-covert side channels by fully excluding them on an architectural base.\\
+covert side-channels by fully excluding them on an architectural base.\\
 
-First, I want to discuss potential threats to TEECore in
+First, I want to potential threats to TEECore in
 section~\ref{sec:30:tee_attacker_model}. This section is followed by a
 description of the general system and usage of the TEECore prototype
 implementation in section~\ref{sec:30:tee_general}. The third part of this
@@ -37,12 +37,12 @@ section~\ref{sec:30:tee_boot_chain}.
 \label{sec:30:tee_attacker_model}
 An attacker against whom TEECore can defend is allowed to run privileged
 software on the same machine as TEECore. This includes the ability to create
-covert side channels. TEECore can prevent a wide variety of side channel attacks
-by design. An exception are cache-based side channel attacks, which TEECore can
-only proactively detect and defend against. Upon detecting a side channel,
+covert side-channels. TEECore can prevent a wide variety of side-channel attacks
+by design. An exception are cache-based side-channel attacks, which TEECore can
+only proactively detect and defend against. Upon detecting a side-channel,
 TEECore can react in a way that prevents an attacker from exfiltrating data. In
 particular, TEECore can react to attacks like Spectre and Meltdown. TEECore is
-immune to interrupt-based side channel attacks such as SGX-Step. Additionally,
+immune to interrupt-based side-channel attacks such as SGX-Step. Additionally,
 TEECore can defend against an attacker who has arbitrary access to memory or I/O
 ports. \\
 
@@ -106,7 +106,7 @@ tries to use the given hardware's functionality to mimic an isolated trusted CPU
 core and works more like the idea of a trusted world in Arm TrustZone instead of
 \gls{sgx} and \gls{sev}. While AMD indeed integrates an Arm Core in their
 \glspl{soc} and uses TrustZone to implement \gls{sev}, Intel uses a dedicated
-CPU core based on a custom design to implement its Management Engine and
+CPU core based on a custom design to implement its \gls{me} and
 \gls{sgx} on top of it. TEECore's goal is to provide a solution for
 x86 that allows the implementation of a \gls{tee} without using proprietary
 vendor features.
@@ -151,18 +151,18 @@ Other possible cache implementations, for example, that would push changes of
 shared cache lines to remote cores, would not work with TEECore. Moreover, for
 TEECore to work correctly, all prefetchers need to be disabled. This is because
 cache lines brought into the cache by prefetchers are not considered for events
-such as L2 misses.d (c.f. section~\ref{eval:sec}).\\
+such as L2 misses (c.f. section~\ref{eval:sec}).\\
 
 To protect a task against interrupt-based attacks, TEECore has to set up the
 \gls{idt} correctly so that any occurrence of any interrupt results in a system
 reset. TEECore achieves this by setting the \gls{idtr} to zero, which results in
 a general protection fault once the CPU tries to locate the \gls{idt}. Because
 this provokes a second fault after the first, the CPU generates a double fault,
-ultimately resulting in a triple fault and, thus, a system reset. TEECore
-triggers a platform reset when receiving maskable interrupt and \glspl{nmi} this
-way. Furthermore, it programs the \gls{pmc} to signal attacks on itself or its
-payload as soon as possible. TEECore uses the possibility to generate
-\glspl{pmi} on the overflow of a \gls{pmc}. As explained, the resulting
+ultimately resulting in a triple fault. As a consequence the platform resets.
+TEECore triggers a platform reset when receiving maskable interrupts and
+\glspl{nmi} this way. Furthermore, it programs the \gls{pmc} to signal attacks
+on itself or its payload as soon as possible. TEECore uses the possibility to
+generate \glspl{pmi} on the overflow of a \gls{pmc}. As explained, the resulting
 \gls{pmi} leads to a system reset. Important at this point is the fact that
 TEECore can only react to attacks in this way. It cannot prevent them
 entirely.\\
@@ -170,12 +170,10 @@ entirely.\\
 External memory, such as the shared memory region used for communication between
 partitions and memory mapped registers of the \gls{tpm}, are mapped as strong
 un-cacheable. For memory mapped devices such as the \gls{tpm} and \gls{lapic},
-this is necessary to keep device memory in sync. For the shared memory
-communication region, the relevant cause for this is that TEECore can
-single out what memory access was caused by malicious interactions through
-specific events. For example, read or write requests served by DRAM are allowed
-for these types of memory, while the same operations being served by other CPUs
-are not allowed.\\
+this is necessary to keep device memory in sync. I also map memory used for the
+shared communication path as uncacheable. As with other memory willingly shared
+with the normal partition, this prevents the detection routine from triggering
+when the remote side accesses the memory.\\
 
 The payload of TEECore is called a trusted application. In the proof of concept,
 tasks are implemented as functions and are thus statically embedded into the
@@ -209,10 +207,10 @@ into the CPU's local cache.\\
 The small size of available memory also restricts the size of data the workload
 can generate. Working with large data sets is not possible, as exceeding the
 capacity of the cache will lead to replacements in the local cache. The
-consequence is leakage of data a shared part of the memory subsystem, an event
-considered by TEECore as an attack. TEECore then reacts similarly, which results
-in a reset of the whole system. Moreover, the organization of cache structures
-can influence memory usage. I will evaluate such effects in
+consequence is leakage of data to shared parts of the memory subsystem, an event
+considered by TEECore as an attack. TEECore then classifies this as an attack,
+which results in a reset of the whole system. Moreover, the organization of
+cache structures can influence memory usage. I will evaluate such effects in
 chapter~\ref{sec:evaluation}. The last aspect regarding memory is how it is
 managed. Trusted applications are only allowed to allocate memory that was
 brought to a defined state. This is because cache lines must be set to either
@@ -276,12 +274,12 @@ log. TEECore uses this chain in two ways. By making the \gls{tpm} attest to its
 \gls{pcr} values, TEECore can prove that itself started from a trusted state and
 that the values that left TEECore were not modified. An appraiser can exchange
 encryption keys with TEECore, after successfully identifying it. This allows
-TEECore and the appraiser to created a encrypted channel and exchange
+TEECore and the appraiser to create a encrypted channel and exchange
 confidential data using it.\\
 
 A \gls{tpm} never uses its \gls{ek} to sign or encrypt data. Instead, it uses
 key derivation functions to create keys on demand with the help of its
-\glspl{ek}. The attestation manager of TEECore requests such a \gls{aik} that
+\gls{ek}. The attestation manager of TEECore requests such a \gls{aik} that
 can be used to sign \gls{pcr} values by the \gls{tpm}. A problem arises when
 TEECore has to prove that the \gls{aik} originates from a genuine \gls{tpm}. For
 this, the signing processes for the \gls{aik} need to be performed with the help
