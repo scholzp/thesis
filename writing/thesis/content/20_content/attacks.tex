@@ -1,10 +1,10 @@
-\section{Side Channel Attacks}
+\section{side-channel Attacks}
 \label{sec:20:attacks}
-In this section we review side channel attacks that TEECore mitigates
-against. While many side channels exists in a computers system, I want to focus
-on two classes of architectural side channels. First, in
+In this section we review side-channel attacks that TEECore mitigates
+against. While many side-channels exists in a computers system, I want to focus
+on two classes of architectural side-channels. First, in
 section~\ref{sec:20:transientattacks} we will learn about transient execution
-side channels. The second class, interrupt based side channels, will be
+side-channels. The second class, interrupt based side-channels, will be
 explained in section~\ref{sec:20:interrupt_sca}. Both classes have in common
 that they rely on observable architectural changes in the processor to
 exfiltrate information.
@@ -25,7 +25,7 @@ need to revert all results from executing an instruction from which they later
 learn that its precondition was not satisfied. An instruction executed in this
 way is called a transient instruction. Because of performance reasons, a
 processor might not revert all microarchitectural side effects of transient
-execution, leaving an oberseveable footprint. Spectre and Meltdown abuse
+execution, leaving an observable footprint. Spectre and Meltdown abuse
 different race conditions in transient execution to exfiltrate data through
 observing these microarchitectural state changes. In particular, the original
 Spectre and Meltdown attacks use cache based covert channels. To use these
@@ -66,17 +66,17 @@ transient execution attacks in general.\\
 \subsection{Interrupt Based Attacks}
 \label{sec:20:interrupt_sca}
 % In section~\ref{sec:20:transientattacks}, we have seen that data can be leaked
-% from various \gls{tee} implementations over side channels if an attacker can
+% from various \gls{tee} implementations over side-channels if an attacker can
 % interrupt a \gls{tee} in a high temporal resolution.
 With SGX-step Van et al. presented the first framework that enables an attacker
 to mount attacks on \gls{sgx} with instruction-level
-granularity~\cite{van2017sgx}. Next to the aforementioned covered side channels,
+granularity~\cite{van2017sgx}. Next to the aforementioned covert side-channels,
 this allows the attacker to learn access patterns of the \gls{tee} and tightly
 monitor its control flow. Wilke et al. and Kou et al. implemented similar
 attacks for AMD and Arm processors~\cite{wilke2023sev, kou2021load}.\\
 
 On x86 processors, the attack scheme uses the \gls{lapic}, while on Arm, it uses
-a separate core to send inter-processor interrupts to overcome the boundaries
+a separate core to send \glspl{ipi} to overcome the boundaries
 set by the two worlds in TrustZone. While Kou et al. use these interrupts to
 mount high-precision flush+evict attacks, both x86 attacks additionally describe
 how to monitor \gls{tee} behavior by manipulating the page tables of the

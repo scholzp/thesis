@@ -17,15 +17,15 @@ trust is defined.
 % authentication in the digital realm is implemented through cryptography and the
 % knowledge of secrets.
 
-Communication involves at least two parties, which we want to call Alice and Bob
-in the following example. When referring to cryptographic algorithms, a secret
-is called a key, and based on the kind of keys used, we can differentiate
-between two kinds of cryptographic algorithms. In symmetric algorithms, the same
-key is used for encryption and decryption. Alice and Bob share thus the same
-secret. In asymmetric algorithms, each of Alice and Bob maintain their secrets.
-These keys have a public and a private part, respectively. Alice uses the public
-part of Bob's key when they want to encrypt a message for Bob, and only Bob's
-private key can decrypt a message in this way.\\
+Communication involves at least two parties, which we call Alice and Bob in the
+following example. When referring to cryptographic algorithms, a secret is
+called a key, and based on the kind of keys used, we can differentiate between
+two kinds of cryptographic algorithms. In symmetric algorithms, the same key is
+used for encryption and decryption. Alice and Bob thus share the same secret. In
+asymmetric algorithms, each of Alice and Bob maintain their secrets. These keys
+have a public and a private part, respectively. Alice uses the public part of
+Bob's key when they want to encrypt a message for Bob, and only Bob's private
+key can decrypt a message in this way.\\
 
 Digital signatures use asymmetric cryptography. Given that Alice wants to sign a
 message so that Bob can verify that Alice is the sender, both proceed as follows
@@ -115,7 +115,7 @@ al~\cite{coker_principles_2011}.
     evidence about the claim. Trusted by appraiser.
 \end{itemize}
 
-The appraiser and the target both follow orthogonal goals. While the appraiser
+The appraiser and the target both follow contradictory goals. While the appraiser
 ideally wants to get as much information as possible about the target, the
 target wants to preserve its privacy as well as possible and, therefore, conceal
 as much information as possible. Both goals can be realized by employing a
@@ -129,14 +129,14 @@ fulfills the claims.
 
 \subsection{Hardware Root of Trust}
 \label{sec:20:hardware_root_of_trust}
-A root of trust is defined by the Trusted Computing Group as follows:
+A root of trust is defined by the \gls{tcg} as follows:
 \begin{quote}
   \textit{ A minimal set of system elements that have to be trusted because
     misbehavior is not detectable. \\
   } \mbox{ -- Trusted Computing Group~\cite{tpm_architecture}}
 \end{quote}
 
-The Trusted Computing Group specifies that a hardware root of trust must be
+The \gls{tcg} specifies that a hardware root of trust must be
 available to enable remote attestation in a confidential computing
 environment~\cite{tpm_architecture}. A hardware root of trust is a device in a
 computer system that the system cannot manipulate. Moreover, it implements
@@ -155,11 +155,11 @@ cards or unique, secure operation modes in CPU hardware. \\
 
 \section{Trusted Execution Environments}
 \label{sec:state:tee}
-GlobalPlatform first used the term trusted execution environment to define a
-solution for mobile trusted computing solutions~\cite{globaltee}. Since then,
-many inconsistent and unspecific definitions have been published for \glspl{tee}
-until the first precise definition was proposed by Sabt
-et.al~\cite{sabt2015trusted}. They define the \gls{tee} in the following way:
+GlobalPlatform first used the term \gls{tee} to define a solution for mobile
+trusted computing solutions~\cite{globaltee}. Since then, many inconsistent and
+unspecific definitions have been published for \glspl{tee} until the first
+precise definition was proposed by Sabt et al.~\cite{sabt2015trusted}. They
+define the \gls{tee} in the following way:
 \begin{quote}
   \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
     environment that runs on a separation kernel. It guarantees the authenticity of
@@ -184,14 +184,14 @@ it does not require a root of trust to be present in the system. To prove its
 trustworthiness, \glspl{tee} employ remote attestation, which is the second
 important aspect of the definition.\\
 
-Trusted execution environment consists of several building blocks. The first
-building block Sabt et al. propose is a secure boot. This building block allows
-\glspl{tee} to verify that only a specific code of a particular state is loaded.
-For a secure boot, a chain of trust is formed by verifying each component's
-state. To generalize the secure boot requirement, a \gls{tee} must be capable of
-verifying what code it loads to the environment. The second building block is
-secure scheduling. Task executing in the \gls{tee} should not be able to disrupt
-the main \gls{os}. Moreover, a \gls{tee} should implement means to allow
+A \gls{tee} consists of several building blocks. The first building block Sabt
+et al. propose is a secure boot. This building block allows \glspl{tee} to
+verify that only a specific code of a particular state is loaded. For a secure
+boot, a chain of trust is formed by verifying each component's state. To
+generalize the secure boot requirement, a \gls{tee} must be capable of verifying
+what code it loads to the environment. The second building block is secure
+scheduling. Tasks executing in the \gls{tee} should not be able to disrupt the
+main \gls{os}. Moreover, a \gls{tee} should implement means to allow
 communication between the insecure world outside the \gls{tee} and the
 application executing inside of it. Secure storage is one more building block.
 It allows the application in the \gls{tee} to store data in a confidentiality,
