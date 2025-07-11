@@ -7,15 +7,17 @@ chapter~\ref{sec:design}, that would need to be implemented to use it to its
 full potential.
 
 The first feature missing is domain separation between the secure applications
-and the TEECore kernel. Currently, secure applications are run with the same
+and the TEECore kernel. Currently, secure applications run with the same
 privileges as TEECore, which is a security risk. Because TEECore is designed to
 operate in an interrupt-free environment, the transition between different
 privilege levels would need to be implemented using the x86\_64 specific
-\textit{syscall} and \textit{sysret} instructions.
+\textit{syscall} and \textit{sysret} instructions. Moreover, supporting more
+than one application would require to trust the applications, as without timer
+interrupts only cooperative scheduling is possible.
 
 Second, a secure channel would need to be established to exchange data between
 secure applications and applications in the normal partition. The shared memory
-communication path can be used for such a channel as a medium. To allow secure
+communication path can be used to build such a channel. To allow secure
 communication via this channel, TEECore would need to implement some key
 exchange algorithm for key exchange with a remote party and consequently
 algorithms to encrypt the shared memory.
@@ -51,13 +53,13 @@ performance measurement facilities.
 
 \section{Additional Features}
 As mentioned in chapter~\ref{sec:evaluation:ipi}, the TEECore prototype
-implementation is vulnerable against \glspl{ipi}. Combining TEECore with other
+implementation is vulnerable against INIT \glspl{ipi}. Combining TEECore with other
 \gls{tee} technologies could help mitigate this flaw and increase the security
 of these other technologies. So, as a possible research area, TEECore could be
 combined with one of these technologies to increase overall security. Moreover,
 other processor features could be used to further increase isolation. For
 example, Intel offers a technology called cache allocation technology, which can
-be used to partition L3 caches via quality of service. Such a technology could
+be used to partition L3 caches via classes of service~\cite{intel_cat}. Such a technology could
 increase resources available to TEECore by disallowing other cores or
 applications to access cache lines allocated to TEECore. Some AMD processors
 implement a similar feature that allows for the specification of quality of
