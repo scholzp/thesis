@@ -1,29 +1,371 @@
 \chapter{Design}
 \label{sec:design}
 
-% Ist das zentrale Kapitel der Arbeit. Hier werden das Ziel sowie die
-% eigenen Ideen, Wertungen, Entwurfsentscheidungen vorgebracht. Es kann
-% sich lohnen, verschiedene Möglichkeiten durchzuspielen und dann
-% explizit zu begründen, warum man sich für eine bestimmte entschieden
-% hat. Dieses Kapitel sollte - zumindest in Stichworten - schon bei den
-% ersten Festlegungen eines Entwurfs skizziert werden.
-% Es wird sich aber in einer normal verlaufenden
-% Arbeit dauernd etwas daran ändern. Das Kapitel darf nicht zu
-% detailliert werden, sonst langweilt sich der Leser. Es ist sehr
-% wichtig, das richtige Abstraktionsniveau zu finden. Beim Verfassen
-% sollte man auf die Wiederverwendbarkeit des Textes achten.
+% Ist das zentrale Kapitel der Arbeit. Hier werden das Ziel sowie die eigenen
+% Ideen, Wertungen, Entwurfsentscheidungen vorgebracht. Es kann sich lohnen,
+% verschiedene Möglichkeiten durchzuspielen und dann explizit zu begründen,
+% warum man sich für eine bestimmte entschieden hat. Dieses Kapitel sollte -
+% zumindest in Stichworten - schon bei den ersten Festlegungen eines Entwurfs
+% skizziert werden. Es wird sich aber in einer normal verlaufenden Arbeit
+% dauernd etwas daran ändern. Das Kapitel darf nicht zu detailliert werden,
+% sonst langweilt sich der Leser. Es ist sehr wichtig, das richtige
+% Abstraktionsniveau zu finden. Beim Verfassen sollte man auf die
+% Wiederverwendbarkeit des Textes achten.
 
-% Plant man eine Veröffentlichung aus der Arbeit zu machen, können von
-% diesem Kapitel Teile genommen werden. Das Kapitel wird in der Regel
-% wohl mindestens 8 Seiten haben, mehr als 20 können ein Hinweis darauf
-% sein, daß das Abstraktionsniveau verfehlt wurde.
+% Plant man eine Veröffentlichung aus der Arbeit zu machen, können von diesem
+% Kapitel Teile genommen werden. Das Kapitel wird in der Regel wohl mindestens 8
+% Seiten haben, mehr als 20 können ein Hinweis darauf sein, daß das
+% Abstraktionsniveau verfehlt wurde.
 
-\ldots design \ldots
+In this chapter, I will explain the design of TEECore and how a system that
+utilizes the TEECore prototype looks. The design mitigates the risk of
+covert side-channels by fully excluding them on an architectural base.\\
 
-\todo{write design}
+First, I want to potential threats to TEECore in
+section~\ref{sec:30:tee_attacker_model}. This section is followed by a
+description of the general system and usage of the TEECore prototype
+implementation in section~\ref{sec:30:tee_general}. The third part of this
+chapter, section~\ref{sec:30:tee_kernel}, will explain TEECore in more detail
+and how it achieves its goals. TEECore alone does not implement any workloads
+that third-party software can use. Such workloads and under what constraints
+they must be implemented will be explained in section~\ref{sec:30:tee_apps} of
+this chapter. I will then explain the remote attestation scheme of TEECore in
+section~\ref{sec:30:tee_ra_scheme} before I sketch the envisioned boot flow in
+section~\ref{sec:30:tee_boot_chain}.
 
-\cleardoublepage
+\section{Threat Model}
+\label{sec:30:tee_attacker_model}
+An attacker against whom TEECore can defend is allowed to run privileged
+software on the same machine as TEECore. This includes the ability to create
+covert side-channels. TEECore can prevent a wide variety of side-channel attacks
+by design. An exception are cache-based side-channel attacks, which TEECore can
+only proactively detect and defend against. Upon detecting a side-channel,
+TEECore can react in a way that prevents an attacker from exfiltrating data. In
+particular, TEECore can react to attacks like Spectre and Meltdown. TEECore is
+immune to interrupt-based side-channel attacks such as SGX-Step. Additionally,
+TEECore can defend against an attacker who has arbitrary access to memory or I/O
+ports. \\
 
-%%% Local Variables:
-%%% TeX-master: "diplom"
-%%% End:
+TEECore can further employ mechanisms to protect itself from bus-tapping
+attacks. It is able to deliver evidence to outside parties that it is operating
+on a trusted system from a trusted state. Conversely, TEECore is not able to
+defend itself against an attacker who can alter the firmware. For its detection
+model to work, TEECore depends on the absence of sibling threads on the core it
+owns. Moreover, TEECore cannot defend itself against an attacker that controls
+the \gls{smm}. Similarly, TEECore requires physical hardware to run. In a
+virtualized environment, TEECore cannot defend against the \gls{vmm}. As an
+additional requirement, TEECore mandates the deactivation of hardware
+prefetchers and the presence of a \gls{tpm}.\\
+
+Denial of service attacks are out of scope, as an attacker with physical access
+or, administrative access to the machine can power it off.
+
+\section{General System Design}
+\label{sec:30:tee_general}
+Figure~\ref{fig:30:tee_system_design} shows an overview of a system integrating
+TEECore next to a commodity \gls{os}. Speaking on a higher level, the bootloader
+is responsible for partitioning the system into two parts: The first is managed
+by TEECore, and the second is running the commodity \gls{os}. Because TEECore is
+designed to run on the local CPU cache, the first partition consists of a single
+CPU core. Thus, the remaining system resources, such as I/O ports, additional
+CPU cores, and memory, are part of the second partition running the commodity
+\gls{os}.\\
+
+\label{sec:30:system_overview}
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/30_system.tex}
+    \caption{TEECore running in a system next to a commodity \gls{os}}
+    \label{fig:30:tee_system_design}
+  \end{center}
+\end{figure}
+
+The design goal of TEECore is to enable the commodity \gls{os} to run workloads
+in a shielded location so that no information can be leaked to other
+applications. In figure~\ref{fig:30:tee_system_design}, such a workload is
+defined as a trusted application.\\
+
+TEECore uses a \gls{tpm} as a hardware trust anchor to store data and keys. It
+utilizes measured boot to later create evidence of the systems trustworthiness
+when setting up its services. Extend operations to the content of the
+\gls{tpm}'s \glspl{pcr} form the backbone of TEECore's attestation feature and
+allow it to fulfill all requirements of a \gls{tee}.\\
+
+The second partition runs the commodity \gls{os} and all its applications. The
+commodity \gls{os} implements system functions that allow applications running
+on top of it to access services hosted in the partition running TEECore. The
+commodity \gls{os} needs a special driver that implements the routines necessary
+to communicate with TEECore and its services. Both partitions communicate via a
+shared memory region. In the setup phase, this shared memory region is reserved
+and placed into the memory map of both partitions for their systems to include
+and map it.\\
+
+The idea of partitioning the system is more similar to the idea behind Arm
+TrustZone than to \gls{sgx} or \gls{sev}. This is because TEECore
+tries to use the given hardware's functionality to mimic an isolated trusted CPU
+core and works more like the idea of a trusted world in Arm TrustZone instead of
+\gls{sgx} and \gls{sev}. While AMD indeed integrates an Arm Core in their
+\glspl{soc} and uses TrustZone to implement \gls{sev}, Intel uses a dedicated
+CPU core based on a custom design to implement its \gls{me} and
+\gls{sgx} on top of it. TEECore's goal is to provide a solution for
+x86 that allows the implementation of a \gls{tee} without using proprietary
+vendor features.
+
+\section{TEECore}
+\label{sec:30:tee_kernel}
+TEECore employs isolation mechanisms that detect any tampering attempt of code
+from the normal partition as well as mechanisms to detect leakage of data from
+the secure partition. For protecting TEECore against malicious workloads, I use
+hardware-assisted domain separation through different privilege levels, as
+widely used in other \gls{os}es. The key component for this is hardware events
+that are triggered when the CPU core under TEECore's control is forced to share
+data with the remaining systems. Using respective interrupts, TEECore can react
+to these leaks appropriately. I decided that the consequences of such a leak
+should lead to a platform reset, effectively undermining an attack.\\
+
+TEECore utilizes CPU core-exclusive \gls{pmc} registers to monitor the data flow
+between cores for isolation. It tries to actively detect hidden communication
+channels this way, that use shared resources. If the CPU uses such resources,
+for example, a shared L3 cache, then those effects trigger respective
+performance monitoring events. \glspl{pmc} can be programmed to emit a
+\gls{pmi}, which TEECore uses to register forbidden events. Because the source
+of those events must be known to conclude the presence of an attacker safely,
+only selected events can be used by TEECore. By restricting itself to use only
+CPU exclusive resources, TEECore ensures that these events are not trigger by
+itself. From the fact that TEECore allows only usage of core local resources, a
+memory constraint is the result, that confines the size of usable memory to
+that of CPU local caches. Moreover, TEECore has to ensure that it can detect
+access to data that is implicitly shared through cache coherency in the
+inclusive L3 cache.\\
+
+Before TEECore can transfer control to tasks, it must bring the environment
+to a defined state. All memory has to be stored in the CPU's local cache in the
+exclusive or modified state. To achieve this, TEECore writes to all memory it
+has to protect, invalidating shared cache lines in other cores in this process.
+As a result, TEECore can detect whenever a remote CPU accesses data from RAM or
+shared L3 cache, as the remote CPU copies the respective memory items to its L1
+cache, triggering a MESIF state change in the isolated cores' cache. Such memory
+snoops are documented behavior of all recent Intel CPUs~\cite{intel_sdm}.
+Nevertheless, I want to mention that this is a requirement for TEECore to work.
+Other possible cache implementations, for example, that would push changes of
+shared cache lines to remote cores, would not work with TEECore. Moreover, for
+TEECore to work correctly, all prefetchers need to be disabled. This is because
+cache lines brought into the cache by prefetchers are not considered for events
+such as L2 misses (c.f. section~\ref{eval:sec}).\\
+
+To protect a task against interrupt-based attacks, TEECore has to set up the
+\gls{idt} correctly so that any occurrence of any interrupt results in a system
+reset. TEECore achieves this by setting the \gls{idtr} to zero, which results in
+a general protection fault once the CPU tries to locate the \gls{idt}. Because
+this provokes a second fault after the first, the CPU generates a double fault,
+ultimately resulting in a triple fault. As a consequence the platform resets.
+TEECore triggers a platform reset when receiving maskable interrupts and
+\glspl{nmi} this way. Furthermore, it programs the \gls{pmc} to signal attacks
+on itself or its payload as soon as possible. TEECore uses the possibility to
+generate \glspl{pmi} on the overflow of a \gls{pmc}. As explained, the resulting
+\gls{pmi} leads to a system reset. Important at this point is the fact that
+TEECore can only react to attacks in this way. It cannot prevent them
+entirely.\\
+
+External memory, such as the shared memory region used for communication between
+partitions and memory mapped registers of the \gls{tpm}, are mapped as strong
+un-cacheable. For memory mapped devices such as the \gls{tpm} and \gls{lapic},
+this is necessary to keep device memory in sync. I also map memory used for the
+shared communication path as uncacheable. As with other memory willingly shared
+with the normal partition, this prevents the detection routine from triggering
+when the remote side accesses the memory.\\
+
+The payload of TEECore is called a trusted application. In the proof of concept,
+tasks are implemented as functions and are thus statically embedded into the
+TEECore binary. A trusted application is allowed to access the shared memory
+communication channel. TEECore monitors this access and makes it part of its
+measurements. After a trusted application run, TEECore creates a Snapshot from
+the \gls{pmc} registers and a report based on this information.
+
+\section{Trusted Applications}
+\label{sec:30:tee_apps}
+Trusted applications run in user space in the secure partition and provide
+services to software in the normal partition. Compared to applications running
+on top of a commodity \gls{os}, applications running in an environment managed
+by TEECore must respect multiple restrictions.\\
+
+For now, the design does not support the dynamic installation of user space
+applications in the \gls{tee} environment. This restriction is the consequence
+of TEECore not being a fully fledged \gls{os} and it missing \gls{os}-specific
+libraries such as a standard C library. As a result, an application must be
+implemented as a function in TEECore using the respective framework.
+Changing the application requires the recreation of the whole TEECore binary.
+While this reduces the flexibility of running systems, it allows for easier
+integrity measurement of applications because they are statically embedded in
+the TEECore binary, which is already measured in the boot flow through the
+measured boot. Moreover, embedding the application in the TEECore binary as a
+function removes the necessity to implement an executable loader, which reduces
+the amount of code and, therefore, the size of the binary. Another restriction
+is that the whole run time environment has to fit together with the application
+into the CPU's local cache.\\
+
+The small size of available memory also restricts the size of data the workload
+can generate. Working with large data sets is not possible, as exceeding the
+capacity of the cache will lead to replacements in the local cache. The
+consequence is leakage of data to shared parts of the memory subsystem, an event
+considered by TEECore as an attack. TEECore then classifies this as an attack,
+which results in a reset of the whole system. Moreover, the organization of
+cache structures can influence memory usage. I will evaluate such effects in
+chapter~\ref{sec:evaluation}. The last aspect regarding memory is how it is
+managed. Trusted applications are only allowed to allocate memory that was
+brought to a defined state. This is because cache lines must be set to either
+exclusive or modified by TEECore to enable protection, which in turn means that
+all used memory addresses must be known beforehand. TEECore has to provide a
+interrupt free way to do system calls. The x86\_64 \gls{isa} offers the
+\textit{SYSCALL} and \textit{SYSRET} instruction for this purpose. This way,
+TEECore can implement domain separation between kernel and user space.\\
+
+Another restriction is that the secure partition only uses local resources from
+a single core. In the current model, trusted applications are forbidden to
+access any I/O beyond the boundaries of the local resources of the core that the
+secure partition forms. The only access allowed is to the shared memory path
+managed by the TEECore kernel. While it would be possible to use the same
+resources, for example, I/O port, as the commodity \gls{os} in the normal
+partition, this would require the implementation of complex synchronization
+protocols in both partitions. On the side of TEECore, this also requires a way
+to uphold its security guarantees while permitting the use of core external
+resources. Therefore, the prototype implementation forbids the usage of core
+external resources and access to I/O paths.
+
+\section{Remote Attestation Scheme of TEECore}
+\label{sec:30:tee_ra_scheme}
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/30_remote_attestation.tex}
+    \caption{Remote Attestation Architecture of TEECore}
+    \label{fig:30:tee_ra}
+  \end{center}
+\end{figure}
+As described in section~\ref{sec:20:remote_attestation}, remote attestation
+verifies a claim made about the system's state. In the case of TEECore, this
+means that TEECore must provide evidence that it holds its defense properties,
+was set up correctly and that the trusted application was executed as expected.
+To fulfill these tasks, TEECore implements two key components:
+\begin{enumerate}
+  \item An attestation manager: This is a privileged module of
+    TEECore. TEECore implements services an attestation target can use to
+    request an attestation report.
+  \item Measurement tools: Implemented as a privileged function in TEECore.
+    TEECore has insight into a target's memory because of its elevated
+    privileges and can thus measure the target's memory. Moreover, it can
+    monitor communication, which can be part of the measurement.
+\end{enumerate}
+
+Figure~\ref{fig:30:tee_ra} shows the remote attestation architecture of TEECore.
+To measure a part of the target means to create a hash of it that can be used to
+extend a \gls{pcr} in the \gls{tpm}. TEECore uses the \gls{tpm}'s \gls{pcr} to
+integrate a hardware root of trust. Additionally, the \gls{tpm} is required to
+act as a hardware token to identify the platform. With its security features,
+the \gls{tpm} forms a trust anchor for external parties by attesting its
+genuineness. It furthermore contains the results of the measured boot chain as a
+result of a technology called measured boot. A measured boot allows the creation
+of a chain of trust, by which each step in the boot chain measures the software
+used for the next step. This allows for comparing the hash value with an
+expected good value. Additionally, each hash value extends a specific \gls{pcr}
+in the \gls{tpm}. Beginning from the firmware, each involved measurement is
+added to a measurement log that tracks what component was measured and what
+\gls{pcr} was extended. A given \gls{pcr} can then prove the integrity of the
+log. TEECore uses this chain in two ways. By making the \gls{tpm} attest to its
+\gls{pcr} values, TEECore can prove that itself started from a trusted state and
+that the values that left TEECore were not modified. An appraiser can exchange
+encryption keys with TEECore, after successfully identifying it. This allows
+TEECore and the appraiser to create a encrypted channel and exchange
+confidential data using it.\\
+
+A \gls{tpm} never uses its \gls{ek} to sign or encrypt data. Instead, it uses
+key derivation functions to create keys on demand with the help of its
+\gls{ek}. The attestation manager of TEECore requests such a \gls{aik} that
+can be used to sign \gls{pcr} values by the \gls{tpm}. A problem arises when
+TEECore has to prove that the \gls{aik} originates from a genuine \gls{tpm}. For
+this, the signing processes for the \gls{aik} need to be performed with the help
+of a \gls{ca} trusted by the appraiser and TEECore. The \gls{aikca} serves this
+role and acts as a proxy by issuing such a certificate. This certificate proves
+that TEECore uses a genuine \gls{tpm}. Moreover, the \gls{aikca} checks the
+\gls{aik} of the \gls{tpm}. By issuing a certificate, the \gls{aikca} pledges,
+that the \gls{aik} used for attestation belongs to the \gls{tpm}s \gls{ek}.
+The \gls{aikca} in this process learns the identity of the \gls{tpm} through
+it's \gls{ek}'s certificate. On the other hand, the appraiser does not, as they
+only know that the \gls{aikca} issued the certificate. It can, therefore, prove
+the correctness of the \gls{aik}'s certificate by proving that it was issued by
+the \gls{aikca}.\\
+
+The attestation manager uses the \gls{aikca} and \gls{tpm} to generate a report
+on behalf of the attestation target. The attestation manager uses digests
+generated by the measurement tool as a third data source. The report created by
+the attestation manager contains the following:
+\begin{itemize}
+  \item The \gls{aik} certificate: The appraiser can check with this that the
+    \gls{aik} is trusted by the \gls{aikca} and the report data were
+    therefore signed by a genuine \gls{tpm}.
+  \item The measured boot report together with \gls{pcr} contents: This attests
+    to the platform integrity.
+  \item \gls{pcr} content of the target measurement results.
+\end{itemize}
+
+The appraiser is able to verify, based on the attestation report, that the
+respective target was executed and what operations it performed. Moreover, the
+appraiser can verify that TEECore was run and its integrity was not
+violated.
+
+\section{Boot Chain}
+\label{sec:30:tee_boot_chain}
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/30_bootflow.tex}
+    \caption{Bootchain of TEECore in the Prototype}
+    \label{fig:30:tee_bootchain}
+  \end{center}
+\end{figure}
+Figure~\ref{fig:30:tee_bootchain} shows the boot chain as implemented in the
+prototype. This boot chain deviates from the boot chain that a standalone
+implementation of TEECore would use. In this, the bootloader would load TEECore
+so that TEECore can set itself up. After this, TEECore would either instruct the
+bootloader to load the commodity \gls{os} or chain load its bootloader.
+Implementing the standalone approach would require me to implement bootloader
+functionality in TEECore or to extensively modify existing bootloaders and boot
+chains of supported commodity \gls{os}es. The latter is necessary if TEECore
+would be booted before the commodity \gls{os} because this would require a way
+to hand the measurement log to TEECore and from TEECore to the commodity
+\gls{os}. Both would induce much work without contributing to the ultimate goal
+of this thesis: to evaluate the security properties of a \gls{tee} defending
+itself with the help of \glspl{pmc}. Because of this, the prototype's design
+follows another approach. It uses already-built infrastructure to set up an
+environment that is trusted until TEECore is fully set up and running. I leave
+the implementation of a standalone version of TEECore to future work.\\
+
+The alternative boot chain as pictured in figure~\ref{fig:30:tee_bootchain}
+works by utilizing the commodity \gls{os} to install TEECore. For this, the
+driver required by the commodity \gls{os} to communicate to TEECore also sets up
+TEECore. Because of its wide use in cloud environments, open-source nature, and
+many freely available tools, I decided to use Linux as the commodity \gls{os}
+kernel. The first process run by a Linux system is called the init process. In
+this prototype, I initialize TEECore and its respective driver in the init
+process to ensure that no other malicious activities happen. Using Linux as a
+test bed also allows me to use already existing infrastructure that implements
+measured boot. Moreover, Linux often uses a minimal image from which it
+initializes the system. This minimal image, called initrd, contains all binaries
+necessary for setting up the system. By integrating the TEECore image and the
+driver into Linux's initrd, I can make them part of the measurement of the Linux
+image performed by the bootloader. Therefore, I do not have to trust the Linux
+kernel to measure TEECore correctly. \\
+
+Each piece of the boot chain measures the software it loads for the next step in
+the boot chain and extends a chosen \gls{pcr} in the \gls{tpm} with its
+measurement. The root of trust is formed by the root of trust for measurement,
+which is not necessarily a part of the firmware but, in all cases, specially
+protected. With the knowledge of each component's source and build chains, an
+appraiser can generate the same binaries and perform the same measurements.
+These measurements and the measured boot log enable the appraiser to verify that
+each loaded binary is a known correct version. The appraiser has to trust the
+root of trust for measurement only because it can detect all other malicious
+modifications of other software components by comparing the respective hash
+values. Still, the \gls{tcb} includes all software components loaded by the
+system before TEECore, as the measured boot does not protect the system from
+software bugs contained in binaries that are assumed to be safe.
+
+%%% Local Variables: %% TeX-master: "diplom" %% End:
