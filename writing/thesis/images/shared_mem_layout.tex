@@ -1,0 +1,22 @@
+\documentclass[crop,tikz]{standalone}
+\begin{document}
+\begin{tikzpicture}[scale=1]
+    \coordinate (x) at (0, 10);
+    \node[scale=0.8, align=center] at ($ (x) + (4, 1.5)$) {4094 bytes};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=4pt}] ($ (x) + (1, 1) $) -- ($ (x) + (7, 1)$);
+    \draw ($ (x) + (1, 0)$) rectangle ($ (x) + (7, 1)$) node[pos=0.5, scale=.8, align=center] {Payload field};
+
+    \node[scale=0.8, align=center] at ($ (x) + (8, 1.5)$) {1 byte};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=4pt}] ($ (x) + (7, 1) $) -- ($ (x) + (9, 1)$);
+    \draw ($ (x) + (7, 0)$) rectangle ($ (x) + (9, 1)$) node[pos=0.5, scale=.8, align=center] {TaskID field};
+
+    \node[scale=0.8, align=center] at ($ (x) + (10, 1.5)$) {1 byte};
+    \draw [decorate,decoration={brace,amplitude=5pt,raise=4pt}] ($ (x) + (9, 1) $) -- ($ (x) + (11, 1)$);
+    \draw ($ (x) + (9, 0)$) rectangle ($ (x) + (11, 1)$) node[pos=0.5, scale=.8, align=center] {SenderID field};
+
+    \node[scale=0.8, align=center] at ($ (x) + (1, -0.25)$) {4095};
+    \node[scale=0.8, align=center] at ($ (x) + (7, -0.25)$) {4 3};
+    \node[scale=0.8, align=center] at ($ (x) + (9, -0.25)$) {2 1};
+    \node[scale=0.8, align=center] at ($ (x) + (11, -0.25)$) {0};
+\end{tikzpicture}
+\end{document}
