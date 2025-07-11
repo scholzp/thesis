@@ -17,7 +17,7 @@
 % gelesen wird.
 
 In this thesis, I presented TEECore, a \gls{tee} framework that aims to be able
-to detect side channel attacks. TEECore prevents side channels by utilizing only
+to detect side-channel attacks. TEECore prevents side-channels by utilizing only
 CPU core exclusive resources of multi-core CPUs, as described in
 chapter~\ref{sec:30:tee_kernel}. This approach ensures no communication paths to
 other cores of the same CPU exist. In chapter~\ref{eval:sec}, I have shown that
@@ -29,7 +29,7 @@ Moreover, in my test cases all events resulting in inter-core cache coherency
 traffic were detected. TEEcore can thus react to attacks by programming the
 performance counting facility to send \glspl{pmi} on the occurrence of such
 events as shown in chapter~\ref{sec:implementation:teeKernel}. At this point, it
-is essential to differentiate between preventing and reacting to side channels.
+is essential to differentiate between preventing and reacting to side-channels.
 TEECore does not protect from side-channel attacks. As I have shown in
 section~\ref{sec:evaluation:ipi}, this comes from the cache coherency algorithms
 implemented by the Intel Core i7 13700k I used for testing. This enables an
