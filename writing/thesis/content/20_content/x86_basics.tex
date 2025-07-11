@@ -1,0 +1,511 @@
+\section{Technical Background}
+\label{sec:state:technical}
+This chapter gives us an overview of important mechanisms used by modern CPUs.
+While there are other widely used architectures, such as Arm on mobile devices,
+we explore these features in the example of the x86\_64 architecture. I decided
+to do so because my proof of concept implementation targets the x86\_64
+architecture, more precisely Intel's implementation of the \gls{isa}.
+
+\subsection{Privilege Levels}
+\label{sec:state:technical:priv}
+The x86 \gls{isa} implements the following four privilege levels:
+\begin{itemize}
+  \item Level 0: \gls{os} kernel
+  \item Level 1 and 2: \gls{os} services
+  \item Level 3: User applications
+\end{itemize}
+Privileges granted by the processor increase with decreasing level, which means
+that level 0 implies the highest privileges and level 3 the least amount. The
+processor ensures that data can only be accessed by code that runs on a
+privilege level that is higher than or equal to that defined for the data. All
+four levels can be used together with memory segmentation. With paging, only one
+bit is used to differentiate between privileged and unprivileged
+accessibility~\cite{intel_sdm}. Moreover, only level 0 grants access to all
+instructions available. For example, the \textit{WRMSR}, \textit{RDMSR}, and
+\textit{HLT} instructions are included in the set of instructions only available
+from level 0. For the remaining parts of this thesis, when I write about
+\textit{privileged software} or \textit{system software}, I am referring to
+software running at level 0. Whenever I write \textit{user space software} or
+\textit{application}, I refer to code running at privilege level 3.
+
+\subsection{Operation Modes}
+\label{sec:state:technical:modes}
+% The x86 architecture is rooted in the Intel 8086, designed in 1978. As a 16-bit
+% microprocessor design, the Intel 8086 physically can only address 64 KiB of
+% memory, which was enlarged by two segment registers to allow addressing nearly 1
+% MiB of memory.
+One advantage of the x86 \gls{isa} is its backward compatibility that allows
+modern processor to execute code written for older CPU designs. To maintain
+compatibility with legacy CPUs, over the course of time additional operation
+modes were introduced to the \gls{isa}. Modern CPUs allow to execute 16-bit
+legacy software in \gls{g_rmode}. The \gls{g_pmode} was introduced together with
+memory protection to the x86 \gls{isa}. With x86\_64 the \gls{isa} is extended
+by \gls{g_lmode}~\cite{intel_sdm}. To maintain the aforementioned compatibility
+to legacy software, all x86 systems start in 16-bit \gls{g_rmode}. Because of
+the limitation of the address space to the first 1 MiB of memory, code that
+transfers a processor from \gls{g_rmode} to any other operation mode has to
+reside in the address range of 0x500 to 0x7FFFF. This address range is called
+low memory and is free for usage by system software.
+
+% introduced an operation mode called
+% \gls{g_rmode}. The name  originates from the fact that the 16-bit
+% design used the real location in memory for addressing. The 32-bit operation
+% mode of this CPUs is called \gls{g_pmode}, because it allows addressing memory
+% through virtual addresses, allowing for memory protection. All x86 processors
+% boot in \gls{g_rmode} to maintain compatibility to legacy software originally
+% written for 16-bit CPUs. With the 64-bit extension x86\_64, AMD introduced an
+% operation mode called \gls{g_lmode} that consists of two sub-modes called
+% Compatibility Mode and 64-bit mode. Compatibility mode allows 64-bit system
+% software to execute legacy 32-bit software. 64-bit mode extends the \gls{isa} by
+% 64-bit operands and addresses, adds eight new general purpose registers and
+% additional instructions. To use \gls{g_lmode}, system software has to prepare
+% the processor by enabling additional processor features and creating required
+% data structures.
+
+\subsection{System Management Mode}
+\label{sec:state:technical:smm}
+Contrary to the operations modes described in
+section~\ref{sec:state:technical:modes}, \gls{smm} does not activate additional
+processor features. Instead, it is a hardware-assisted isolation mechanism that
+protects firmware code from system software. In legacy systems, firmware used
+the \gls{smm} to react to special hardware events that required the firmware to
+react to platform events, e.g., energy management~\cite{intel_sdm}. The
+\gls{smm} code resides in a specially protected area of the main memory,
+referred to as \gls{smram}. \gls{smm} executes with privileges higher than level
+0, and system software cannot interfere with it. In fact, \gls{smm} can
+interrupt systems software whenever necessary, not vice versa. Firmware has to
+issue a \gls{smi} to enter \gls{smm}.
+
+\subsection{Virtualization}
+\label{sec:state:technical:virt}
+After Popek et al., a \gls{vm} is characterized by the following
+definition:
+\begin{quote}
+  \textit{ A virtual machine is taken to be an efficient, isolated duplicate of
+    the real machine. \\
+  } \mbox{ -- Popek et. al. ~\cite{popek1974formal}}
+\end{quote}
+To allow the duplicate to run efficiently, a special environment is created that
+enables the duplicate to use the resources of the real machine. To create this
+environment, a piece of software called  \gls{vmm} is used. The \gls{vmm}
+controls the resources of the real machine and ensures isolation between
+duplicates and the real machine. To allow the \gls{vmm} to remain in control of
+the real machine, a virtual environment is configured in a way that it traps
+upon special conditions. These condition are, for example, access to memory or
+the execution of instruction that would influence the real machine in a way,
+that the \gls{vmm} could lose control over it. In such a case, control is
+transferred back to the VMM. Processor architectures have to fulfill different
+conditions to be called virtualizable. In the case of x86, additional \gls{isa}
+extensions allow for virtualizability~\cite {adams2006comparison}. AMD
+processors implement the Secure Virtual Machine (SVM) extensions while Intel
+processors implement Intel Virtualization Extensions (VT-x or
+VMX)~\cite{amd_manual, intel_sdm}.
+inter-processor interrupt
+\subsection{Interrupts and Exceptions}
+\label{sec:state:technical:interrupts}
+Interrupts and Exceptions are used to call system-specific functions and respond
+to special conditions in the CPU or system. Exceptions are raised by the CPU
+upon executing software or detecting hardware errors. Interrupts, on the other
+hand, are either the result of software interrupt instructions or signals
+generated by external hardware, such as keyboard input.
+% Exceptions can be
+% divided into three types by their origin or if they allow to restart the causing
+% instruction:
+% \begin{enumerate}
+%   \item Faults: Result of an error with the instruction to execute
+%   \item Traps: Result of breakpoint and software interrupt instructions
+%   \item Aborts: The causing instruction cannot be restarted
+% \end{enumerate}
+Interrupts, can be divided into two classes:
+\begin{enumerate}
+  \item Maskable Interrupts: Masking an interrupt means that software can
+    temporarily disable them. The interrupt controller holds them back until
+    interrupts are enabled again.
+  \item \Gls{nmi}: Software cannot turn off \glspl{nmi}. The interrupt
+    controller delivers \glspl{nmi} to the CPU unless it currently serves
+    another \gls{nmi}. When the CPU executes the IRET instruction in the
+    interrupt handler, the interrupt controller can deliver the next \gls{nmi}.
+\end{enumerate}
+
+The x86 \gls{isa} assigns a vector number to each interrupt or exception. Vector
+numbers range from 0 to 255 in newer implementations. The CPU uses the vector
+number of an interrupt as an index to locate the respective handler function in
+a data structure called the \gls{idt}. The \gls{idt} resides in the main memory
+and contains the address of an interrupt handler routine for each vector. System
+software defines the handler routines and writes their addresses to the
+\gls{idt}. Once system software defines the handler routines, it makes the
+\gls{idt} active by writing its address to the \gls{idtr}. System software
+cannot write directly to the \gls{idtr} but has to prepare the special memory
+descriptor from which the LIDT instruction loads the \gls{idt}. After setting up
+and loading the \gls{idt}, the CPU executes interrupt handlers as defined by
+system software. System software can enable maskable interrupts by executing the
+\textit{STI} instruction. or disable them by executing the \textit{CLI}. \\
+
+% Over time, interrupt controllers were improved and adapted to new use cases
+% similar to CPUs. In \gls{g_rmode}, the CPU falls back to using the Intel 8259 or
+% a compatible programmable interrupt controller (PIC), that delivers
+% interrupts to the CPU. Once the PIC delivers an interrupt to the CPU, the system
+% software must serve it and signal the PIC with an \gls{eoi}, that the serving
+% routine is done. \\
+
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/lapic.tex}
+    \caption{Illustration of how \glspl{lapic} integrate in a
+    multiprocessor system (Figure after~\cite{amd_manual}, p. 1075)}
+    \label{fig:state:technical:lapic}
+  \end{center}
+\end{figure}
+
+In modern systems, multiprocessor configurations are prevalent, and each logical
+processor core has its own Advanced Programmable Interrupt Controller (APIC).
+Because the APIC is CPU local, these APICs are called local APICs or
+\gls{lapic}. \glspl{lapic} forward interrupts from different sources to the
+respective CPU core. For example, the \gls{lapic} receives interrupts such as
+\glspl{ipi} from other \glspl{lapic} and forwards legacy interrupts from the PIC
+via the LINT0 pin. CPU external devices can deliver their interrupts to the
+IOAPIC, which forwards them to the respective \gls{lapic}. Devices that
+implement PCI version 2.2 and later do not use the IOAPIC. Instead, these
+devices use Message Signaled Interrupts by directly writing to a memory-mapped
+register of the \gls{lapic}. Figure~\ref{fig:state:technical:lapic} shows a
+schematic view of how the \gls{lapic} of each CPU core integrates into the
+system. All \gls{lapic} registers are mapped to the 4-KiB \gls{lapic} register
+space starting at the address specified in the \gls{lapic} base address
+register. System software can then access \gls{lapic} registers with memory
+reads and writes to the APIC register space. Most interrupts require the CPU to
+interact with the \gls{lapic}. Exceptions are \gls{smi}, \gls{nmi}, INIT and
+STARTUP \glspl{ipi}, as well as ExtINT. These interrupts are sent forwarded
+directly to the CPU by th \gls{lapic}~\cite{amd_manual, intel_sdm}. \glspl{smi},
+INIT and STARTUP \glspl{ipi} are not routed through the \gls{idt}. As described
+in section~\ref{sec:state:technical:smm}, a \gls{smi} invokes the \gls{smm}.
+INIT \glspl{ipi} transfer the CPU into a special state that effectively halts it
+until it receives a STARTUP \gls{ipi}. All other interrupts are held pending by
+the processor, and the CPU is reset to an initial state. The STARTUP \gls{ipi}
+causes the CPU to begin processing a bootstrap routine, whose memory address
+number is placed in the Vector field.
+
+\subsection{Caches}
+\label{sec:state:technical:caches}
+% Since 1980, the performance growth of memory and processors has diverged
+% steadily with an ever-growing gap. Hennessy et al. note a difference in
+% performance growth of factor 1,000 for a single CPU core and memory
+% technologies~\cite{hennessy2011computer}. To come by this disparity, CPU a
+% on-chip buffer called cache memory.\\
+
+% With processors gaining capabilities to
+% process more and more data in parallel, for example by increasing the core count
+% or introducing new instructions, the demand for fast memory further grows. For
+% example, from November 2023 to January 2024, the number of systems in the TOP500
+% list that employed CPUs with 96 cores per socket increased from 0 to 3, with the
+% former maximum number of cores per socket being 72~\cite{top500}. To hide
+% latencies and bridge the gap between CPU demand and actual main memory
+% bandwidth, CPUs today employ fast local on-chip memory to buffer data they
+% already accessed. If they reaccess this memory item, they can use these buffers
+% to speed up access. This on-chip buffer described is called cache.\\
+
+The cache is an integral component with the purpose of speeding up memory access
+and organized in a multi-level hierarchy in modern CPUs. In this hierarchy, the
+lowest and the nearest to the core level, called the L1 cache, implements the
+fastest access. Most modern x86 CPUs divide their L1 cache into two parts: L1D
+for data and L1I for instructions. With increasing levels, caches grow in size
+but tend to be slower. For example, while the L2 Cache of AMD's recent Zen4 CPUs
+offers only 14 cycles of latency, the L3 cache of the same CPU has a latency of
+50 cycles~\cite{zen4}.\\
+
+When the CPU tries to access data, it first queries the fastest cache. If the
+CPU can locate the data in the cache, this is called a cache hit. On a cache
+hit, the CPU can profit from reduced access time and improved bandwidth. The
+opposite of a cache hit is called a cache miss, after which the CPU subsequently
+queries the next level in the memory hierarchy. If it finds the data needed, the
+CPU loads it into the nearest cache for faster access. Caches can only store a
+limited number of items, organized in cache lines. Cache lines are a copy of the
+main memory, and the processor uses this copy for all of its operations unless
+otherwise configured. The processor loads data in cache line size granularity
+from the main memory. All of this happens transparent to software and the
+processor automatically manages its cache. \\
+
+% Caches use the principle of locality, which consists of two kinds of locality.
+% The first is called spatial locality. Spatial locality describes the observation
+% that if a program accesses data from the main memory, data located at nearby
+% addresses are the target of future accesses with a high probability. In this
+% case, without any prefetching, the CPU tries to guess the size of the loaded
+% structure to load parts missing in the cache in advance. If the CPU then
+% accesses the neighbor of the first data, it already resides in the cache,
+% lowering the latency. The second principle is temporal locality, which states
+% that a program soon reuses memory references with a high probability. The CPU
+% can, therefore, gain performance by storing recently used data in the cache for
+% reuse.\\
+
+With cache lines being copies of main memory items, and the possibility of
+multiple copies of the same item existing in multiple caches at the same time,
+the need for keeping them consistent arises. For this, different strategies for
+writing data back to main memory exist:
+\begin{itemize}
+  \item \textbf{write-back}: Data modified in the cache is stored and written
+    back to the main memory later. Cache coherency protocols are required to
+    allow multiple devices to access the same memory range.
+  \item \textbf{write-through}: The changes in the cache are instantly written
+    to the main memory. These writes can slow down program execution because of
+    costly main memory writes, but ensure consistency with system memory and
+    cache content. This type is relevant for devices that access system memory
+    but do not access CPU cache.
+  \item \textbf{cache-disable}: The CPU cache is disabled, and the CPU
+    performs all memory operations using the main memory.
+\end{itemize}
+% Legacy x86 software controls cache settings by setting or clearing configuration
+% bits in the control register CR0. In a system employing modern x86\_64
+% processors, systems software can set the caching strategy on page granularity
+% (c.f. Chapter~\ref{sec:state:technical:paging}) by setting and clearing the
+% respective bits in the page table entries. These settings are used in
+% conjunction with values of the Memory Type Range Registers (MTTR) and Page
+% Attribute Table (PAT) to calculate the effective caching strategy for a physical
+% address.
+
+Legacy x86 software has different ways of managing the cache settings than
+modern \gls{os}. In modern \gls{os}es that use paging, the processor ignores the
+write-through setting of CR0 and uses the page-level settings
+instead~\cite{amd_manual}. The default in x86\_64 processors is to use a
+write-back strategy.
+
+\subsection{Cache coherence protocols}
+\label{sec:state:technical:caches_protocol}
+%An interesting difference in the x86\_64 implementation of Intel and AMD
+%processors are the cache coherency and inclusion policies.
+%AMD processors useMOESI as a cache coherency protocol~\cite{amd_manual}.
+Intel processors
+%,on the other hand,
+use MESIF as a coherency protocol to maintain consistency of the caches among
+different CPUs~\cite{thomadakis2011architecture}.
+%MOESI and
+MESIF is an extension of the MESI protocol, introducing the additional
+\textit{Forward} state respectively.
+
+The meaning of the states in the MESIF protocols are as follows:
+\begin{itemize}
+  \item \textbf{Modified}: The copy in the processor's cache is the most
+    recent and modified. The copy in the main memory needs to be updated.
+    Other processors in the system might maintain stale copies.
+  \item \textbf{Shared}:  The copy is the most recent and correct copy of the
+    data. Other processors may hold copies, too. Main memory holds the
+    most recent and correct copy, too.
+  \item \textbf{Exclusive}: The processor's and the main memory's copy are the
+    most recent and correct copies. No other processor holds a copy.
+  \item \textbf{Invalid}: The cache line is invalid and needs to be replaced by
+    a valid copy from main memory or other CPU's caches before it can be used.
+  \item \textbf{Forward}: Only one processor can hold a cache line in this
+    state. Other processors might hold a correct copy of the cache line in
+    shared state. The owning core responds to requests. The cache line is clear,
+    so no writeback is required before discarding the line.
+\end{itemize}
+
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/mesi.tex}
+    \caption{MESI state transition of a cache line resulting from a (remote) activity (after~\cite{mckenney2010memory}, p. 4)}
+    \label{fig:state:technical:mesi}
+  \end{center}
+\end{figure}
+
+All cache lines are tracked to be in one of the states.
+Figure~\ref{fig:state:technical:mesi} shows transitions of MESI states of a
+cache line as a result from a core's own or another core's remote
+access~\cite{mckenney2010memory}. The \textit{forward} state is essentially
+equal to the \textit{shared} state when it comes to state
+transitions~\cite{hay2012mesif}. It was created as an optimization to the MESI
+protocol and reduces overhead in multi node
+architectures~\cite{goodman2004mesif}. Important for my use case are the
+following state transitions:
+
+\paragraph{Foward from/to Shared}
+Processor $0$ has the \textit{forward} copy of a cache line. Processor $1$
+acquires a copy to read from processor $0$. Processor $1$ is the most recent
+requester of the item and forwards it if any other processor requests a copy. It
+holds the line in \textit{forward} state. Processor $0$ does not answer to
+requests anymore, it now holds the cache line in the \textit{shared} state.
+
+\paragraph{Exclusive to Shared}
+Processor $0$ has the \textit{exclusive} copy of a cache line. Processor $1$
+acquires a copy to read. In this case, the state of the line in processor $0$'s
+cache changes from \textit{exclusive} to \textit{shared} to reflect that other
+cores use the line.
+
+\paragraph{Shared to Modified/Exclusive/Invalid}
+Processor $0$ and processor $1$ both have the same data item in their local
+caches. The state of both copies of the cache lines is \textit{shared}. Before
+processor $0$ writes to the cache line it triggers the \textit{invalidation} of
+the line in processor $1$'s cache. Upon receiving the acknowledgement of
+\textit{invalidation} from processor $1$'s cache line, processor $0$ changes the
+state of its cache line from \textit{shared} to \textit{exclusive}. At this
+point the cache line is clean and matches the copy in the main memory.
+Transferring a cache line to \textit{exclusive} can be done in preparation to an
+anticipated write. After writing to the cache line, its state is changed to
+\textit{modified}. If processor $0$ performs an atomic read-write operation it
+will change its copy directly from \textit{shared} to \textit{modified}. The
+state of the cache line in processor $1$'s cache is now \textit{invalid}.
+
+Processors write back their data to the main memory once a cache line is evicted
+or when other processors request the same data item. If another processor
+requests the data item, then the owning processor will make the item available
+via inter-cache transfers or through a writeback.
+
+\subsection{Cache Inclusion Policies}
+\label{sec:state:technical:caches_inclusivity}
+On all current x86\_64 multicore CPUs, the \gls{llc} is shared among all cores
+for synchronization and uses one of the coherency protocols. Older multicore
+CPUs produced by Intel use an inclusive \gls{llc}, while more recent ones use a
+non-inclusive \gls{llc}~\cite{intel_optimization, raptorlake_spec_sheet}. An
+inclusive cache describes a cache containing the same content as lower levels
+and vice versa. A line evicted, for example, in the \gls{llc}, is also evicted
+in the lower levels. If an item is modified in a lower cache level, the changes
+are automatically propagated to the higher inclusive cache
+level~\cite{backes2019impact}. The opposite of an inclusive cache is an
+exclusive cache design, as used by recent AMD CPUs~\cite{amd_z4_optimization}.
+Exclusive caches do not replicate data in upper levels. Instead, the exclusive
+cache level serves as a victim cache of the lower levels. Non-inclusive caches
+can contain items of the lower levels, but inclusion is not enforced. This
+means, if a line is evicted from higher levels its eviction is not enforced in
+the lower levels~\cite{backes2019impact}.
+
+\subsection{Hardware Performance Monitoring Counters}
+\label{sec:state:technical:hpc}
+\glspl{pmc} are registers that increment on the occurrence of predefined
+microarchitectural events. The x86\_64 \gls{isa} specifies four freely
+programmable general purpose \glspl{pmc}~\cite{amd_manual}. Concrete processor
+implementations can offer additional counters. Similarly, the \gls{isa}
+specifies architectural events that must be present in every processor
+implementing x86\_64. Additional events are vendor and implementation-specific.
+The four general purpose counters can be programmed to count any event supported
+by the respective processor implementation. Vendors of x86 CPUs publish what
+processor supports what additional events in their manuals. Moreover, a CPU
+reports what events it supports in the result of the \gls{g_cpuid} instruction.
+\\
+
+In x86 hardware, performance counters are implemented by a set of two
+\glspl{msr} per counter. One \gls{msr} can be programmed by system software with
+the event to measure, while a second \gls{msr} counts the occurrence of the
+respective event. Reading \glspl{pmc} can be done with the privileged RDMSR
+instruction or from user space with the RDPMC instruction. In this way, a
+program can poll the values of counters. The system software can also program a
+threshold for a \gls{pmi}. Once the \gls{pmc} values exceed the threshold, the
+\gls{pmi} is triggered, offering an alternative to expensive polling
+techniques.\\
+
+When using hardware \gls{pmc}, one must use the proper technique adopted to the
+environment in which to obtain the counter values. Das et al. found in a
+comprehensive survey that noise from the system is often present, e.g. context
+switches influence the values of performance counters~\cite{das_sok_2019}.
+Moreover, some counter events are over-counted while the CPU can undercount
+others~\cite{weaver_non-determinism_2013}. It is therefore important to check
+the right conditions for using hardware counters and verify that they work
+correctly.
+
+\subsection{Paging}
+\label{sec:state:technical:paging}
+% With the evolution of computer systems not strictly processing data in a batched
+% manner anymore but instead allowing for multiple applications to run
+% concurrently, a need for complex memory management arose. For example, system
+% software must ensure that two applications programmed to use the same memory
+% addresses do not influence each other. Segmentation is a legacy technique used
+% in x86 systems to solve this problem. Segmentation allows the construction of
+% address spaces that allow transparent translation of application addresses
+% within an address space dedicated to the application. However, if applications
+% do not entirely fit into memory, system software must perform expensive swapping
+% operations between main and disk memory. In this swapping operation, programmers
+% either need to split up their application into parts that must reside in the
+% main memory simultaneously, or system software must swap the complete
+% application.\\
+
+% A solution to this is virtual memory implemented through
+% paging~\cite{tanenbaum2015modern}.
+
+The preferred way to manage memory in modern x86\_64 system is a technique
+called paging. Paging splits the virtual address space into small, evenly
+sized-parts called pages. The main memory is split into parts of the same size,
+called page frames, by which each page can be backed.
+% By splitting the address
+% space into pages, system software can now perform swapping more fine-grained. If
+% an application accesses a page not backed by a frame, hardware emits a fault,
+% and system software can take the necessary steps to load it into physical
+% memory. On the other hand, applications are now implicitly split into parts,
+% allowing system software to only swap out parts of running applications.
+% Additionally, paging allows applications to theoretically use the whole address
+% space, with system software to decide what virtual address is currently backed
+% by what physical page frame through its mapping function. This allows system
+% software even to map a single physical page frame to the address spaces of two
+% applications simultaneously, for example, if both applications use the same
+% shared library. Knowing in detail how paging work on x86\_64 hardware will help
+% understand content of later chapters.\\
+
+% \begin{figure}
+%   \begin{center}
+%     \includestandalone{images/paging.tex}
+%     \caption{Illustration of Virtual Address Translation with 4 Levels of Page Tables (after~\cite{amd_manual}, p. 597)}
+%     \label{fig:state:technical:paging}
+%   \end{center}
+% \end{figure}
+Hardware uses page tables that are hierarchically organized for the translation
+of virtual to physical addresses. Each page table forms a level in the table
+hierarchy and is the size of one page, storing references (addresses) to the
+next lower level. The last page table in this hierarchy stores the address of
+the physical page frame.
+% By default, x86\_64 uses pages of size 4 KiB. Because
+% x86\_64 uses 64-bit addresses, each 4 KiB sized page table can store 512
+% entries. Figure~\ref{fig:state:technical:paging} shows the page translation of a
+% virtual 64-bit address in x86\_64 with a page table hierarchy of four levels and
+% a page size of 4 KiB. A virtual 64-bit address consists thereby of indices in
+% the respective page tables to find the address as an entry in the lowest-level
+% page table. Each page table in the hierarchy is referenced by its physical
+% address.\\
+
+% A virtual address for x86\_64 4-level paging with 4 KiB page size is divided
+% into a 12-bit field used as an index in the page frame and four 9-bit fields,
+% which the hardware uses as an index to access the content of the respective page
+% level. The remaining address bits are sign extensions of bit 52, forming a
+% canonical address. The hardware must perform a page table walk to resolve the
+% virtual address.
+% For the first step of a page table walk, the processor locates the address of
+% the first page table, in this case, the PML4 table. The address of the PML4 is
+% written by system software to CR3 after it created the page table. All page
+% tables are aligned to 4 KiB, which leads to a value of 0 for the 12 least
+% significant bits. Depending on the configuration, these 12 bits in CR3 are
+% either used to determine the memory type of the PML4 or to store process-context
+% identifiers.
+To access the first table of the hierarchy, the CPU reads its physical address
+from CR3.\\
+% It uses the 9-bit index of the PML4 offset field in the virtual
+% address to find the Page-Map-Level 4 entry containing the address of the next
+% page table, the Page-Directory-Pointer table. The CPU accesses this table and
+% all successor tables similarly until it locates the physical page. To access the
+% data that belongs to the virtual address, the CPU uses the last 12 bits of the
+% virtual address as an index to access the respective byte in the page frame. \\
+
+% As the page table walk is expensive, the \gls{mmu} automatically stores the
+% translated addresses in a cache called \gls{tlb}. System software has to manage
+% page tables and \glspl{tlb} for each CPU independently. Furthermore, system
+% software must maintain consistency between page tables and each \gls{tlb} by
+% invalidating individual entries or the entire \gls{tlb}. If system software
+% invalidates an entry, the CPU has to complete a page walk for this virtual
+% address, upon which the \gls{mmu} updates the \gls{tlb}. Similar to other
+% caches, filling entries in the \gls{tlb} works transparent to software. System
+% software can use the INVLPG instruction to explicitly invalidate the \gls{tlb}.
+
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/pte_rights.tex}
+    \caption{Layout of the 12 least significant bits in a page table entry (after~\cite{amd_manual}, p. 592)}
+    \label{fig:state:technical:paging_rights}
+  \end{center}
+\end{figure}
+The 12 least significant bits of each page table entry are used for management
+properties, such as access rights management.
+Figure~\ref{fig:state:technical:paging_rights} shows the layout of the 12 least
+significant bits of a page table entry. The present bit is another property
+stored in the 12 least significant bits of a page table's entry. It indicates if
+the page the respective entry points to was initialized and loaded to the page
+table. If this bit is clear, the CPU generates a \gls{pf} exception and expects
+system software to load the respective entry. The CPU also generates a \gls{pf}
+if software violates access rights. A second bit important for this thesis is
+the Page-Level Cache Disable (PCD) bit. If the PCD bit is set, the CPU cannot
+cache the respective page. Bit 3 (PWT) controls page-level write-through. If
+system software sets this bit, the page table has a write-through caching
+policy.

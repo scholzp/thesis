@@ -1,0 +1,86 @@
+\section{side-channel Attacks}
+\label{sec:20:attacks}
+In this section we review side-channel attacks that TEECore mitigates
+against. While many side-channels exists in a computers system, I want to focus
+on two classes of architectural side-channels. First, in
+section~\ref{sec:20:transientattacks} we will learn about transient execution
+side-channels. The second class, interrupt based side-channels, will be
+explained in section~\ref{sec:20:interrupt_sca}. Both classes have in common
+that they rely on observable architectural changes in the processor to
+exfiltrate information.
+
+\subsection{Transient Execution Attacks}
+\label{sec:20:transientattacks}
+In 2018, researchers published the Spectre and Meltdown
+attacks~\cite{Kocher2018spectre, lipp_meltdown_2020}. These attacks were the
+first to exploit the side effects of transient execution in modern CPUs and
+affected all commodity processor architectures. As an example, CPU designs of
+AMD, Intel, Qualcomm, and Arm were identified to be vulnerable by transient
+execution
+attacks~\cite{wikner2022retbleed,moghimi2023downfall,ragab_ghostrace_2024}.\\
+
+Modern processor often execute instructions without the knowledge that their
+execution preconditions are met to gain performance. As a result, processors
+need to revert all results from executing an instruction from which they later
+learn that its precondition was not satisfied. An instruction executed in this
+way is called a transient instruction. Because of performance reasons, a
+processor might not revert all microarchitectural side effects of transient
+execution, leaving an observable footprint. Spectre and Meltdown abuse
+different race conditions in transient execution to exfiltrate data through
+observing these microarchitectural state changes. In particular, the original
+Spectre and Meltdown attacks use cache based covert channels. To use these
+channels, both attacks measure the access time through special crafted memory
+addresses from which they can conclude the presence of data. They therefore rely
+on the presence of a medium shared by the attacking and the victim thread to
+communicate information beyond process boundaries. \\
+
+% \subsubsection{Spectre Attack}
+% \subsubsection{Meltdown Attack}
+% Both attacks abuse a race condition between transient executed instructions and
+% memory access (Spectre) or exception delivery (Meltdown). In strictly sequential
+% instruction processing, each instruction would only be executed if the results
+% of the one before arrived. With speculative execution, the CPU executes
+% instructions before the results of previous instructions arrive. With branching
+% or exception delivery, this can lead to a race condition in which instructions
+% are executed before the branching decision is committed or an exception arrives.
+% Both attacks aim to make the window in which instructions are executed
+% speculatively as large as possible to observe the microarchitectural side
+% effects later. With carefully crafted code, these race conditions can be used to
+% access arbitrary memory (Meltdown) or memory readable by the attacked process
+% (Spectre). \\
+
+% Both attacks have in common the fact that they transmit data through a covert
+% channel. In the original attack descriptions, both attacks use a cache covert
+% channel to which they transfer data with the help of transient executed
+% instructions.
+
+The class of transient execution attacks is still highly relevant to this day.
+Since 2023, security researchers discovered at least five attacks that use
+microarchitectural effects to exfiltrate data, similar to Spectre and Meltdown~
+\cite{ormandy2023zenbleed,trujillo2023inception,
+moghimi2023downfall,ragab_ghostrace_2024, wilke2024tdxdown}. Current hardware
+\gls{tee} solutions are affected, too, because these attacks enable attackers to
+read arbitrary memory. The problem persists, and no solution exists to mitigate
+transient execution attacks in general.\\
+
+\subsection{Interrupt Based Attacks}
+\label{sec:20:interrupt_sca}
+% In section~\ref{sec:20:transientattacks}, we have seen that data can be leaked
+% from various \gls{tee} implementations over side-channels if an attacker can
+% interrupt a \gls{tee} in a high temporal resolution.
+With SGX-step Van et al. presented the first framework that enables an attacker
+to mount attacks on \gls{sgx} with instruction-level
+granularity~\cite{van2017sgx}. Next to the aforementioned covert side-channels,
+this allows the attacker to learn access patterns of the \gls{tee} and tightly
+monitor its control flow. Wilke et al. and Kou et al. implemented similar
+attacks for AMD and Arm processors~\cite{wilke2023sev, kou2021load}.\\
+
+On x86 processors, the attack scheme uses the \gls{lapic}, while on Arm, it uses
+a separate core to send \glspl{ipi} to overcome the boundaries
+set by the two worlds in TrustZone. While Kou et al. use these interrupts to
+mount high-precision flush+evict attacks, both x86 attacks additionally describe
+how to monitor \gls{tee} behavior by manipulating the page tables of the
+\gls{tee}. By setting the accessed bit to 0, the attacker can at least learn of
+memory accesses on page granularity. All three attacks are, therefore, able to
+break the security guarantees of the \gls{tee} while not granting an attacker
+more power than the attacker model of the respective solution does.

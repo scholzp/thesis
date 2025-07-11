@@ -1,0 +1,292 @@
+\section{Trusted Execution Environment Building Blocks}
+\label{sec:20:building_blocks}
+Before we have a broader look at \glspl{tee}, their definition, and how existing
+implementations look, we need to learn about standard building blocks of
+\glspl{tee}. For this, we first take a look at chains of trust and \gls{pki}.
+Then, we revisit the fundamentals of remote attestation and how a root of
+trust is defined.
+
+\subsection{Chain of Trust}
+\label{sec:20:chain_of_trust}
+% Signatures of real humans differ because humans do not work entirely
+% deterministic. The process of forging signatures of other humans requires
+% dictations and practice by the forger because the human factor introduces
+% entropy to the process of signing. On the contrary, computers are built to work
+% deterministically. If the same input data is processed the same way, computers
+% working as intended by humans produce the same output. It is, therefore, that
+% authentication in the digital realm is implemented through cryptography and the
+% knowledge of secrets.
+
+Communication involves at least two parties, which we call Alice and Bob in the
+following example. When referring to cryptographic algorithms, a secret is
+called a key, and based on the kind of keys used, we can differentiate between
+two kinds of cryptographic algorithms. In symmetric algorithms, the same key is
+used for encryption and decryption. Alice and Bob thus share the same secret. In
+asymmetric algorithms, each of Alice and Bob maintain their secrets. These keys
+have a public and a private part, respectively. Alice uses the public part of
+Bob's key when they want to encrypt a message for Bob, and only Bob's private
+key can decrypt a message in this way.\\
+
+Digital signatures use asymmetric cryptography. Given that Alice wants to sign a
+message so that Bob can verify that Alice is the sender, both proceed as follows
+to fulfill their goal. First, Alice creates a pair of keys, a public and a
+private one. Alice uses their private key to sign a message and distributes
+their public key so others can use it to verify Alice's signature. Alice then
+publishes their public key to make it available to Bob. When sending a message
+to Bob, Alice uses a signing function that takes the message and Alice's private
+key as input and produces a signature, which Alice sends along the message to
+Bob. Knowing Alice's public key, Bob can now check the validity of the signature
+with the help of a signature validation function. This function takes the
+message, the signature, and Alice's public key as input and generates the answer
+to whether the message was signed with the signature.\\
+
+Another problem arises when the network increases and Bob does not have the
+chance to receive Alice's key in person. To prevent man-in-the-middle attacks,
+Bob must ensure that the key they received over a network originates from Alice
+and not from a malicious entity. The attack surface increases with the number of
+different entities Bob wants to communicate with, as Bob needs to verify the
+keys of each of their communication partner. A third party, the \gls{ca}, that
+Bob trusts, can help with this. The \gls{ca}'s task is to pledge to Bob that a
+certified key belongs to Alice or any other chosen entity and not a potentially
+malicious third party. Bob trusts the \gls{ca} to do the keys' background check
+and only deliver certificates of trusted identities.
+% Alice first registers their
+% key with the \gls{ca}. The \gls{ca} owns a pair of private and public keys too.
+% It uses these keys to cryptographically bind Alice's public key to Alice's
+% identity. The \gls{ca} this way creates a certificate that it signs with its
+% private key. With this certificate, Bob can validate that a public key belongs
+% to Alice by validating the certificate with the \glspl{ca} public key. Alice now
+% delivers their public key and the certificate issued by the \gls{ca}. This
+% proves to Bob that the key belongs Alice. As long as the \gls{ca} is not
+% malicious, Bob can detect man-in-the-middle attacks if any malicious entity
+% ships a key not belonging to Alice. While all participants can create
+% certificates for their key with a dedicated key pair, such self-signed
+% certificates could allow man-in-the-middle attacks again. Hence, a trusted third
+% party creates the certificates.
+\\
+
+\begin{figure}
+  \begin{center}
+    \includestandalone{images/pki.tex}
+    \caption{Verification in a Public Key Infrastructure}
+    \label{fig:state:technical:chain_of_trust}
+  \end{center}
+\end{figure}
+
+% Because the single \gls{ca} is trusted by all participants in the network,
+% compromising it would mean control over all the communication in the network.
+% The solution to this is distributed trust.
+Multiple \gls{ca}s can exist in a
+network and compete with each other on the reputation gained from
+users~\cite{perlman1999overview}.
+% Such a \gls{pki} is used in many network
+% technologies, such as HTTPS, that use the X.509 standard.
+Next to leaf certificates issued to Alice and Bob, a \gls{ca} can also issue
+certificates on keys that allow other entities to issue certificates and act as
+an \gls{ica}, creating a chain of certificates.
+Figure~\ref{fig:state:technical:chain_of_trust} shows such a chain of
+certificates.
+% If Bob now wants to establish trust in the certificate provided by
+% Alice, they must first decide if they trust the \gls{ica}. The first step is to
+% verify that Alice's certificate was issued by the \gls{ica}. In the next step,
+% Bob needs to check all succeeding certificates until they reach the root
+% \gls{ca} by validating the \glspl{ica} respective certificates with the public
+% key of their issuer. In this way, Bob builds a chain of trust by verifying the
+% validity of the chain of certificates and deciding to trust the root \gls{ca}.
+% In the following section, we will see that such trust chains allow the
+% implementation of software attestation schemes.
+
+\subsection{Remote attestation}
+\label{sec:20:remote_attestation}
+Remote attestation proves claims about a target by delivering supporting
+evidence to an relying party over a network. Before I further proceed to explain
+remote attestation, I want to define the following terms similar to Coker et.
+al~\cite{coker_principles_2011}.
+\begin{itemize}
+  \item \textbf{Appraiser}: Member of a network. Makes decisions about other
+    parties on the base of delivered evidence.
+  \item \textbf{Target}: Member of a network. Party about which properties the
+    appraiser makes decisions.
+  \item \textbf{Attestation}: Action of making claims about the target and
+    delivering supportive evidence.
+  \item \textbf{Measurement}: Collect evidence through direct and local
+    observation.
+  \item \textbf{Attestation protocol}: Cryptographic protocol transmitting
+    evidence about the claim. Trusted by appraiser.
+\end{itemize}
+
+The appraiser and the target both follow contradictory goals. While the appraiser
+ideally wants to get as much information as possible about the target, the
+target wants to preserve its privacy as well as possible and, therefore, conceal
+as much information as possible. Both goals can be realized by employing a
+trusted third party local to the target who can measure the target. This
+third party then sends a signed report of the evidence on behalf of the
+target. This report can contain the full raw measurement result, a reduced
+variant, or a complete measurement substitute. For example, the reduced
+measurement could be from a hash of the raw data. The substitute could be a
+signature associated with the trusted third party that verifies that the target
+fulfills the claims.
+
+\subsection{Hardware Root of Trust}
+\label{sec:20:hardware_root_of_trust}
+A root of trust is defined by the \gls{tcg} as follows:
+\begin{quote}
+  \textit{ A minimal set of system elements that have to be trusted because
+    misbehavior is not detectable. \\
+  } \mbox{ -- Trusted Computing Group~\cite{tpm_architecture}}
+\end{quote}
+
+The \gls{tcg} specifies that a hardware root of trust must be
+available to enable remote attestation in a confidential computing
+environment~\cite{tpm_architecture}. A hardware root of trust is a device in a
+computer system that the system cannot manipulate. Moreover, it implements
+security functionality such as encryption and random number generation. While
+misbehavior is impossible to detect, hardware manufacturers can verify that
+their devices work as intended by providing certificates. These certificates can
+be embedded into the device with the help of tamper-resistant memory, such as
+ROM or eFuses. A user can then check the validity of a certificate by consulting
+the respective manufacturer's service. \\
+
+Hardware roots of trust are necessary because system software could tamper with
+software or memory to manipulate a possible software solution. The following
+sections review the most widely spread solutions to the hardware root of
+trust. These implementations rely on dedicated hardware modules such as add-in
+cards or unique, secure operation modes in CPU hardware. \\
+
+\section{Trusted Execution Environments}
+\label{sec:state:tee}
+GlobalPlatform first used the term \gls{tee} to define a solution for mobile
+trusted computing solutions~\cite{globaltee}. Since then, many inconsistent and
+unspecific definitions have been published for \glspl{tee} until the first
+precise definition was proposed by Sabt et al.~\cite{sabt2015trusted}. They
+define the \gls{tee} in the following way:
+\begin{quote}
+  \textit{Trusted Execution Environment (TEE) is a tamper-resistant processing
+    environment that runs on a separation kernel. It guarantees the authenticity of
+    the executed code, the integrity of the runtime states (e.g., CPU registers,
+    memory, and sensitive I/O), and the confidentiality of its code, data, and
+    runtime states are stored on persistent memory. In addition, it shall be able
+    to provide a remote attestation that proves its trustworthiness for third
+    parties. The content of TEE is not static; it can be securely updated. The TEE
+    resists all software attacks as well as physical attacks performed on the
+    system's main memory. Attacks performed by exploiting backdoor security flaws
+    are not possible. \\
+  } \mbox{ -- Sabt et al.~\cite{sabt2015trusted}}
+\end{quote}
+
+The first half of the definition describes a \gls{see}. A \gls{see} can protect
+the integrity, authenticity, and confidentiality of the application hosted by
+the \gls{see}. Malicious privileged software is thus neither able to modify the
+code, tamper with the runtime state, nor observe code and data through the
+runtime. Contrary to \glspl{tee}, a \gls{see} cannot prove these claims against
+an appraiser, and much less to a third party outside the system. This is because
+it does not require a root of trust to be present in the system. To prove its
+trustworthiness, \glspl{tee} employ remote attestation, which is the second
+important aspect of the definition.\\
+
+A \gls{tee} consists of several building blocks. The first building block Sabt
+et al. propose is a secure boot. This building block allows \glspl{tee} to
+verify that only a specific code of a particular state is loaded. For a secure
+boot, a chain of trust is formed by verifying each component's state. To
+generalize the secure boot requirement, a \gls{tee} must be capable of verifying
+what code it loads to the environment. The second building block is secure
+scheduling. Tasks executing in the \gls{tee} should not be able to disrupt the
+main \gls{os}. Moreover, a \gls{tee} should implement means to allow
+communication between the insecure world outside the \gls{tee} and the
+application executing inside of it. Secure storage is one more building block.
+It allows the application in the \gls{tee} to store data in a confidentiality,
+integrity, and freshness-conserving way. Trusted I/O paths secure the
+communication between a \gls{tee} and its users.\\
+
+\section{Trusted Platform Module}
+\label{sec:20:tpm}
+The \gls{tpm} is a low-cost cryptographical coprocessor that offers different
+cryptographic functions, such as hash functions, asymmetric and symmetric
+encryption and decryption functions, asymmetric signing and verification
+functions, and key generation functions. Implementations of the \gls{tpm} follow
+different versions of specifications created and managed by the \gls{tcg}
+consortium~\cite{tpm_architecture}. The \gls{tpm} is specified by the Trusted
+Computing Group as a system component with a state separate from the host system
+on which it reports. The host system cannot directly manipulate the state of the
+\gls{tpm} but has to use a defined interface to interact with the \gls{tpm}. To
+separate the state between the host system and the \gls{tpm}, the \gls{tpm} is
+implemented using dedicated hardware, such as a processor, RAM, ROM, and Flash
+memory, all physically protected from the host system. Other physical separation
+means can be used to implement \gls{tpm} services, such as unique processor
+modes with dedicated memory access rights.\\
+
+The most recent version of the \gls{tpm} specification is 2.0.
+% The first
+% widespread family of \glspl{tpm} followed specification version 1.2, which was
+% implemented on modules shipped with personal computers beginning from the year
+% 2005~\cite{arthur2015practical}. One major drawback of version 1.2 was the
+% hard-coded usage of SHA-1 as a hashing algorithm. SHA-1 was first broken in 2005
+% by Wang et al.~\cite{wang2005collision}. In 2011, NIST deprecated SHA-1 because
+% of security concerns~\cite{nist-sha1}. \gls{tpm} 1.2 is constrained with respect
+% to its data structures to use either RSA or SHA-1\cite{tpm_architecture}
+% Therefore, when designing \gls{tpm} 2.0, the \gls{tcg} decided to leave the
+% exact algorithms specific \glspl{tpm} support open for their implementation.
+% Instead, the specification mandates a \gls{tpm} of version 2.0 to implement at
+% least one symmetric hashing, one symmetric encryption, and one asymmetric
+% encryption and signing algorithm. \\
+In x86 systems, \gls{tpm} 2.0 is widely spread today and one of Windows 11s
+system requirements. Often, \gls{tpm} is not implemented as a dedicated hardware
+module but as firmware \gls{tpm}. The firmware \gls{tpm} is part of the Intel
+Platform Trust Technology (Intel PTT). AMD platforms use an implementation
+called fTPM, which is integrated in the platform security
+processor~\cite{pirker2024brief}. \\
+
+At manufacturing time, a vendor burns a \gls{ek} together with a certificate
+into the \gls{tpm}. The \gls{ek} can be used to identify the \gls{tpm}, and the
+certificate can be used to prove that the \gls{tpm} is genuine with the help of
+the vendor's public key. Moreover, the \gls{tpm} uses the \gls{ek} as an input
+to its key derivation functions. With the help of these key derivation
+functions, a \gls{tpm} can generate keys for other applications such as
+attestation, hashing, and signing. It never uses the \gls{ek} directly to
+prevent leaking it in any form. A built-in entropy collector enables the
+\gls{tpm} to generate random numbers. The \gls{tpm} uses hash functions to
+generate a digest of input. Next to its cryptographic properties, the advantage
+of a hash function is the output's constant length independent of the input's
+length. Thus, the buffer only needs to be large enough to hold the result of the
+digest. Message digests are used to store data outside of the \gls{tpm} or
+generate certificates of values.% The \gls{tpm} uses HMACs when storing data
+%outside of it. HMACs allow verifying that this data was not altered and
+%originates from a certain entity with the signing key.
+\\
+
+The \gls{tcg} specifies three roots of trust for a trusted system. Two of them
+can be implemented by the \gls{tpm}. The first is the root of trust for storage.
+The \gls{tpm} implements memory that is shielded from the rest of the system,
+and that can only be accessed by the \gls{tpm}. The second root of trust is the
+root of trust for reporting. With its signing ability, the \gls{tpm} can attest
+to values stored in its memory and create certificates for a measurement chain.
+The third root of trust is the root of trust for measurement. This root is
+formed by the CPU that measures on behalf of the system software or firmware.
+The specification describes a core root of trust for measurement as the first
+instructions executed in a new chain of trust, typically the firmware. In other
+words, the core root of trust is trusted software that is believed to perform
+the first measurement of the system correctly.\\
+
+Software that performs the measurements instructs the \gls{tpm} to store its
+result in \gls{pcr}. \glspl{pcr} are special registers of the \gls{tpm} that
+only allow the \texttt{extend} operation and only reset when resetting the
+system. The \texttt{extend} operation takes the current value of the \gls{pcr}
+and a new value as input, concatenates both values, and processes the result
+with the help of a hash function to create a digest that reflects the current
+system state. The \gls{tpm} can assist in creating a chain of trust
+(see~\ref{sec:20:chain_of_trust}) with the help of \glspl{pcr}. An example of
+how to use the \gls{tpm} to build up a chain of trust is given by Arthur et
+al~\cite{arthur2015practical}. The system software can extend a certain
+\gls{pcr} for each state before transferring control to the next application.
+The application can then check the respective \gls{pcr} to contain a known good
+value, indicating the platform was in a known good state before the application
+was launched. If so, it can continue operation. If not, the application might
+terminate. The measurement can also contain data about the application to be
+launched to make sure that the application's integrity is not hurt. Remote
+parties can use the \gls{tpm} attestation function to determine whether a system
+was in a known good state at some time. For this, the \gls{tpm} offers the
+possibility to sign the content of one or more \glspl{pcr}, producing a quote.
+The remote party receives the quote, the public key, and the message contents.
+The remote party can validate the certificate by executing the signature
+validation function. With the public key of the \gls{tpm}, a remote party can
+verify that the \gls{tpm} is genuine, and the vendor pledged to do so.

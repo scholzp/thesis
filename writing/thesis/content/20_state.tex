@@ -1,4 +1,4 @@
-\chapter{Technical Background}
+\chapter{Background}
 \label{sec:state}
 
 % Hier werden zwei wesentliche Aufgaben erledigt:
@@ -29,11 +29,18 @@
 % Kapitel wird in der Regel zuerst geschrieben und ist das Einfachste
 % (oder das Schwerste weil erste).
 
-\ldots state of the art \ldots
+In this chapter, I will provide background information on the topics revolving
+around creating a standalone \gls{tee} that uses primitives of the processor
+core to isolate itself. For this, I first introduce the basics about how x86
+processor programming works in section~\ref{sec:state:technical}. Then we
+revisit \glspl{tee} in general and how important building blocks look (c.f.
+sections~\ref{sec:20:building_blocks} and~\ref{sec:state:tee}). We continue in
+section~\ref{sec:20:attacks} to learn about side-channel attacks to later
+understand vulnerabilities in existing \gls{tee} implementations.
 
-\todo{write state}
-
-\cleardoublepage
+\input{content/20_content/x86_basics.tex}
+\input{content/20_content/tee.tex}
+\input{content/20_content/attacks.tex}
 
 %%% Local Variables:
 %%% TeX-master: "diplom"
