@@ -18,7 +18,18 @@ static int apic_id = 0;
 static u64 physical_entry_addr = 0;
 
 void ping_app(void);
-void attack_mem(enum tee_task task);
+/* ---------------
+*  IMPORTANT: Although these functions (the following 3 until the one-line
+*  comment) could be merged by conditionally executing memory operations, this
+*  is nor recommended. I did this and because the branch predictor were wrong, I
+*  got wrong result for the performance counter values in TEECore. All I'm
+*  saying is, that it is easy to trigger Spectre-like behavior that can mess up
+*  your measurements if you 'refactor' the code of these functions.
+*/
+void attack_mem_writing(void);
+void attack_mem_reading(void);
+void attack_mem_nop(void);
+// --------------
 void ipi_attack(void);
 
 static void tee_poll_timer_handler(struct timer_list *timer)
@@ -46,9 +57,13 @@ static void tee_poll_timer_handler(struct timer_list *timer)
 					ipi_attack();
 					break;
 				case TEE_T_ATTACK_READ_MEM:
+					attack_mem_reading();
+					break;
 				case TEE_T_ATTACK_WRITE_MEM:
+					attack_mem_writing();
+					break;
 				case TEE_T_ATTACK_NOP_MEM:
-					attack_mem(SHARED_MEM_PTR->task_id);
+					attack_mem_nop();
 					break;
 				case TEE_T_UNKNOWN:
 				default:
@@ -149,7 +164,7 @@ void ping_app(void) {
 	}
 }
 
-void attack_mem(enum tee_task task) {
+void attack_mem_writing() {
 	const u8 number_of_read_attempts = 10;
 	u64 address = 0;
 	u64 secret_mem_size = 4096;
@@ -161,32 +176,99 @@ void attack_mem(enum tee_task task) {
 	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
 	// The memory was initialized, we read
 	if (number_of_read_attempts > SHARED_MEM_PTR->memory[1]) {
-		if (TEE_T_ATTACK_NOP_MEM != task) {
-			// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
-			// 64 bit physical memory addresss 
-			address = *((u32*) &(SHARED_MEM_PTR->memory[2]));
-			/*
-			* We got the physical address and can calculate the page frame number 
-			* from it. The pages were already allocated (and never freed) when we 
-			* copied the Elf to memory.
-			*/ 
-			secret_mem = kmap(pfn_to_page(address >> 12));
-			pr_info("Received phy. addr: 0x%016llx mapped to 0x%016llx\n", 
-				address, (u64) secret_mem);
-				for (u64 offset = 0; offset < num_iterations; offset++) {
-					const u32 value = ioread32(secret_mem + offset);
-					if (TEE_T_ATTACK_WRITE_MEM == task) {
-						iowrite32(value + 1, (secret_mem + offset));
-						hash += value + 1;
-					} else {
-						hash += value;
-					}
-				}
-			pr_info("%s: Hash: 0x%016llx", __FUNCTION__, hash);
-			kunmap(pfn_to_page(address >> 12));
-		} 
+		// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
+		// 64 bit physical memory addresss 
+		address = *((u32*) &(SHARED_MEM_PTR->memory[2]));
+		/*
+		* We got the physical address and can calculate the page frame number 
+		* from it. The pages were already allocated (and never freed) when we 
+		* copied the Elf to memory.
+		*/ 
+		secret_mem = kmap(pfn_to_page(address >> 12));
+		pr_info("Received phy. addr: 0x%016llx mapped to 0x%016llx\n", 
+			address, (u64) secret_mem);
+			for (u64 offset = 0; offset < num_iterations; offset++) {
+				const u32 value = ioread32(secret_mem + offset);
+				iowrite32(value + 1, (secret_mem + offset));
+				hash += value + 1;
+			}
+		pr_info("%s: Hash: 0x%016llx", __FUNCTION__, hash);
+		kunmap(pfn_to_page(address >> 12));
+
 		++SHARED_MEM_PTR->memory[1];
-		SHARED_MEM_PTR->task_id = task;
+		SHARED_MEM_PTR->task_id = TEE_T_ATTACK_WRITE_MEM;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
+		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
+	} else {
+		pr_info("Done! Reached task count of %u", number_of_read_attempts);
+		SHARED_MEM_PTR->task_id = TEE_T_UNKNOWN;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
+		SHARED_MEM_PTR->status = TEE_C_NONE;
+	}
+}
+
+void attack_mem_reading() {
+	const u8 number_of_read_attempts = 10;
+	u64 address = 0;
+	u64 secret_mem_size = 4096;
+	u64 hash = 0;
+	u32 *secret_mem = NULL;
+	u32 num_iterations = secret_mem_size / sizeof(*secret_mem);
+
+	// Vector not yet initalized
+	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
+	// The memory was initialized, we read
+	if (number_of_read_attempts > SHARED_MEM_PTR->memory[1]) {
+		// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
+		// 64 bit physical memory addresss 
+		address = *((u32*) &(SHARED_MEM_PTR->memory[2]));
+		/*
+		* We got the physical address and can calculate the page frame number 
+		* from it. The pages were already allocated (and never freed) when we 
+		* copied the Elf to memory.
+		*/ 
+		secret_mem = kmap(pfn_to_page(address >> 12));
+		pr_info("Received phy. addr: 0x%016llx mapped to 0x%016llx\n", 
+			address, (u64) secret_mem);
+			for (u64 offset = 0; offset < num_iterations; offset++) {
+				const u32 value = ioread32(secret_mem + offset);
+				hash += value;
+			}
+		pr_info("%s: Hash: 0x%016llx", __FUNCTION__, hash);
+		kunmap(pfn_to_page(address >> 12));
+
+		++SHARED_MEM_PTR->memory[1];
+		SHARED_MEM_PTR->task_id = TEE_T_ATTACK_READ_MEM;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
+		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
+	} else {
+		pr_info("Done! Reached task count of %u", number_of_read_attempts);
+		SHARED_MEM_PTR->task_id = TEE_T_UNKNOWN;
+		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
+		SHARED_MEM_PTR->status = TEE_C_NONE;
+	}
+}
+
+void attack_mem_nop() {
+	const u8 number_of_read_attempts = 10;
+	u64 address = 0;
+	u32 *secret_mem = NULL;
+
+	// Vector not yet initalized
+	if (0 == SHARED_MEM_PTR->memory[0]) { return; }
+	// The memory was initialized, we read
+	if (number_of_read_attempts > SHARED_MEM_PTR->memory[1]) {
+		// The 8 bytes beginning at memory SHARED_MEM_PTR->memory[2] denote a 
+		// 64 bit physical memory addresss 
+		address = *((u32*) &(SHARED_MEM_PTR->memory[2]));
+		/*
+		* We do nothing except of mapping the memory.
+		*/ 
+		secret_mem = kmap(pfn_to_page(address >> 12));
+		kunmap(pfn_to_page(address >> 12));
+
+		++SHARED_MEM_PTR->memory[1];
+		SHARED_MEM_PTR->task_id = TEE_T_ATTACK_NOP_MEM;
 		pr_info("%s: TSC: 0x%016llx", __FUNCTION__, rdtsc());
 		SHARED_MEM_PTR->status = TEE_C_HOSTSEND;
 	} else {
