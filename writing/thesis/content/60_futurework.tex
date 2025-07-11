@@ -1,11 +1,71 @@
 \chapter{Future Work}
 \label{sec:futurework}
 
-\ldots future work \ldots
+\section{Missing Features}
+The prototype of TEECore is missing several features described in
+chapter~\ref{sec:design}, that would need to be implemented to use it to its
+full potential.
 
-\todo{write future work}
+The first feature missing is domain separation between the secure applications
+and the TEECore kernel. Currently, secure applications run with the same
+privileges as TEECore, which is a security risk. Because TEECore is designed to
+operate in an interrupt-free environment, the transition between different
+privilege levels would need to be implemented using the x86\_64 specific
+\textit{syscall} and \textit{sysret} instructions. Moreover, supporting more
+than one application would require to trust the applications, as without timer
+interrupts only cooperative scheduling is possible.
 
-\cleardoublepage
+Second, a secure channel would need to be established to exchange data between
+secure applications and applications in the normal partition. The shared memory
+communication path can be used to build such a channel. To allow secure
+communication via this channel, TEECore would need to implement some key
+exchange algorithm for key exchange with a remote party and consequently
+algorithms to encrypt the shared memory.
+
+Third, TEECore currently only works with tasks that are directly embedded as a
+function into TEECore's code. This makes it complicated to adopt TEECore to new
+tasks. To support easier adoption, TEECore should be able to load tasks from
+binaries, such as \gls{elf} files. Such functionality would require the
+implementation of a binary loader together with infrastructure to support
+dynamic binary loading. Alternatively, TEECore could support linking of static
+libraries to ship applications as binaries. Enhancements to the build system
+and a clear API for application would then be required.
+
+Moreover, the prototype only allows communication with one remote party, as it
+does not enforce exclusive usage of the shared communication path. To allow
+multiple applications to use TEECore's features, a more complex communication
+protocol would need to be implemented.
+
+Lastly, TEECore lacks any remote attestation feature. I sketched the general
+design in chapter~\ref{sec:30:tee_ra_scheme}. TEECore must implement a \gls{tpm}
+driver and measurement facilities to implement this feature. The required
+measurement facilities include those for measuring the secure applications code,
+the secure application communication, and the general state of TEECore.
+
+\section{Other Platform Support}
+Currently, TEECore is only implemented for one Intel platform. This platform
+implements inclusive caches. An open question at this point is how TEECore
+behaves on architectures implementing different cache coherency protocols. For
+example, AMD processors implement the MOESI protocol, which would allow for a
+comparison of how TEECore's approach performs in such an architecture.
+Additionally, I would like to evaluate AMD processors regarding their
+performance measurement facilities.
+
+\section{Additional Features}
+As mentioned in chapter~\ref{sec:evaluation:ipi}, the TEECore prototype
+implementation is vulnerable against INIT \glspl{ipi}. Combining TEECore with other
+\gls{tee} technologies could help mitigate this flaw and increase the security
+of these other technologies. So, as a possible research area, TEECore could be
+combined with one of these technologies to increase overall security. Moreover,
+other processor features could be used to further increase isolation. For
+example, Intel offers a technology called cache allocation technology, which can
+be used to partition L3 caches via classes of service~\cite{intel_cat}. Such a technology could
+increase resources available to TEECore by disallowing other cores or
+applications to access cache lines allocated to TEECore. Some AMD processors
+implement a similar feature that allows for the specification of quality of
+service constraints for cache usage. Further, TEECore could use undocumented
+features such as cache-as-ram (CAR). Finding ways to utilize a dynamic root of
+trust for measurement would reduce TEECore's \gls{tcb}.
 
 %%% Local Variables:
 %%% TeX-master: "diplom"
