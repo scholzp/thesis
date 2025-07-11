@@ -1,10 +1,28 @@
 #![no_main]
 #![no_std]
 
+extern crate alloc;
+
+pub mod pmc_utils;
+
 use log::info;
 use uefi::prelude::*;
 use core::arch::asm;
 use core::arch::x86_64::__cpuid_count;
+use alloc::vec::Vec; 
+use alloc::boxed::Box;
+use alloc::string::String; 
+use uefi::proto::console::text::ScanCode;
+use uefi::Char16;
+use uefi::system::with_stdin;
+use alloc::collections::BTreeMap;
+use uefi::{CString16, print, println};
+
+use pmc_utils::intel::{query_features_intel, test_offcore_pmc};
+use pmc_utils::architectural::{architectural_test_setup, read_and_print_pmcs};
+use pmc_utils::vendor::{check_vendor, CpuVendor};
+
+use x86::msr;
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u32)]
@@ -84,16 +102,118 @@ impl Into<u32> for Fn8000_0001_ECX_Feature {
     }
 }
 
+fn get_vendor() {
+    let vendor_string = unsafe {
+        let mut cpuid_result = __cpuid_count(0x0, 0x0);
+        let ebx_bytes = cpuid_result.ebx.to_le_bytes();
+        let edx_bytes = cpuid_result.edx.to_le_bytes();
+        let ecx_bytes = cpuid_result.ecx.to_le_bytes();
+        let bytes : Vec<char> = ebx_bytes.iter()
+            .chain(edx_bytes.iter().chain(ecx_bytes.iter()))
+            .map(|c| {char::from_u32(u32::from(*c)).expect("Conversion from byte should work")} )
+            .collect();
+        String::from_iter(bytes.iter())
+    };
+    info!("Got vendor string {:?}", vendor_string);
+    match vendor_string.as_str() {
+        "AuthenticAMD" => {
+            info!("Identified AMD.");
+        },
+        "GenuineIntel" => {
+            info!("Identified Intel");
+            query_features_intel();
+        },
+        &_ => {
+            todo!("Found a not supported vendor string!");  
+        },
+    }
+}
+
+fn pmc_test() {
+    if false == check_vendor(CpuVendor::Intel) {
+        return
+    }
+    test_offcore_pmc();
+    architectural_test_setup(); 
+    read_and_print_pmcs();
+}
+
+fn query_features_amd() {
+    let cpuid_result = unsafe{ __cpuid_count(0x8000_0001, 0x0)};
+    info!("CPUID Result: {:#x?}, PerfCtrExtLLC: {:#x?}", cpuid_result, Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32);
+    info!("CPUID LLC extensions: {:#x?}", cpuid_result.ecx & (Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32));
+}
+
+fn print_help() {
+    info!("Supported command:");
+    info!("help     -- Prints this help.");
+    info!("pmcTest  -- Test if PMC can be programmed with offcore events.");
+    info!("query    -- Queries CPUID for information about MPC.");
+    info!("quit     -- Terminate this UEFI app.");
+    info!("vendor   -- Queries CPUID for vendor information.");
+}
+
 #[entry]
 fn main() -> Status {
     uefi::helpers::init().unwrap();
-    info!("Hello world!");
+
+    // let mut lineBuffer = Vec::new();
+
+    let mut commands: BTreeMap<CString16, Box<dyn Fn()>> = BTreeMap::new();
+    commands.insert(CString16::try_from("less").unwrap(), Box::new(||{info!("less: Not implemented")}));
+    commands.insert(CString16::try_from("help").unwrap(), Box::new(print_help));
+    commands.insert(CString16::try_from("pmcTest").unwrap(), Box::new(pmc_test));
+    commands.insert(CString16::try_from("query").unwrap(), Box::new(query_features_intel));
+    commands.insert(CString16::try_from("vendor").unwrap(), Box::new(get_vendor));
+    
+
     // CPU ID Name
-    let mut cpuid_result = unsafe{ __cpuid_count(0x0, 0x0) };
-    info!("CPUID Result: {:#x?}", cpuid_result);
-    cpuid_result = unsafe{ __cpuid_count(0x8000_0001, 0x0) };
-    info!("CPUID Result: {:#x?}, PerfCtrExtLLC: {:#x?}", cpuid_result, Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32);
-    info!("CPUID LLC extensiosn: {:#x?}", cpuid_result.ecx & (Fn8000_0001_ECX_Feature::PerfCtrExtLLC as u32));
+    info!("Welcome!");
+    info!("Type \"help\" to show valid commands, \"quit\" to terminate!");
+    
+    let mut line: CString16 = CString16::new();
+    while line != CString16::try_from("quit").expect("Should work") {
+        line = CString16::new();
+        let mut hit_enter = false;
+        print!("# ");
+        while false == hit_enter {
+            let key = with_stdin(| mut input | { input.read_key().expect("Expected input") });
+            match key {
+                Some(k) =>  {
+                    match k {
+                        uefi::proto::console::text::Key::Printable(p) => {
+                            print!("{}", p);
+                            if p == Char16::try_from('\r').expect("Unable to convert the ESC ascii code to Char16") {
+                                hit_enter = true;
+                                println!("");
+                            } else {
+                                line.push(p.into());
+                            }
+                        }
+                        uefi::proto::console::text::Key::Special(s) => {
+                            info!( "A special key was entered: {:?}\r\n", s);
+                            if s == ScanCode::ESCAPE {
+                                hit_enter = true;
+                            }
+                        }
+                    };             
+                },
+                None => { 
+                }
+            };
+        };
+        match commands.get(&line) {
+            Some(func) => func(),
+            None =>{
+                info!("Unknown command! {:?}", line);
+                info!("Type \"help\" to print commands");  
+            },
+        };
+
+    }
+
+    info!("Terminating...");
+    
     while true {}
     boot::stall(10_000_000);
     Status::SUCCESS
