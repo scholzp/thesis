@@ -1,0 +1,147 @@
+\documentclass[crop,tikz]{standalone}
+\begin{document}
+\begin{tikzpicture}[scale=1]  \coordinate (x) at (0, 10);
+  \coordinate (x) at (0, 10);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_1$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center ] {$i_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center] {0};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center ] {$i_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center] {$i_4$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center] {3};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_1$};
+
+  \coordinate (x) at (0, 8);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_1$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center] {0};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {$w_1$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center,text=orange] {1};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_2$};
+
+  \coordinate (x) at (0, 6);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {$w_2$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center,text=orange] {1};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {1};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {2};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_1$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {2};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_3$};
+
+  \coordinate (x) at (0, 4);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_2$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {2};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {2};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {$w_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {1};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_1$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {3};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_4$};
+
+  \coordinate (x) at (0, 2);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_2$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {$w_4$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {1};
+
+  \node[scale=.9, align=center] at (3, 11.5) {First Pass};
+  \node[scale=.9, align=center] at (10, 11.5) {Second Pass};
+  \draw [dashed] (6.5, 11.5) -- (6.5, 1.75);
+  % Right side
+  \coordinate (x) at (7, 10);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_2$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_4$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_1$};
+
+  \coordinate (x) at (7, 8);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {$w_1$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {1};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$i_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {3};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {2};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_4$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {2};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_2$};
+
+  \coordinate (x) at (7, 6);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_1$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {$w_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {1};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_4$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_3$};
+
+  \coordinate (x) at (7, 4);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_1$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {1};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_4$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center] {2};
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (2, 0)$) -- ($ (x) + (2, -1)$);
+  \draw [arrows = {-Latex[width=3pt, length=5pt]}] ($ (x) + (4, 0)$) -- ($ (x) + (4, -1)$);
+  \node [scale=.8, align=left] at ($ (x) + (3, -.5)$) {Access $w_4$};
+
+  \coordinate (x) at (7, 2);
+  \draw ($ (x) + (0, 0)$) rectangle ($ (x) + (6, 1.0)$) node[pos=0.5, scale=.8, align=center, ] {};
+  \draw ($ (x) + (0.25, .25)$) rectangle ($ (x) + (.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_1$};
+  \filldraw[fill=gray!30] ($ (x) + (.75, .25)$) rectangle ($ (x) + (1.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (1.75, .25)$) rectangle ($ (x) + (2.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_2$};
+  \filldraw[fill=gray!30] ($ (x) + (2.25, .25)$) rectangle ($ (x) + (2.75, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (3.25, .25)$) rectangle ($ (x) + (3.75, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_3$};
+  \filldraw[fill=gray!30] ($ (x) + (3.75, .25)$) rectangle ($ (x) + (4.25, .75)$) node[pos=0.5, scale=.8, align=center] {1};
+  \draw ($ (x) + (4.75, .25)$) rectangle ($ (x) + (5.25, .75)$) node[pos=0.5, scale=.8, align=center, ] {$w_4$};
+  \filldraw[fill=gray!30] ($ (x) + (5.25, .25)$) rectangle ($ (x) + (5.75, .75)$) node[pos=0.5, scale=.8, align=center, text=orange] {1};
+
+  \node[scale=.9] at (.5, 1) {Legend:};
+  \draw (1.25, 0.25) rectangle (2.5, 0.75) node[pos=0.5, scale=.8, align=center, ] {Item};
+  \filldraw[fill=gray!30] (2.5, 0.25) rectangle (3.75, 0.75) node[pos=0.5, scale=.8, align=center] {Age};
+  \draw (4.25, 0.25) rectangle (6.5, 0.75) node[pos=0.5, scale=.8, align=center, text=orange ] {Updated Value};
+\end{tikzpicture}
+\end{document}
